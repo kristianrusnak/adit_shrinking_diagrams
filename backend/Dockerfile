@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 8000
 
 # Run server
-CMD ["fastapi", "dev", "app/main.py", "--host", "0.0.0.0"]
+CMD ["uvicorn", "app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
