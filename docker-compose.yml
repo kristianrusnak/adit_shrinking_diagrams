@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      - ./backend:/backend
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontend:/frontend
+      - /frontend/node_modules   # keeps container’s node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_BASE=/api
+    depends_on:
+      - backend
