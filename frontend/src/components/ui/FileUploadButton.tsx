@@ -1,4 +1,4 @@
-import { Button } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useError } from "../../context/useError.jsx";
@@ -35,6 +35,14 @@ const FileUploadButton = () => {
     }
 
     const file = event.target.files[0];
+    handleFile(file);
+  };
+
+  const handleFile = (file: File | null) => {
+    if (file == null) {
+      showError("No file selected", "File selection error");
+      return;
+    }
 
     if (file.size > MAX_FILE_SIZE) {
       if (inputRef.current) {
@@ -44,29 +52,61 @@ const FileUploadButton = () => {
       return;
     }
 
-    // const fileSize = event.target.files[0].size;
-    // console.log(fileSize);
+    const ext = file.name.split(".").pop();
 
-    // update file in store so that it can be used in other components
-    dispatch(setFile(event.target.files[0]));
+    if (ext !== "puml") {
+      showError("File must be a .puml file", "File type error");
+      return;
+    }
+
+    dispatch(setFile(file));
+  };
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (
+      event.dataTransfer.items == null ||
+      event.dataTransfer.items.length === 0
+    ) {
+      return;
+    }
+
+    if (event.dataTransfer.items.length > 1) {
+      showError("Only one file can be dropped", "File selection error");
+      return;
+    }
+
+    const file = event.dataTransfer.items[0].getAsFile();
+
+    handleFile(file);
+  };
+
+  // prevent default behavior (load file in browser)
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
   };
 
   return (
-    <Button
-      component="label"
-      role={undefined}
-      variant="contained"
-      tabIndex={-1}
-      startIcon={<CloudUploadIcon />}
-    >
-      Upload files
-      <VisuallyHiddenInput
-        ref={inputRef}
-        type="file"
-        accept=".puml"
-        onChange={handleChange}
-      />
-    </Button>
+    <Box onDrop={handleDrop} onDragOver={handleDragOver}>
+      <Button
+        component="label"
+        role={undefined}
+        variant="contained"
+        tabIndex={-1}
+        startIcon={<CloudUploadIcon />}
+      >
+        Upload files
+        <VisuallyHiddenInput
+          ref={inputRef}
+          type="file"
+          accept=".puml"
+          onChange={handleChange}
+        />
+      </Button>
+    </Box>
   );
 };
 

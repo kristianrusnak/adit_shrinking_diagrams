@@ -31,15 +31,24 @@ const FilePreview = () => {
     console.log(selectedFile);
   }, [selectedFile]);
 
-  // TODO: add nicer preview (proper formatting?? scrolling text??)
   return (
     <Card>
-      <Box sx={{ p: 2, minWidth: "250px" }}>
+      <Box
+        sx={{ p: 2, minWidth: "250px", overflow: "auto", maxHeight: "400px" }}
+      >
         <Typography variant="h6" gutterBottom>
           {selectedFile?.name ?? "No file selected"}
         </Typography>
         <Divider />
-        <Typography variant="body2" textAlign="left" gutterBottom>
+        <Typography
+          variant="body2"
+          textAlign="left"
+          gutterBottom
+          sx={{
+            whiteSpace: "pre-wrap", // preserves newlines and indentation
+            fontFamily: "monospace", // optional, looks better for code/text files
+          }}
+        >
           {previewText}
         </Typography>
       </Box>
