@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "esModuleInterop": true,
     "allowJs": true,
     "jsx": "react-jsx",
@@ -10,6 +10,7 @@
     "isolatedModules": true,
     "skipLibCheck": true,
     "noEmit": true,
+    // "allowImportingTsExtensions": true,
     "lib": ["DOM", "DOM.Iterable", "ESNext"]
   },
   "include": ["src", "vite.config.ts"]
