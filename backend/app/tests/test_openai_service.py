@@ -1,4 +1,4 @@
-from backend.app.services.openai_service import OpenAIService
+from app.services.openai_service import OpenAIService
 
 
 def test_openai_chat():
