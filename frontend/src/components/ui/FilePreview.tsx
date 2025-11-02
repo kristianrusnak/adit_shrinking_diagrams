@@ -32,26 +32,34 @@ const FilePreview = () => {
   }, [selectedFile]);
 
   return (
-    <Card>
-      <Box
-        sx={{ p: 2, minWidth: "250px", overflow: "auto", maxHeight: "400px" }}
-      >
-        <Typography variant="h6" gutterBottom>
-          {selectedFile?.name ?? "No file selected"}
-        </Typography>
-        <Divider />
-        <Typography
-          variant="body2"
-          textAlign="left"
-          gutterBottom
+    <Card sx={{ minWidth: "600px", marginTop: 2, marginBottom: 2 }}>
+      {selectedFile && (
+        <Box
           sx={{
-            whiteSpace: "pre-wrap", // preserves newlines and indentation
-            fontFamily: "monospace", // optional, looks better for code/text files
+            backgroundColor: "#e0e0e0",
+            color: "#000",
+            p: 2,
+            overflow: "auto",
+            maxHeight: "250px",
           }}
         >
-          {previewText}
-        </Typography>
-      </Box>
+          <Typography variant="h6" gutterBottom>
+            {selectedFile?.name ?? "No file selected"}
+          </Typography>
+          <Divider />
+          <Typography
+            variant="body2"
+            textAlign="left"
+            gutterBottom
+            sx={{
+              whiteSpace: "pre-wrap", // preserves newlines and indentation
+              fontFamily: "monospace", // optional, looks better for code/text files
+            }}
+          >
+            {previewText}
+          </Typography>
+        </Box>
+      )}
     </Card>
   );
 };

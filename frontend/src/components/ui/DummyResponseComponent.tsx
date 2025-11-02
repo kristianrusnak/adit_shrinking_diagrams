@@ -2,14 +2,18 @@ import { Box, Button, Typography } from "@mui/material";
 import { useSendMessageMutation } from "../../api/dbApi";
 import { useState } from "react";
 import { useError } from "../../context/useError";
-import { selectFile } from "../../store/slices/fileSlice";
+import { selectFile, selectMessage } from "../../store/slices/fileSlice";
 import { useSelector } from "react-redux";
+import BasicChat from "./BasicChat";
 
-// This is just a dummy component. The real component should use file/message from the store
+const PROMPT_DEFAULT = "Describe provided diagram in a few words.";
+
+// TODO: we should figure out a meaningful name for this component + a more meaningful structure
+// (ie: maybe group all form elements into a single component)
 const DummyResponseComponent = () => {
   const [sendMessage, { data, error, isLoading }] = useSendMessageMutation();
-  const [response, setResponse] = useState("placeholder");
   const selectedFile = useSelector(selectFile);
+  const selectedMessage = useSelector(selectMessage);
 
   const { showError } = useError() as {
     showError: (msg: string, title?: string) => void;
@@ -19,34 +23,26 @@ const DummyResponseComponent = () => {
     try {
       let file = null;
       if (!selectedFile) {
-        file = new File(["Hello tell me who you are"], "test.txt", {
-          type: "text/plain",
-        });
+        showError("No file selected", "Error");
+        return;
       } else {
         file = selectedFile;
       }
-      const response = await sendMessage({
+      await sendMessage({
         file: file,
-        message: "what is in this file?",
+        message: selectedMessage == "" ? PROMPT_DEFAULT : selectedMessage,
       }).unwrap();
-      setResponse(response);
     } catch (error: any) {
-      // console.error(error);
       showError(error.error, `Status: ${error.status}`);
-      setResponse(
-        "An error has occured. This should contain response from the server once our backend is setup.",
-      );
     }
   };
 
   return (
-    <Box sx={{ minWidth: "300px" }}>
+    <Box sx={{ minWidth: "300px", paddingTop: 1 }}>
       <Button variant="contained" onClick={handleClick}>
-        {isLoading ? "Processing request..." : "Send message"}
+        {isLoading ? "Processing request..." : "Send"}
       </Button>
-      <Typography variant="body2" textAlign="left">
-        {response}
-      </Typography>
+      {data && <BasicChat text={data ? data : "..."} />}
     </Box>
   );
 };
