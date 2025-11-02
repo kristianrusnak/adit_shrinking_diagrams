@@ -40,3 +40,7 @@ To stop the containers press `Ctrl+C`, or run `docker compose down` in a separat
   ```
 
 Refer to the READMEs inside the `frontend/` and `backend/` directories for instructions on running each service without Docker.
+
+### Environment variables
+
+In order to utilize OpenAI API, you need to copy `.env.example` to `.env` and set the `OPENAI_API_KEY` variable in /backend directory.
