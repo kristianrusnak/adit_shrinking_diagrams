@@ -2,20 +2,32 @@ import { Box, Button, Typography } from "@mui/material";
 import { useSendMessageMutation } from "../../api/dbApi";
 import { useState } from "react";
 import { useError } from "../../context/useError";
+import { selectFile } from "../../store/slices/fileSlice";
+import { useSelector } from "react-redux";
 
 // This is just a dummy component. The real component should use file/message from the store
 const DummyResponseComponent = () => {
   const [sendMessage, { data, error, isLoading }] = useSendMessageMutation();
   const [response, setResponse] = useState("placeholder");
+  const selectedFile = useSelector(selectFile);
+
   const { showError } = useError() as {
     showError: (msg: string, title?: string) => void;
   };
 
   const handleClick = async () => {
     try {
+      let file = null;
+      if (!selectedFile) {
+        file = new File(["Hello tell me who you are"], "test.txt", {
+          type: "text/plain",
+        });
+      } else {
+        file = selectedFile;
+      }
       const response = await sendMessage({
-        file: "test.txt",
-        message: "test",
+        file: file,
+        message: "what is in this file?",
       }).unwrap();
       setResponse(response);
     } catch (error: any) {
