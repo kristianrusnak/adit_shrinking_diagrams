@@ -98,7 +98,7 @@ const FileUploadButton = () => {
         tabIndex={-1}
         startIcon={<CloudUploadIcon />}
       >
-        Upload files
+        Upload file
         <VisuallyHiddenInput
           ref={inputRef}
           type="file"
