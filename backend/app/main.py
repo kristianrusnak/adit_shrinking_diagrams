@@ -1,11 +1,18 @@
 from typing import Union
 
 from fastapi import FastAPI, UploadFile, Form, HTTPException
-
+from fastapi.middleware.cors import CORSMiddleware
 from app.services.openai_service import OpenAIService
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # or set to frontend url (security)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def read_root():
