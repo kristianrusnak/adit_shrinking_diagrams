@@ -1,0 +1,41 @@
+name: Move Azure Board Task on PR Merge
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  move_task:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Extract task number
+        id: extract
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          if [[ "$PR_TITLE" =~ ([0-9]+) ]]; then
+            echo "task_id=${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
+            echo "Found task ID: ${BASH_REMATCH[1]}"
+          else
+            echo "No task ID found in PR title."
+          fi
+
+      - name: Move Azure Board work item
+        if: steps.extract.outputs.task_id != ''
+        env:
+          AZURE_DEVOPS_PAT: ${{ secrets.AZURE_DEVOPS_PAT }}
+        run: |
+          echo "Moving Azure DevOps task ID ${{ steps.extract.outputs.task_id }} to Testing..."
+
+          curl -X PATCH \
+            -H "Content-Type: application/json-patch+json" \
+            -H "Authorization: Basic $(echo -n ":$AZURE_DEVOPS_PAT" | base64)" \
+            -d '[
+              {
+                "op": "add",
+                "path": "/fields/System.State",
+                "value": "Testing"
+              }
+            ]' \
+            "https://dev.azure.com/teamok/Shrinking%20diagrams/_apis/wit/workitems/${{ steps.extract.outputs.task_id }}?api-version=7.0"
