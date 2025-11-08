@@ -31,8 +31,10 @@ jobs:
           AZURE_DEVOPS_PAT: ${{ secrets.AZURE_DEVOPS_PAT }}
         run: |
           echo "Testing Azure DevOps connectivity..."
+          AUTH_HEADER=$(echo -n ":${AZURE_DEVOPS_PAT}" | base64 | tr -d '\n')
+          echo "Authorization header built successfully (not printing)."
           curl -v --fail \
-            -H "Authorization: Basic $(echo -n ":${AZURE_DEVOPS_PAT}" | base64)" \
+            -H "Authorization: Basic ${AUTH_HEADER}" \
             "https://dev.azure.com/teamok/Shrinking%20diagrams/_apis/wit/workitems/44?api-version=7.0"
 
       - name: Extract task number
