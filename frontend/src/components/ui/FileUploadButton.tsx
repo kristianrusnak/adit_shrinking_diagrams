@@ -6,8 +6,7 @@ import { useRef } from "react";
 import { useDispatch } from "react-redux";
 import { setFile } from "../../store/slices/fileSlice";
 
-const MAX_FILE_SIZE = 1024; // for testing only
-// const MAX_FILE_SIZE = 1024 * 1024 * 10; // 10 MB
+const MAX_FILE_SIZE = 1024 * 1024 * 10; // 10 MB
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
