@@ -22,6 +22,9 @@ export default defineConfig([
         sourceType: 'module',
       },
     },
+    server: {
+      historyApiFallback: true
+    },
     rules: {
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
     },

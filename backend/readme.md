@@ -44,7 +44,7 @@ This installs FastAPI, Uvicorn, and other utilities listed in `requirements.txt`
 Start the FastAPI application with Uvicorn:
 
 ```bash
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn AppPage.main:AppPage --reload --host 0.0.0.0 --port 8000
 ```
 
 - The `--reload` flag enables auto-reload when files change.
