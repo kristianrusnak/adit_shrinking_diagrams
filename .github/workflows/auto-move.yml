@@ -57,11 +57,5 @@ jobs:
           curl -X PATCH \
             -H "Content-Type: application/json-patch+json" \
             -H "Authorization: Basic $(echo -n ":$AZURE_DEVOPS_PAT" | base64)" \
-            -d '[
-              {
-                "op": "add",
-                "path": "/fields/System.State",
-                "value": "${{ steps.state.outputs.new_state }}"
-              }
-            ]' \
+            -d '[{"op":"add","path":"/fields/System.State","value":"${{ steps.state.outputs.new_state }}"}]' \
             "https://dev.azure.com/teamok/Shrinking%20diagrams/_apis/wit/workitems/${{ steps.extract.outputs.task_id }}?api-version=7.0"
