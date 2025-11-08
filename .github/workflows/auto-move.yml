@@ -1,19 +1,24 @@
-name: Move Azure Board Task on PR Merge
+name: Sync Azure Board Task with PR Status
 
 on:
   pull_request:
-    types: [closed]
+    types: [edited, closed]
 
 jobs:
-  move_task:
-    if: github.event.pull_request.merged == true
+  update_task:
     runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.merged == true ||
+      contains(github.event.pull_request.title, 'TESTING') ||
+      contains(github.event.pull_request.title, 'TEST FAILED')
 
     steps:
       - name: Extract task number
         id: extract
         run: |
           PR_TITLE="${{ github.event.pull_request.title }}"
+          echo "Pull Request title: $PR_TITLE"
+
           if [[ "$PR_TITLE" =~ ([0-9]+) ]]; then
             echo "task_id=${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             echo "Found task ID: ${BASH_REMATCH[1]}"
@@ -21,12 +26,33 @@ jobs:
             echo "No task ID found in PR title."
           fi
 
+      - name: Determine new Azure DevOps state
+        id: state
+        run: |
+          TITLE="${{ github.event.pull_request.title }}"
+          NEW_STATE=""
+
+          if echo "$TITLE" | grep -qi "TESTING"; then
+            NEW_STATE="Testing"
+          elif echo "$TITLE" | grep -qi "TEST FAILED"; then
+            NEW_STATE="Doing"
+          elif [ "${{ github.event.pull_request.merged }}" = "true" ]; then
+            NEW_STATE="Done"
+          fi
+
+          if [ -n "$NEW_STATE" ]; then
+            echo "new_state=$NEW_STATE" >> $GITHUB_OUTPUT
+            echo "New state: $NEW_STATE"
+          else
+            echo "No matching state found; skipping update."
+          fi
+
       - name: Move Azure Board work item
-        if: steps.extract.outputs.task_id != ''
+        if: steps.extract.outputs.task_id != '' && steps.state.outputs.new_state != ''
         env:
           AZURE_DEVOPS_PAT: ${{ secrets.AZURE_DEVOPS_PAT }}
         run: |
-          echo "Moving Azure DevOps task ID ${{ steps.extract.outputs.task_id }} to Testing..."
+          echo "Moving Azure DevOps task ID ${{ steps.extract.outputs.task_id }} to '${{ steps.state.outputs.new_state }}'..."
 
           curl -X PATCH \
             -H "Content-Type: application/json-patch+json" \
@@ -35,7 +61,7 @@ jobs:
               {
                 "op": "add",
                 "path": "/fields/System.State",
-                "value": "Testing"
+                "value": "${{ steps.state.outputs.new_state }}"
               }
             ]' \
             "https://dev.azure.com/teamok/Shrinking%20diagrams/_apis/wit/workitems/${{ steps.extract.outputs.task_id }}?api-version=7.0"
