@@ -13,6 +13,20 @@ jobs:
       contains(github.event.pull_request.title, 'TEST FAILED')
 
     steps:
+      - name: Debug Azure DevOps connection
+        env:
+          AZURE_DEVOPS_PAT: ${{ secrets.AZURE_DEVOPS_PAT }}
+        run: |
+          echo "Testing token presence..."
+          if [ -z "$AZURE_DEVOPS_PAT" ]; then
+            echo "❌ AZURE_DEVOPS_PAT is empty!"
+            exit 1
+          fi
+          echo "✅ Token is set (not showing for security)."
+          echo "Testing curl request formatting..."
+          echo '[{"op":"add","path":"/fields/System.State","value":"Doing"}]'
+        
+
       - name: Extract task number
         id: extract
         run: |
@@ -46,6 +60,7 @@ jobs:
           else
             echo "No matching state found; skipping update."
           fi
+
 
       - name: Move Azure Board work item
         if: steps.extract.outputs.task_id != '' && steps.state.outputs.new_state != ''
