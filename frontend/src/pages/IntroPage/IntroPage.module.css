@@ -1,0 +1,11 @@
+.changing_header_container {
+  display: flex;
+  justify-content: center;
+  margin-top: 10%;
+}
+
+.changing_header {
+  color: white;
+  font-size: 4rem;
+  font-weight: bold;
+}
