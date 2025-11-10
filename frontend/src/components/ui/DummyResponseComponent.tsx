@@ -38,7 +38,7 @@ const DummyResponseComponent = () => {
   };
 
   return (
-    <Box sx={{ minWidth: "300px", paddingTop: 1 }}>
+    <Box sx={{ minWidth: "300px", paddingTop: 1, display: "flex", justifyContent: "center" }}>
       <Button variant="contained" onClick={handleClick}>
         {isLoading ? "Processing request..." : "Send"}
       </Button>
