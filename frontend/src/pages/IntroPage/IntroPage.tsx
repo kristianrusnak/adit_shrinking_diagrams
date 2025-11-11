@@ -21,7 +21,7 @@ export default function IntroPage() {
         <PixelBlast
           variant="circle"
           pixelSize={11}
-          color="#b50202"
+          color="#63b3ed"
           patternScale={3}
           patternDensity={1.2}
           pixelSizeJitter={0.5}

@@ -1,4 +1,3 @@
-import logo from "../../../../public/vite.svg";
 import CardNav from "./CardNav";
 
 export default function IntroNavbar(){
@@ -34,7 +33,7 @@ export default function IntroNavbar(){
 
   return (
     <CardNav
-      logo={logo}
+      logo={""}
       logoAlt="Company Logo"
       items={items}
       baseColor="#fff"

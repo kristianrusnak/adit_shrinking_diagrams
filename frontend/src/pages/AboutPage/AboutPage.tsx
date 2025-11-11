@@ -1,4 +1,3 @@
-import IntroNavbar from "../../components/layout/IntroNavbar/IntroNavbar";
 
 export default function AboutPage() {
   return (

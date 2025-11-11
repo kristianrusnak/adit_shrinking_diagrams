@@ -1,5 +1,3 @@
-import styles from './DocsPage.module.css';
-
 export default function DocsPage() {
   return (
     <div

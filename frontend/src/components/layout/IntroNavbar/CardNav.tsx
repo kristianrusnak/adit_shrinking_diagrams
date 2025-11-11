@@ -176,7 +176,7 @@ const CardNav: React.FC<CardNavProps> = ({
           </div>
 
           <div className="logo-container">
-            <img src={logo} alt={logoAlt} className="logo" />
+            {/*<img src={logo} alt={logoAlt} className="logo" />*/}
             <span>Shrinking diagrams</span>
           </div>
 
