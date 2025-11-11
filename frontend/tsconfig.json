@@ -1,17 +1,18 @@
 {
-  "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "esModuleInterop": true,
-    "allowJs": true,
-    "jsx": "react-jsx",
-    "strict": true,
-    "isolatedModules": true,
-    "skipLibCheck": true,
-    "noEmit": true,
-    // "allowImportingTsExtensions": true,
-    "lib": ["DOM", "DOM.Iterable", "ESNext"]
-  },
-  "include": ["src", "vite.config.ts"]
+    "compilerOptions": {
+        "paths": { "@/*": ["./src/*"] },
+        "target": "esnext",
+        "module": "esnext",
+        "moduleResolution": "bundler",
+        "esModuleInterop": true,
+        "allowJs": true,
+        "jsx": "react-jsx",
+        "strict": true,
+        "isolatedModules": true,
+        "skipLibCheck": true,
+        "noEmit": true,
+        // "allowImportingTsExtensions": true,
+        "lib": ["DOM", "DOM.Iterable", "ESNext"]
+    },
+    "include": ["src", "vite.config.ts"]
 }

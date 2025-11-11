@@ -1,11 +1,18 @@
 .changing_header_container {
   display: flex;
   justify-content: center;
-  margin-top: 10%;
-}
-
-.changing_header {
+  margin-top: 20%;
+  margin-bottom: 0;
   color: white;
   font-size: 4rem;
+  font-weight: bold;
+}
+
+.changing_description_container {
+  display: flex;
+  justify-content: left;
+  margin: 2% 8% 0 8%;
+  color: white;
+  font-size: 1rem;
   font-weight: bold;
 }
