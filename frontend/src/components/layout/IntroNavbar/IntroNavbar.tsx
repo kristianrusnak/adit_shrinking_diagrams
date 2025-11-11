@@ -8,6 +8,7 @@ export default function IntroNavbar(){
       bgColor: "#0D0716",
       textColor: "#fff",
       links: [
+        { label: "Home", ariaLabel: "Home", href: "/" },
         { label: "Information", ariaLabel: "Information", href: "/about" },
         { label: "Docs", ariaLabel: "Docs", href: "/docs" }
       ]

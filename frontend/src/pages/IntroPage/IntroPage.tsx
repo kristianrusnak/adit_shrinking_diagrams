@@ -1,7 +1,6 @@
 import styles from './IntroPage.module.css';
 import PixelBlast from './PixelBlast';
 import BlurText from "./BlurText";
-import IntroNavbar from '../../components/layout/IntroNavbar/IntroNavbar'
 
 const handleAnimationComplete = () => {
   console.log('Animation completed!');
@@ -39,8 +38,6 @@ export default function IntroPage() {
           transparent={false}
         />
       </div>
-
-      <IntroNavbar />
 
       <BlurText
         text="Smaller is Better — Shrinking Diagrams"
