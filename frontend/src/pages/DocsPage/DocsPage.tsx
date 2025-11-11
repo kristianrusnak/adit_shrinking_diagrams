@@ -1,4 +1,10 @@
+import {useEffect} from "react";
+
 export default function DocsPage() {
+  useEffect(() => {
+    document.title = "Docs - Model Shrinker";
+  }, []);
+
   return (
     <div
       style={{

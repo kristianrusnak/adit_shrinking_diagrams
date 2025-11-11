@@ -1,12 +1,17 @@
 import styles from './IntroPage.module.css';
 import PixelBlast from './PixelBlast';
 import BlurText from "./BlurText";
+import {useEffect} from "react";
 
 const handleAnimationComplete = () => {
   console.log('Animation completed!');
 };
 
 export default function IntroPage() {
+  useEffect(() => {
+    document.title = "Shrinking Diagrams";
+  }, []);
+
   return (
     <>
       <div style={{

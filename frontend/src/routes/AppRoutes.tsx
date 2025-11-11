@@ -4,6 +4,7 @@ import AppPage from "../pages/AppPage/AppPage";
 import IntroNavbarPage from "../pages/IntroNavbarPage/IntroNavbarPage";
 import AboutPage from "../pages/AboutPage/AboutPage";
 import DocsPage from "../pages/DocsPage/DocsPage";
+import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
 
 export default function AppRoutes() {
   return (
@@ -15,6 +16,7 @@ export default function AppRoutes() {
           <Route path="docs" element={<DocsPage />} />
         </Route>
         <Route path="/app" element={<AppPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </>
   );

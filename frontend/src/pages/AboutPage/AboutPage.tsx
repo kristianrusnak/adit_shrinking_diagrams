@@ -1,5 +1,10 @@
+import {useEffect} from "react";
 
 export default function AboutPage() {
+  useEffect(() => {
+    document.title = "About - Shrinking Diagrams";
+  }, []);
+
   return (
     <div
     style={{
