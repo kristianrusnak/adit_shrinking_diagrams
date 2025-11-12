@@ -1,0 +1,35 @@
+{
+
+  "class_names" : [
+    "abstract",
+    "abstract class",
+    "annotation",
+    "class",
+    "dataclass",
+    "entity",
+    "enum",
+    "exception",
+    "interface",
+    "metaclass",
+    "protocol",
+    "record",
+    "stereotype",
+    "struct"
+  ],
+
+  "weights": {
+    " --> ": 1,
+    " <-- ": 1,
+    " --|> ": 3,
+    " <|-- ": 3,
+    " ..> ": 3,
+    " <.. ": 3,
+    " o-- ": 2,
+    " --o ": 2,
+    " *-- ": 2,
+    " --* ": 2,
+    " -- ": 1,
+    " .. ": 1
+  }
+
+}
