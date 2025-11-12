@@ -34,7 +34,7 @@ export default function IntroNavbar(){
   return (
     <CardNav
       logo={""}
-      logoAlt="Company Logo"
+      logoAlt="Shrinking Diagrams"
       items={items}
       baseColor="#fff"
       menuColor="#000"

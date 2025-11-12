@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { EffectComposer, EffectPass, RenderPass, Effect } from 'postprocessing';
-import './PixelBlast.css';
 
 type PixelBlastVariant = 'square' | 'circle' | 'triangle' | 'diamond';
 
@@ -165,7 +164,6 @@ void main() {
   gl_Position = vec4(position, 1.0);
 }
 `;
-
 const FRAGMENT_SRC = `
 precision highp float;
 
@@ -458,7 +456,6 @@ const PixelBlast: React.FC<PixelBlastProps> = ({
         depthWrite: false,
         glslVersion: THREE.GLSL3
       });
-
       const quadGeom = new THREE.PlaneGeometry(2, 2);
       const quad = new THREE.Mesh(quadGeom, material);
       scene.add(quad);
@@ -655,7 +652,7 @@ const PixelBlast: React.FC<PixelBlastProps> = ({
   return (
     <div
       ref={containerRef}
-      className={`pixel-blast-container ${className ?? ''}`}
+      className={`w-full h-full relative overflow-hidden ${className ?? ''}`}
       style={style}
       aria-label="PixelBlast interactive background"
     />

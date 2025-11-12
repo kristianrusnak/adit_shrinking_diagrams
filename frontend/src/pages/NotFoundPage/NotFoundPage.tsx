@@ -1,34 +1,29 @@
-import { useEffect } from "react";
 import FuzzyText from './FuzzyText';
+import styles from './NotFoundPage.module.css';
 
 export default function NotFoundPage() {
-  useEffect(() => {
-    document.title = "404 Not Found";
-  }, []);
-
   return (
-    <div
-    style={{
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)'
-    }}>
-      <FuzzyText
-      baseIntensity={0.25}
-      hoverIntensity={0.5}
-      enableHover={true}
+    <>
+      <title>404 - Page Not Found</title>
+      <div
+      className={styles.not_found_page_container}
       >
-        404
-      </FuzzyText>
-      <FuzzyText
+        <FuzzyText
         baseIntensity={0.25}
         hoverIntensity={0.5}
         enableHover={true}
-        fontSize='80px'
-      >
-        Page Not Found
-      </FuzzyText>
-    </div>
+        >
+          404
+        </FuzzyText>
+        <FuzzyText
+          baseIntensity={0.25}
+          hoverIntensity={0.5}
+          enableHover={true}
+          fontSize='80px'
+        >
+          Page Not Found
+        </FuzzyText>
+      </div>
+    </>
   );
 }
