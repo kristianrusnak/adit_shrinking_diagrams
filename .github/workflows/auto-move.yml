@@ -32,12 +32,12 @@ jobs:
           TITLE="${{ github.event.pull_request.title }}"
           NEW_STATE=""
 
-          if echo "$TITLE" | grep -qi "TESTING"; then
+          if [ "${{ github.event.pull_request.merged }}" = "true" ]; then
+            NEW_STATE="Done"
+          elif echo "$TITLE" | grep -qi "TESTING"; then
             NEW_STATE="Testing"
           elif echo "$TITLE" | grep -qi "TEST FAILED"; then
             NEW_STATE="Doing"
-          elif [ "${{ github.event.pull_request.merged }}" = "true" ]; then
-            NEW_STATE="Done"
           fi
 
           if [ -n "$NEW_STATE" ]; then
