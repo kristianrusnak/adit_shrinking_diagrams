@@ -1,9 +1,10 @@
 
 import json
+from kruskals_algorithm import Graph
 
 class PUMLParser:
     
-    def __init__(self, config_path ="parser_config.json"):
+    def __init__(self, config_path):
         self.weights = {}
         self.class_names = set()
         self.parse_config(config_path)
@@ -94,3 +95,51 @@ class PUMLParser:
             
             return {"source": source, "target": target}
         return {}
+    
+    def reparse_file(self, source_path, output_path, new_data):
+
+        if source_path is None or output_path is None:
+            print("Source or output path is None.")
+            return
+        
+        if not new_data:
+            print("No new data provided for reparsing.")
+            return
+        
+        lines = []
+
+        with open(source_path, 'r') as file:
+            line = file.readline()
+            while line:
+
+                appendLine = True
+
+                for weight_key, weight_value in self.weights.items():
+                    if weight_key in line.strip():
+                        parts = line.split(weight_key)
+                        edge = self.extract_edge_info(parts)
+                        if edge | {"weight": weight_value} not in new_data["edges"]:
+                            appendLine = False
+                            break
+                        break
+
+                if appendLine:
+                    lines.append(line)
+
+                line = file.readline()
+        
+        with open(output_path, 'w') as file:
+            file.writelines(lines)
+
+if __name__ == "__main__":
+    parser = PUMLParser("parser_config.json")
+    result = parser.parse_file("testing_file.puml")
+    print(json.dumps(result, indent=4))
+
+    graph = Graph(result)
+    sol = graph.kruskals_algorithm()
+
+    sol = graph.extract_solution(sol)
+    print(json.dumps(sol, indent=4))
+
+    parser.reparse_file("testing_file.puml", "output_file.puml", sol)
