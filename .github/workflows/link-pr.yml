@@ -1,0 +1,49 @@
+name: Link PR to Azure DevOps Work Item
+
+on:
+  pull_request:
+    types: [opened, reopened, edited]
+
+jobs:
+  link_pr_to_task:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract task ID from PR title
+        id: extract
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          echo "PR Title: $PR_TITLE"
+
+          if [[ "$PR_TITLE" =~ ([0-9]+) ]]; then
+            echo "task_id=${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
+            echo "Found task ID: ${BASH_REMATCH[1]}"
+          else
+            echo "No task ID found in PR title."
+          fi
+
+      - name: Link PR to Azure DevOps Work Item
+        if: steps.extract.outputs.task_id != ''
+        env:
+          AZURE_DEVOPS_PAT: ${{ secrets.AZURE_DEVOPS_PAT }}
+          ORG_NAME: teamok
+          PROJECT_NAME: Shrinking%20diagrams
+          REPO_NAME: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          TASK_ID=${{ steps.extract.outputs.task_id }}
+
+          echo "Linking PR #$PR_NUMBER to Azure DevOps work item $TASK_ID..."
+
+          AUTH_HEADER=$(echo -n ":${AZURE_DEVOPS_PAT}" | base64 | tr -d '\n')
+
+          # Build PR link
+          PR_URL="https://github.com/${REPO_NAME}/pull/${PR_NUMBER}"
+
+          # Azure DevOps API: add relation to work item
+          curl -X PATCH \
+            -H "Content-Type: application/json-patch+json" \
+            -H "Authorization: Basic $AUTH_HEADER" \
+            -d "[{\"op\":\"add\",\"path\":\"/relations/-\",\"value\":{\"rel\": \"ArtifactLink\", \"url\": \"$PR_URL\", \"attributes\": {\"name\": \"Pull Request\"}}}]"
+            "https://dev.azure.com/${ORG_NAME}/${PROJECT_NAME}/_apis/wit/workitems/${TASK_ID}?api-version=7.0"
+
+          echo "PR linked to Azure DevOps work item."
