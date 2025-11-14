@@ -29,6 +29,22 @@ def read_item(item_id: int, q: Union[str, None] = None):
     return {"item_id": item_id, "q": q}
 
 
+@app.post("/api/sendMock")
+def mock_controller(file: UploadFile):
+    # simulate wait 5 seconds
+    import time
+
+    time.sleep(5)
+    try:
+        content_bytes = file.file.read()
+        content = content_bytes.decode("utf-8")
+    except Exception:
+        raise HTTPException(
+            status_code=400, detail="Nepodarilo sa prečítať textový súbor"
+        )
+    return {"response": content}
+
+
 @app.post("/api/sendMessage")
 def message_controller(file: UploadFile, message: str = Form(...)):
     try:
