@@ -43,7 +43,7 @@ class PUMLParser:
         return start_found and end_found
     
 
-    def parse_file(self, filepath) -> json:
+    def parse_file(self, filepath) -> dict | list:
 
         with open(filepath, 'r') as file:
             if not self.check_correct_puml(file):
