@@ -18,7 +18,10 @@ const MessageInput = () => {
       maxRows={8}
       minRows={3}
       placeholder="Type your message here..."
-      style={{ width: 600 }}
+      style={{
+        width: 600,
+        border: "1px solid #ccc",
+    }}
       onChange={handleChange}
     />
   );

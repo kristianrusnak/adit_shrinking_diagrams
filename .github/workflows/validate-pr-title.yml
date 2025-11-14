@@ -1,0 +1,24 @@
+name: Validate PR title (no TESTING prefixes)
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  validate_title:
+    name: Title clean check
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read   # only read access needed
+    steps:
+      - name: Check PR title
+        run: |
+          TITLE="${{ github.event.pull_request.title }}"
+          echo "Checking PR title: '$TITLE'"
+
+          if echo "$TITLE" | grep -qiE '^(TESTING|TEST FAILED)'; then
+            echo "::error::❌ PR title contains forbidden prefix (TESTING or TEST FAILED). Please remove it before merging."
+            exit 1
+          fi
+
+          echo "✅ Title is clean. Proceed with merge."
