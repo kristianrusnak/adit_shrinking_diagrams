@@ -21,29 +21,41 @@ jobs:
             echo "No task ID found in PR title."
           fi
 
-      - name: Link PR to Azure DevOps Work Item
+      - name: Add hidden ADO metadata to PR description
         if: steps.extract.outputs.task_id != ''
         env:
-          AZURE_DEVOPS_PAT: ${{ secrets.AZURE_DEVOPS_PAT }}
-          ORG_NAME: teamok
-          PROJECT_NAME: Shrinking%20diagrams
-          REPO_NAME: ${{ github.repository }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          TASK_ID: ${{ steps.extract.outputs.task_id }}
+          REPO: ${{ github.repository }}
         run: |
-          TASK_ID=${{ steps.extract.outputs.task_id }}
+          echo "Updating PR description with hidden AB#$TASK_ID metadata..."
 
-          echo "Linking PR #$PR_NUMBER to Azure DevOps work item $TASK_ID..."
+          # Build hidden metadata line
+          META_LINE="<!-- Work item reference: AB#$TASK_ID -->"
 
-          AUTH_HEADER=$(echo -n ":${AZURE_DEVOPS_PAT}" | base64 | tr -d '\n')
+          # Fetch existing PR description
+          BODY=$(gh api repos/$REPO/pulls/$PR_NUMBER --jq '.body')
 
-          # Build PR link
-          PR_URL="https://github.com/${REPO_NAME}/pull/${PR_NUMBER}"
+          echo "Existing PR Body:"
+          echo "$BODY"
 
-          # Azure DevOps API: add relation to work item
-          curl -X PATCH \
-            -H "Content-Type: application/json-patch+json" \
-            -H "Authorization: Basic $AUTH_HEADER" \
-            -d "[{\"op\":\"add\",\"path\":\"/relations/-\",\"value\":{\"rel\": \"Hyperlink\", \"url\": \"$PR_URL\", \"attributes\": {\"name\": \"Pull Request\"}}}]" \
-            "https://dev.azure.com/${ORG_NAME}/${PROJECT_NAME}/_apis/wit/workitems/${TASK_ID}?api-version=7.0"
+          # If metadata already exists, skip updating
+          if echo "$BODY" | grep -q "AB#$TASK_ID"; then
+            echo "Metadata already present. Skipping update."
+            exit 0
+          fi
 
-          echo "PR linked to Azure DevOps work item."
+          # Append metadata to body
+          UPDATED_BODY="${BODY}\n${META_LINE}"
+
+          echo -e "$UPDATED_BODY" > updated_body.txt
+
+          # Push updated body back to GitHub
+          gh api \
+            --method PATCH \
+            -H "Accept: application/vnd.github+json" \
+            /repos/$REPO/pulls/$PR_NUMBER \
+            -f body="@updated_body.txt"
+
+          echo "Metadata added: $META_LINE"
