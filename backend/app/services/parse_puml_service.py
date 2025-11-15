@@ -1,9 +1,8 @@
-
 import json
 from kruskals_algorithm import Graph
 
+
 class PUMLParser:
-    
     def __init__(self, config_path):
         self.weights = {}
         self.class_names = set()
@@ -19,7 +18,7 @@ class PUMLParser:
             return {}
 
         try:
-            with open(config_path, 'r') as file:
+            with open(config_path, "r") as file:
                 config = json.load(file)
                 self.weights = config.get("weights", {})
                 self.class_names = set(config.get("class_names", []))
@@ -28,7 +27,7 @@ class PUMLParser:
         except Exception as e:
             print(f"Error reading config file: {e}")
             return {}
-            
+
     def check_correct_puml(self, file) -> bool:
         start_found = False
         end_found = False
@@ -41,11 +40,10 @@ class PUMLParser:
                 end_found = True
 
         return start_found and end_found
-    
 
     def parse_file(self, filepath) -> dict | list:
 
-        with open(filepath, 'r') as file:
+        with open(filepath, "r") as file:
             if not self.check_correct_puml(file):
                 print("File is not a correct PUML file.")
                 return []
@@ -58,7 +56,7 @@ class PUMLParser:
 
             for line in file:
                 line = line.strip()
-                
+
                 for keyword in self.class_names:
                     if line.startswith(keyword):
                         class_info = self.extract_class_name(keyword, line)
@@ -86,29 +84,29 @@ class PUMLParser:
         if len(parts) == 2:
             source = parts[0].strip()
             target = parts[1].strip()
-            
+
             if '"' in source:
                 source = source.split('"')[0].strip()
-            
+
             if '"' in target:
                 target = target.split('"')[-1].strip()
-            
+
             return {"source": source, "target": target}
         return {}
-    
+
     def reparse_file(self, source_path, output_path, new_data):
 
         if source_path is None or output_path is None:
             print("Source or output path is None.")
             return
-        
+
         if not new_data:
             print("No new data provided for reparsing.")
             return
-        
+
         lines = []
 
-        with open(source_path, 'r') as file:
+        with open(source_path, "r") as file:
             line = file.readline()
             while line:
 
@@ -127,9 +125,10 @@ class PUMLParser:
                     lines.append(line)
 
                 line = file.readline()
-        
-        with open(output_path, 'w') as file:
+
+        with open(output_path, "w") as file:
             file.writelines(lines)
+
 
 if __name__ == "__main__":
     parser = PUMLParser("parser_config.json")

@@ -11,6 +11,7 @@ import { selectFile } from "../../store/slices/fileSlice";
 import { useEffect, useState } from "react";
 import { useSendMockMutation } from "../../api/dbApi";
 import { useError } from "../../context/useError.jsx";
+import getSplitDiffRows from "../../utils/myersdiff";
 
 const FilePreview = () => {
   const selectedFile = useSelector(selectFile);
@@ -33,12 +34,19 @@ const FilePreview = () => {
     const fetchResponse = async () => {
       const beforeProcessing = await selectedFile.text();
       setPreviewText2(beforeProcessing);
-      setPreviewText("aaaaa" + beforeProcessing);
 
       try {
         const response = await sendMock({ file: selectedFile }).unwrap();
-        setPreviewText(response);
+        const filtered = response.split("\n").filter((line, idx) => idx % 2);
+
+        setPreviewText(filtered.join("\n"));
         console.log("got response");
+
+        const splitRows = getSplitDiffRows(
+          beforeProcessing.split("\n"),
+          filtered,
+        );
+        console.log(splitRows);
       } catch (error: any) {
         showError(error.error, `Status: ${error.status}`);
       }
@@ -56,6 +64,7 @@ const FilePreview = () => {
               backgroundColor: "#e0e0e0",
               color: "#000",
               p: 2,
+              width: "50%",
               overflow: "auto",
               maxHeight: "250px",
               "&::-webkit-scrollbar": {
@@ -93,6 +102,7 @@ const FilePreview = () => {
               backgroundColor: "#e0e0e0",
               color: "#000",
               p: 2,
+              width: "50%",
               overflow: "auto",
               maxHeight: "250px",
               "&::-webkit-scrollbar": {
