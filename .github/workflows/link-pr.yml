@@ -61,6 +61,6 @@ jobs:
             --method PATCH \
             -H "Accept: application/vnd.github+json" \
             /repos/$REPO/pulls/$PR_NUMBER \
-            -f body="@updated_body.txt"
+            -F body="@updated_body.txt"
 
           echo "Metadata added: $META_LINE"
