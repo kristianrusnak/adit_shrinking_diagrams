@@ -5,7 +5,7 @@ from kruskals_algorithm import Graph
 # TODO:
 # Add support for class visibility
 # Add support for notes
-# Add support for named or styled associations
+# Add support for named and styled relations
 
 class PUMLParser:
     
