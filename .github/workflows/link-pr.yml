@@ -45,12 +45,6 @@ jobs:
           echo "Existing PR Body:"
           echo "$BODY"
 
-          # If metadata already exists, skip updating
-          if echo "$BODY" | grep -q "AB#$TASK_ID"; then
-            echo "Metadata already present. Skipping update."
-            exit 0
-          fi
-
           # Append metadata to body
           UPDATED_BODY="${BODY}\n${META_LINE}"
 
