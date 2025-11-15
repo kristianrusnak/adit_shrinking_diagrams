@@ -8,9 +8,6 @@ export interface DiffComponentProps {
 }
 
 const DiffComponent = ({ splitRows, fileName }: DiffComponentProps) => {
-  const leftRef = useRef<HTMLDivElement>(null);
-  const rightRef = useRef<HTMLDivElement>(null);
-
   const getDiffTexts = (splitRows: SplitRow[]): string[] => {
     const before: string[] = [];
     const after: string[] = [];
@@ -32,36 +29,40 @@ const DiffComponent = ({ splitRows, fileName }: DiffComponentProps) => {
 
   const [before, after] = getDiffTexts(splitRows);
 
-  useEffect(() => {
-    const left = leftRef.current;
-    const right = rightRef.current;
-
-    if (left == null || right == null) {
-      return;
-    }
-
-    const handleScroll = () => {
-      if (left && right) {
-        left.scrollTop = right.scrollTop;
-      }
-    };
-    right.addEventListener("scroll", handleScroll);
-    return () => right.removeEventListener("scroll", handleScroll);
-  });
+  console.log(before.split("\n").length);
+  console.log(after.split("\n").length);
 
   // TODO: implement line background color for insert/delete like on github
 
   return (
-    <Stack direction="row" spacing={0} sx={{ alignItems: "center" }}>
+    <Stack
+      direction="row"
+      spacing={0}
+      sx={{
+        alignItems: "center",
+        maxHeight: "250px",
+        overflow: "auto",
+
+        "&::-webkit-scrollbar": {
+          width: "5px",
+        },
+        "&::-webkit-scrollbar-thumb": {
+          backgroundColor: "#888",
+          borderRadius: "4px",
+        },
+        "&::-webkit-scrollbar-track": {
+          backgroundColor: "#e0e0e0",
+          borderRadius: "2px",
+        },
+      }}
+    >
       <Box
-        ref={leftRef}
         sx={{
           backgroundColor: "#e0e0e0",
           color: "#000",
           p: 2,
           width: "50%",
           overflow: "hidden",
-          maxHeight: "250px",
         }}
       >
         <Typography variant="h6" gutterBottom>
@@ -82,25 +83,12 @@ const DiffComponent = ({ splitRows, fileName }: DiffComponentProps) => {
         </Typography>
       </Box>
       <Box
-        ref={rightRef}
         sx={{
           backgroundColor: "#e0e0e0",
           color: "#000",
           p: 2,
           width: "50%",
-          overflow: "auto",
-          maxHeight: "250px",
-          "&::-webkit-scrollbar": {
-            width: "5px",
-          },
-          "&::-webkit-scrollbar-thumb": {
-            backgroundColor: "#888",
-            borderRadius: "4px",
-          },
-          "&::-webkit-scrollbar-track": {
-            backgroundColor: "#e0e0e0",
-            borderRadius: "2px",
-          },
+          overflow: "hidden",
         }}
       >
         <Typography variant="h6" gutterBottom>
