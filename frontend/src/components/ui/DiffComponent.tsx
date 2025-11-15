@@ -39,7 +39,7 @@ const DiffComponent = ({ splitRows, fileName }: DiffComponentProps) => {
       direction="row"
       spacing={0}
       sx={{
-        alignItems: "center",
+        alignItems: "stretch",
         maxHeight: "250px",
         overflow: "auto",
 
@@ -62,6 +62,7 @@ const DiffComponent = ({ splitRows, fileName }: DiffComponentProps) => {
           color: "#000",
           p: 2,
           width: "50%",
+          height: "100%",
           overflow: "hidden",
         }}
       >
@@ -88,6 +89,7 @@ const DiffComponent = ({ splitRows, fileName }: DiffComponentProps) => {
           color: "#000",
           p: 2,
           width: "50%",
+          height: "100%",
           overflow: "hidden",
         }}
       >
