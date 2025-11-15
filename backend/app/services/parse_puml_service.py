@@ -1,15 +1,9 @@
 import json
-import re
 from kruskals_algorithm import Graph
 
-# TODO:
-# Add support for class visibility
-# Add support for notes
-# Add support for named and styled relations
 
 class PUMLParser:
-    
-    def __init__(self, config_path = "parser_config.json"):
+    def __init__(self, config_path):
         self.weights = {}
         self.class_names = set()
         self.parse_config(config_path)
@@ -24,7 +18,7 @@ class PUMLParser:
             return {}
 
         try:
-            with open(config_path, 'r') as file:
+            with open(config_path, "r") as file:
                 config = json.load(file)
                 self.weights = config.get("weights", {})
                 self.class_names = set(config.get("class_names", []))
@@ -46,30 +40,21 @@ class PUMLParser:
                 end_found = True
 
         return start_found and end_found
-    
-    def remove_comments(self, file):
-        file.seek(0)
-        content = file.read()
-        
-        content = re.sub(r"/\'.*?\'\/", "", content, flags=re.DOTALL)
-        
-        return content.split('\n')
-    
 
     def parse_file(self, filepath) -> dict | list:
 
-        with open(filepath, 'r') as file:
+        with open(filepath, "r") as file:
             if not self.check_correct_puml(file):
                 print("File is not a correct PUML file.")
                 return []
-            
-            lines = self.remove_comments(file)
-            
+
+            file.seek(0)
+
             classes = {}
             classesCount = 0
             edges = []
 
-            for line in lines:
+            for line in file:
                 line = line.strip()
 
                 for keyword in self.class_names:
@@ -97,9 +82,9 @@ class PUMLParser:
 
     def extract_edge_info(self, parts) -> dict:
         if len(parts) == 2:
-            source = parts[0]
-            target = parts[1]
-            
+            source = parts[0].strip()
+            target = parts[1].strip()
+
             if '"' in source:
                 source = source.split('"')[0].strip()
 
@@ -121,30 +106,33 @@ class PUMLParser:
 
         lines = []
 
-        with open(source_path, 'r') as file:
-            for line in file:
+        with open(source_path, "r") as file:
+            line = file.readline()
+            while line:
 
                 appendLine = True
 
                 for weight_key, weight_value in self.weights.items():
                     if weight_key in line.strip():
-                        lineWithoutComments = re.sub(r"/\'.*?\'\/", "", line, flags=re.DOTALL).strip()
-                        parts = lineWithoutComments.split(weight_key)
+                        parts = line.split(weight_key)
                         edge = self.extract_edge_info(parts)
                         if edge | {"weight": weight_value} not in new_data["edges"]:
                             appendLine = False
                             break
                         break
-                        
+
                 if appendLine:
                     lines.append(line)
-        
-        with open(output_path, 'w') as file:
+
+                line = file.readline()
+
+        with open(output_path, "w") as file:
             file.writelines(lines)
+
 
 if __name__ == "__main__":
     parser = PUMLParser("parser_config.json")
-    result = parser.parse_file("test_class.puml")
+    result = parser.parse_file("testing_file.puml")
     print(json.dumps(result, indent=4))
 
     graph = Graph(result)
@@ -153,4 +141,4 @@ if __name__ == "__main__":
     sol = graph.extract_solution(sol)
     print(json.dumps(sol, indent=4))
 
-    parser.reparse_file("test_class.puml", "output_file.puml", sol)
+    parser.reparse_file("testing_file.puml", "output_file.puml", sol)
