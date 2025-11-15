@@ -1,8 +1,13 @@
 name: Link PR to Azure DevOps Work Item
 
+permissions:
+  pull-requests: write
+  contents: write
+
 on:
   pull_request:
     types: [opened, reopened, edited]
+
 
 jobs:
   link_pr_to_task:
