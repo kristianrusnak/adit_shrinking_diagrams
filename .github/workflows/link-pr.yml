@@ -11,6 +11,7 @@ on:
 
 jobs:
   link_pr_to_task:
+    if: github.actor != 'github-actions[bot]' 
     runs-on: ubuntu-latest
     steps:
       - name: Extract task ID from PR title
