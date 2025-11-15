@@ -34,7 +34,7 @@ def mock_controller(file: UploadFile):
     # simulate wait 5 seconds
     import time
 
-    time.sleep(5)
+    time.sleep(1)
     try:
         content_bytes = file.file.read()
         content = content_bytes.decode("utf-8")
