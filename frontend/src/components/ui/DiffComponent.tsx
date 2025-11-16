@@ -7,8 +7,9 @@ export interface DiffComponentProps {
   splitRows: SplitRow[];
 }
 
+// TODO: implement "replace". this happens when - is followed by + (a line is replaced by another)
 const DiffComponent = ({ splitRows, fileName }: DiffComponentProps) => {
-  const getDiffTexts = (splitRows: SplitRow[]): string[] => {
+  const getDiffTexts = (splitRows: SplitRow[]): string[][] => {
     const before: string[] = [];
     const after: string[] = [];
     splitRows.forEach((row) => {
@@ -24,15 +25,10 @@ const DiffComponent = ({ splitRows, fileName }: DiffComponentProps) => {
       }
     });
 
-    return [before.join("\n"), after.join("\n")];
+    return [before, after];
   };
 
   const [before, after] = getDiffTexts(splitRows);
-
-  console.log(before.split("\n").length);
-  console.log(after.split("\n").length);
-
-  // TODO: implement line background color for insert/delete like on github
 
   return (
     <Stack
@@ -64,24 +60,31 @@ const DiffComponent = ({ splitRows, fileName }: DiffComponentProps) => {
           width: "50%",
           height: "100%",
           overflow: "hidden",
+          paddingRight: 0,
         }}
       >
         <Typography variant="h6" gutterBottom>
           {fileName}
         </Typography>
         <Divider />
-
-        <Typography
-          variant="body2"
-          textAlign="left"
-          gutterBottom
-          sx={{
+        {before.map((line, idx) => {
+          const firstChar = line.charAt(0);
+          const sx = {
             whiteSpace: "pre-wrap",
             fontFamily: "monospace",
-          }}
-        >
-          {before}
-        </Typography>
+            backgroundColor:
+              firstChar === "+"
+                ? "success.main"
+                : firstChar === "-"
+                  ? "error.main"
+                  : "e0e0e0",
+          };
+          return (
+            <Typography key={idx} variant="body2" sx={sx}>
+              {line}
+            </Typography>
+          );
+        })}
       </Box>
       <Box
         sx={{
@@ -91,24 +94,32 @@ const DiffComponent = ({ splitRows, fileName }: DiffComponentProps) => {
           width: "50%",
           height: "100%",
           overflow: "hidden",
+          paddingLeft: 0,
         }}
       >
-        <Typography variant="h6" gutterBottom>
+        <Typography paddingLeft={2} variant="h6" gutterBottom>
           {fileName}
         </Typography>
         <Divider />
 
-        <Typography
-          variant="body2"
-          textAlign="left"
-          gutterBottom
-          sx={{
+        {after.map((line, idx) => {
+          const firstChar = line.charAt(0);
+          const sx = {
             whiteSpace: "pre-wrap",
             fontFamily: "monospace",
-          }}
-        >
-          {after}
-        </Typography>
+            backgroundColor:
+              firstChar === "+"
+                ? "success.main"
+                : firstChar === "-"
+                  ? "error.main"
+                  : "e0e0e0",
+          };
+          return (
+            <Typography key={idx} variant="body2" sx={sx}>
+              {line}
+            </Typography>
+          );
+        })}
       </Box>
     </Stack>
   );
