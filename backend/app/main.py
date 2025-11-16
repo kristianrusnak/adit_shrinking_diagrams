@@ -29,9 +29,10 @@ def read_item(item_id: int, q: Union[str, None] = None):
     return {"item_id": item_id, "q": q}
 
 
+# bounce back the file
 @app.post("/api/sendMock")
 def mock_controller(file: UploadFile):
-    # simulate wait 5 seconds
+    # simulate wait 1 seconds
     import time
 
     time.sleep(1)
@@ -39,9 +40,7 @@ def mock_controller(file: UploadFile):
         content_bytes = file.file.read()
         content = content_bytes.decode("utf-8")
     except Exception:
-        raise HTTPException(
-            status_code=400, detail="Nepodarilo sa prečítať textový súbor"
-        )
+        raise HTTPException(status_code=400, detail="Unable to read PUML file")
     return {"response": content}
 
 
@@ -51,9 +50,7 @@ def message_controller(file: UploadFile, message: str = Form(...)):
         content_bytes = file.file.read()
         content = content_bytes.decode("utf-8")
     except Exception:
-        raise HTTPException(
-            status_code=400, detail="Unable to read PUML file"
-        )
+        raise HTTPException(status_code=400, detail="Unable to read PUML file")
 
     full_message = f"{content} | {message}"
     service = OpenAIService()
@@ -64,9 +61,10 @@ def message_controller(file: UploadFile, message: str = Form(...)):
 
     return {"response": response}
 
+
 @app.post("/api/processPUML")
 def process_puml(file: UploadFile):
-    parser = PUMLParser("parser_config.json")
+    parser = PUMLParser("app/services/parser_config.json")
     source_path = None
     output_path = None
     try:
@@ -75,21 +73,19 @@ def process_puml(file: UploadFile):
             tmp.write(content)
             source_path = tmp.name
         parsed = parser.parse_file(source_path)
-
         graph = Graph(parsed)
         reduced = graph.kruskals_algorithm()
         reduced = graph.extract_solution(reduced)
 
-        with tempfile.NamedTemporaryFile(delete=False, suffix="_reduced.puml") as tmp_out:
+        with tempfile.NamedTemporaryFile(
+            delete=False, suffix="_reduced.puml"
+        ) as tmp_out:
             output_path = tmp_out.name
         parser.reparse_file(source_path, output_path, reduced)
         with open(output_path, "r") as f:
             result = f.read()
 
-        return {
-            "parsed": parsed,
-            "reduced": reduced,
-            "result_puml": result }
+        return {"parsed": parsed, "reduced": reduced, "result_puml": result}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

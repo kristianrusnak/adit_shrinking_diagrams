@@ -1,5 +1,5 @@
 import json
-from kruskals_algorithm import Graph
+from app.services.kruskals_algorithm import Graph
 
 
 class PUMLParser:

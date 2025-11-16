@@ -1,7 +1,6 @@
 import { SplitRow } from "@/utils/myersdiff";
 import { Box, Divider, Stack, Typography } from "@mui/material";
-import { useEffect, useRef } from "react";
-
+import { grey } from "@mui/material/colors";
 export interface DiffComponentProps {
   fileName: string;
   splitRows: SplitRow[];
@@ -29,6 +28,7 @@ const DiffComponent = ({ splitRows, fileName }: DiffComponentProps) => {
   };
 
   const [before, after] = getDiffTexts(splitRows);
+  const bg1 = grey[50];
 
   return (
     <Stack
@@ -38,7 +38,7 @@ const DiffComponent = ({ splitRows, fileName }: DiffComponentProps) => {
         alignItems: "stretch",
         maxHeight: "250px",
         overflow: "auto",
-        backgroundColor: "#e0e0e0",
+        backgroundColor: `${bg1}`,
         "&::-webkit-scrollbar": {
           width: "5px",
         },
@@ -54,7 +54,6 @@ const DiffComponent = ({ splitRows, fileName }: DiffComponentProps) => {
     >
       <Box
         sx={{
-          backgroundColor: "#e0e0e0",
           color: "#000",
           p: 2,
           width: "50%",
@@ -74,9 +73,9 @@ const DiffComponent = ({ splitRows, fileName }: DiffComponentProps) => {
             fontFamily: "monospace",
             backgroundColor:
               firstChar === "+"
-                ? "success.main"
+                ? "success.light"
                 : firstChar === "-"
-                  ? "error.main"
+                  ? "error.light"
                   : "e0e0e0",
           };
           return (
@@ -88,7 +87,6 @@ const DiffComponent = ({ splitRows, fileName }: DiffComponentProps) => {
       </Box>
       <Box
         sx={{
-          backgroundColor: "#e0e0e0",
           color: "#000",
           p: 2,
           width: "50%",
@@ -98,7 +96,7 @@ const DiffComponent = ({ splitRows, fileName }: DiffComponentProps) => {
         }}
       >
         <Typography paddingLeft={2} variant="h6" gutterBottom>
-          {fileName}
+          Kruskal's reduction
         </Typography>
         <Divider />
 

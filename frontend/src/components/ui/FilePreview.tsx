@@ -2,7 +2,8 @@ import { Card, CircularProgress } from "@mui/material";
 import { useSelector } from "react-redux";
 import { selectFile } from "../../store/slices/fileSlice";
 import { useEffect, useState } from "react";
-import { useSendMockMutation } from "../../api/dbApi";
+import { useProcessPumlMutation, useSendMockMutation } from "../../api/dbApi";
+
 import { useError } from "../../context/useError.jsx";
 import getSplitDiffRows, { SplitRow } from "../../utils/myersdiff";
 import DiffComponent from "./DiffComponent";
@@ -13,10 +14,12 @@ const FilePreview = () => {
     showError: (msg: string, title?: string) => void;
   };
   const [splitRows, setSplitRows] = useState<SplitRow[]>([]);
-  const [sendMock, { data, error, isLoading }] = useSendMockMutation();
+  // const [sendMock, { data, error, isLoading }] = useSendMockMutation();
+  const [processPuml, { data, error, isLoading }] = useProcessPumlMutation();
 
   // console.log(selectedFile);
   //
+  console.log(data);
 
   useEffect(() => {
     if (!selectedFile) {
@@ -27,22 +30,25 @@ const FilePreview = () => {
       const beforeProcessing = await selectedFile.text();
 
       try {
-        const response = await sendMock({ file: selectedFile }).unwrap();
-        const filtered = response.split("\n").filter((line, idx) => idx % 2);
-        filtered.push("blaba added 1 ");
-        filtered.push("blaba added 2 ");
-        filtered.push("blaba added 3 ");
-        filtered.push("blaba added 4 ");
+        // const response = await processPuml({ file: selectedFile }).unwrap();
+        // const filtered = response.split("\n").filter((line, idx) => idx % 2);
+        // filtered.push("blaba added 1 ");
+        // filtered.push("blaba added 2 ");
+        // filtered.push("blaba added 3 ");
+        // filtered.push("blaba added 4 ");
 
-        console.log("got response");
+        const response = await processPuml({ file: selectedFile }).unwrap();
+        const result = response.result_puml;
+
+        // console.log("got response");
 
         const _splitRows = getSplitDiffRows(
           beforeProcessing.split("\n"),
-          filtered,
+          result.split("\n"),
         );
 
         setSplitRows(_splitRows);
-        console.log(splitRows);
+        // console.log(splitRows);
       } catch (error: any) {
         showError(error.error, `Status: ${error.status}`);
       }
