@@ -38,8 +38,23 @@ const DummyResponseComponent = () => {
   };
 
   return (
-    <Box sx={{ minWidth: "300px", paddingTop: 1, display: "flex", justifyContent: "center" }}>
-      <Button variant="contained" onClick={handleClick}>
+    <Box sx={{
+      minWidth: "300px",
+      paddingTop: 1,
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      flexDirection: "column"
+    }}>
+      <Button
+        color="inherit"
+        component="label"
+        variant="outlined"
+
+        loading={isLoading}
+        loadingPosition="end"
+        onClick={handleClick}
+      >
         {isLoading ? "Processing request..." : "Send"}
       </Button>
       {data && <BasicChat text={data ? data : "..."} />}

@@ -93,7 +93,8 @@ const FileUploadButton = () => {
       <Button
         component="label"
         role={undefined}
-        variant="contained"
+        variant="outlined"
+        color="inherit"
         tabIndex={-1}
         startIcon={<CloudUploadIcon />}
       >
