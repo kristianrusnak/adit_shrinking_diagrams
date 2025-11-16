@@ -42,7 +42,7 @@ const DiffComponent = ({ splitRows, fileName }: DiffComponentProps) => {
         alignItems: "stretch",
         maxHeight: "250px",
         overflow: "auto",
-
+        backgroundColor: "#e0e0e0",
         "&::-webkit-scrollbar": {
           width: "5px",
         },
