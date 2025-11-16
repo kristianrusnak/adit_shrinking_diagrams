@@ -2,7 +2,11 @@ import { Box, Button, Typography } from "@mui/material";
 import { useSendMessageMutation } from "../../api/dbApi";
 import { useState } from "react";
 import { useError } from "../../context/useError";
-import { selectFile, selectMessage } from "../../store/slices/fileSlice";
+import {
+  selectFile,
+  selectMessage,
+  selectFileReduced,
+} from "../../store/slices/fileSlice";
 import { useSelector } from "react-redux";
 import BasicChat from "./BasicChat";
 
@@ -13,6 +17,7 @@ const PROMPT_DEFAULT = "Describe provided diagram in a few words.";
 const DummyResponseComponent = () => {
   const [sendMessage, { data, error, isLoading }] = useSendMessageMutation();
   const selectedFile = useSelector(selectFile);
+  const selectedFileReduced = useSelector(selectFileReduced);
   const selectedMessage = useSelector(selectMessage);
 
   const { showError } = useError() as {
@@ -21,15 +26,19 @@ const DummyResponseComponent = () => {
 
   const handleClick = async () => {
     try {
+      // I added the kruskal's reduced file here but kept the old one as well
+      // we might wanna send the original file too
       let file = null;
-      if (!selectedFile) {
+      let fileReduced = null;
+      if (!selectedFile || !selectedFileReduced) {
         showError("No file selected", "Error");
         return;
       } else {
         file = selectedFile;
+        fileReduced = selectedFileReduced;
       }
       await sendMessage({
-        file: file,
+        file: fileReduced,
         message: selectedMessage == "" ? PROMPT_DEFAULT : selectedMessage,
       }).unwrap();
     } catch (error: any) {
