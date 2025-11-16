@@ -12,6 +12,7 @@ export default function NotFoundPage() {
         baseIntensity={0.25}
         hoverIntensity={0.5}
         enableHover={true}
+        fontSize='80px'
         >
           404
         </FuzzyText>
