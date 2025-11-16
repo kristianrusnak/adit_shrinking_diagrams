@@ -46,12 +46,10 @@ jobs:
           echo "$BODY"
 
           # Append metadata to body
-          UPDATED_BODY="${BODY}\n${META_LINE}"
+          UPDATED_BODY="${BODY}${META_LINE}"
           
           # Escape for JSON
           ESCAPED_BODY=$(printf '%s' "$UPDATED_BODY" | jq -Rs .)
-          
-          echo "$ESCAPED_BODY"
           
           # Create JSON payload
           printf '{"body": %s}' "$ESCAPED_BODY" > payload.json
