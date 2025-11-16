@@ -6,12 +6,11 @@ permissions:
 
 on:
   pull_request:
-    types: [opened, reopened]
+    types: [edited, opened, reopened]
 
 
 jobs:
   link_pr_to_task:
-    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Extract task ID from PR title
@@ -38,7 +37,7 @@ jobs:
           echo "Updating PR description with hidden AB#$TASK_ID metadata..."
 
           # Build hidden metadata line
-          META_LINE="<!-- Work item reference: AB#$TASK_ID -->"
+          META_LINE="Work item reference: AB#$TASK_ID"
 
           # Fetch existing PR description
           BODY=$(gh api repos/$REPO/pulls/$PR_NUMBER --jq '.body')
@@ -48,12 +47,11 @@ jobs:
 
           # Append metadata to body
           UPDATED_BODY="${BODY}\n${META_LINE}"
-
-          # Append metadata
-          UPDATED_BODY="${BODY}\n${META_LINE}"
           
           # Escape for JSON
           ESCAPED_BODY=$(printf '%s' "$UPDATED_BODY" | jq -Rs .)
+          
+          echo "$ESCAPED_BODY"
           
           # Create JSON payload
           printf '{"body": %s}' "$ESCAPED_BODY" > payload.json
