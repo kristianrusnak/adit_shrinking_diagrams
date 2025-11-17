@@ -14,14 +14,15 @@ This testing suite uses Selenium and pytest for automated testing of the applica
 
 1. Install the required Python packages:
 ```
+cd frontend\tests
 pip install -r requirements.txt
 ```
 
 2. Make sure you have at least one supported browser installed (Chrome, Firefox, Edge, or Safari).
 
 3. **For Safari users (macOS only):**
-   - Enable the Develop menu: Safari → Preferences → Advanced → "Show Develop menu in menu bar"
-   - Enable automation: Develop → Allow Remote Automation
+   - Enable the Develop menu: Safari → Settings... → Advanced → Show features for web developers
+   - Enable automation: Safari → Settings... → Developer → Allow Remote Automation
    - Run once: `safaridriver --enable` in Terminal
 
 ## Running Tests
