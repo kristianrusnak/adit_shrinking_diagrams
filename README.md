@@ -80,7 +80,7 @@ class Transaction {
 
 User "1" --> "1..*" Account
 Account "1" --> "0..*" Transaction
-Transaction --> User ' this should get removed
+Transaction --> User
 
 @enduml
 ```
