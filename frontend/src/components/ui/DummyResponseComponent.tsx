@@ -50,10 +50,16 @@ const DummyResponseComponent = () => {
         color="inherit"
         component="label"
         variant="outlined"
-
         loading={isLoading}
         loadingPosition="end"
         onClick={handleClick}
+        sx={{
+          "@media (prefers-color-scheme: dark)": {
+            borderColor: "white !important",
+            color: "white !important",
+            backgroundColor: "gray !important",
+          }
+        }}
       >
         {isLoading ? "Processing request..." : "Send"}
       </Button>
