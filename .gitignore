@@ -48,3 +48,8 @@ __pycache__/
 .coverage
 .tox/
 .cache/
+
+# Testing 
+test.puml 
+notes
+backend/app/services/*.puml
