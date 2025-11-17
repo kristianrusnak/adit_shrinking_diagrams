@@ -72,7 +72,13 @@ def process_puml(file: UploadFile):
         with tempfile.NamedTemporaryFile(delete=False, suffix=".puml") as tmp:
             tmp.write(content)
             source_path = tmp.name
-        parsed = parser.parse_file(source_path)
+
+        parsed = parser.parse_file(
+            source_path
+        )  # TODO: this should be throwing an exception not an empty list
+        if not parsed:
+            raise HTTPException(status_code=500, detail="Unable to parse PUML file")
+
         graph = Graph(parsed)
         reduced = graph.kruskals_algorithm()
         reduced = graph.extract_solution(reduced)

@@ -67,7 +67,15 @@ const FileUploadButton = () => {
       dispatch(setFileReduced(new File([result], file.name)));
     } catch (error: any) {
       // might wanna clear out global store, or just keep the previous file like now
-      showError(error.error, `Status: ${error.status}`);
+      // console.log(error);
+      dispatch(setFile(null)); // this should not happen
+      dispatch(setFileReduced(null));
+      showError(error.data.detail, `Status: ${error.status}`);
+
+      if (inputRef.current) {
+        // clear out the input so we can trigger on change again if the user wants to upload the same file again (and fail)
+        inputRef.current.value = "";
+      }
     }
   };
 
