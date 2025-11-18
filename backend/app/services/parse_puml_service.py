@@ -1,6 +1,6 @@
 import json
 import re
-from kruskals_algorithm import Graph
+from app.services.kruskals_algorithm import Graph
 
 # TODO:
 # Add support for class visibility
