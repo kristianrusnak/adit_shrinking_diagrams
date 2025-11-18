@@ -1,64 +1,46 @@
-import { Card, Box, Divider, Typography } from "@mui/material";
+import { Card, CircularProgress } from "@mui/material";
 import { useSelector } from "react-redux";
-import { selectFile } from "../../store/slices/fileSlice";
+import { selectFile, selectFileReduced } from "../../store/slices/fileSlice";
 import { useEffect, useState } from "react";
+import { useProcessPumlMutation, useSendMockMutation } from "../../api/dbApi";
+
+import { useError } from "../../context/useError.jsx";
+import getSplitDiffRows, { SplitRow } from "../../utils/myersdiff";
+import DiffComponent from "./DiffComponent";
 
 const FilePreview = () => {
   const selectedFile = useSelector(selectFile);
-  const [previewText, setPreviewText] = useState("");
+  const selectedFileReduced = useSelector(selectFileReduced);
+  const [splitRows, setSplitRows] = useState<SplitRow[]>([]);
+  // const [sendMock, { data, error, isLoading }] = useSendMockMutation();
 
   // console.log(selectedFile);
+  //
 
   useEffect(() => {
-    if (!selectedFile) {
-      setPreviewText("");
+    if (!selectedFile || !selectedFileReduced) {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const text = event.target?.result as string;
-      setPreviewText(text);
+    const buildDiff = async () => {
+      const beforeProcessing = await selectedFile.text();
+      const afterProcessing = await selectedFileReduced.text();
+
+      const _splitRows = getSplitDiffRows(
+        beforeProcessing.split("\n"),
+        afterProcessing.split("\n"),
+      );
+
+      setSplitRows(_splitRows);
     };
 
-    reader.onerror = () => {
-      // TODO: maybe use the error provider here? this should technically not happen though
-      setPreviewText("Error reading file");
-    };
-
-    reader.readAsText(selectedFile);
-
-    console.log(selectedFile);
-  }, [selectedFile]);
+    buildDiff();
+  }, [selectedFile, selectedFileReduced]);
 
   return (
-    <Card sx={{ minWidth: "600px", marginTop: 2, marginBottom: 2 }}>
-      {selectedFile && (
-        <Box
-          sx={{
-            backgroundColor: "#e0e0e0",
-            color: "#000",
-            p: 2,
-            overflow: "auto",
-            maxHeight: "250px",
-          }}
-        >
-          <Typography variant="h6" gutterBottom>
-            {selectedFile?.name ?? "No file selected"}
-          </Typography>
-          <Divider />
-          <Typography
-            variant="body2"
-            textAlign="left"
-            gutterBottom
-            sx={{
-              whiteSpace: "pre-wrap", // preserves newlines and indentation
-              fontFamily: "monospace", // optional, looks better for code/text files
-            }}
-          >
-            {previewText}
-          </Typography>
-        </Box>
+    <Card sx={{ minWidth: "800px", marginTop: 2, marginBottom: 2 }}>
+      {selectedFile && splitRows.length > 0 && (
+        <DiffComponent fileName={selectedFile.name} splitRows={splitRows} />
       )}
     </Card>
   );

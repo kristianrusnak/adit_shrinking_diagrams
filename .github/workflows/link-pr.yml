@@ -1,0 +1,65 @@
+name: Link PR to Azure DevOps Work Item
+
+permissions:
+  pull-requests: write
+  contents: write
+
+on:
+  pull_request:
+    types: [opened, reopened]
+
+
+jobs:
+  link_pr_to_task:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract task ID from PR title
+        id: extract
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          echo "PR Title: $PR_TITLE"
+
+          if [[ "$PR_TITLE" =~ ([0-9]+) ]]; then
+            echo "task_id=${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
+            echo "Found task ID: ${BASH_REMATCH[1]}"
+          else
+            echo "No task ID found in PR title."
+          fi
+
+      - name: Add hidden ADO metadata to PR description
+        if: steps.extract.outputs.task_id != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          TASK_ID: ${{ steps.extract.outputs.task_id }}
+          REPO: ${{ github.repository }}
+        run: |
+          echo "Updating PR description with hidden AB#$TASK_ID metadata..."
+
+          # Build hidden metadata line
+          META_LINE="Work item reference: AB#$TASK_ID"
+
+          # Fetch existing PR description
+          BODY=$(gh api repos/$REPO/pulls/$PR_NUMBER --jq '.body')
+
+          echo "Existing PR Body:"
+          echo "$BODY"
+
+          # Append metadata to body
+          UPDATED_BODY="$(printf '%s\n\n%s' "$BODY" "$META_LINE")"
+          
+          # Escape for JSON
+          ESCAPED_BODY=$(printf '%s' "$UPDATED_BODY" | jq -Rs .)
+          
+          # Create JSON payload
+          jq -n --arg body "$UPDATED_BODY" '{body: $body}' > payload.json
+          
+          # Send update request
+          gh api \
+            --method PATCH \
+            -H "Accept: application/vnd.github+json" \
+            /repos/$REPO/pulls/$PR_NUMBER \
+            --input payload.json
+
+
+          echo "Metadata added: $META_LINE"

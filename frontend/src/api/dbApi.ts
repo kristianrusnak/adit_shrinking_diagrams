@@ -19,8 +19,44 @@ const extendedApi = apiSlice.injectEndpoints({
       },
       invalidatesTags: [],
     }),
+    sendMock: build.mutation<string, { file: File }>({
+      query: (data) => {
+        const formData = new FormData();
+        formData.append("file", data.file);
+
+        return {
+          url: "api/sendMock",
+          method: "POST",
+          body: formData,
+        };
+      },
+      transformResponse: (response: any) => {
+        return response.response;
+      },
+      invalidatesTags: [],
+    }),
+    processPuml: build.mutation<ProcessPumlResponse, { file: File }>({
+      query: (data) => {
+        const formData = new FormData();
+        formData.append("file", data.file);
+
+        return {
+          url: "api/processPUML",
+          method: "POST",
+          body: formData,
+        };
+      },
+      transformResponse: (response: ProcessPumlResponse) => {
+        return response;
+      },
+      invalidatesTags: [],
+    }),
   }),
   overrideExisting: false,
 });
 
-export const { useSendMessageMutation } = extendedApi;
+export const {
+  useSendMessageMutation,
+  useSendMockMutation,
+  useProcessPumlMutation,
+} = extendedApi;

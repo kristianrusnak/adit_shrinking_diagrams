@@ -52,6 +52,7 @@ const ErrorMessage = ({ text, title = "An error occurred", open = true, onClose 
           <AlertTitle>{title}</AlertTitle>
           <div>{text}</div>
           <Button
+            component="label"
             variant="outlined"
             color="inherit"
             size="small"
