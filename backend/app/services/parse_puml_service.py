@@ -98,18 +98,9 @@ class PUMLParser:
         if len(parts) == 2:
             source = parts[0]
             target = parts[1]
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
             
             if ':' in target:
                 target = target.split(':')[0].strip()
->>>>>>> 561756c (Added support for named relations parsing)
-=======
-            
-            if ':' in target:
-                target = target.split(':')[0].strip()
->>>>>>> 6711131f9d35496856ec7fab2187e8d1fa238737
 
             if '"' in source:
                 source = source.split('"')[0].strip()
