@@ -7,9 +7,9 @@ from app.services.kruskals_algorithm import Graph
 # Add support for notes
 # Add support for named and styled relations
 
+
 class PUMLParser:
-    
-    def __init__(self, config_path = "parser_config.json"):
+    def __init__(self, config_path="parser_config.json"):
         self.weights = {}
         self.class_names = set()
         self.parse_config(config_path)
@@ -24,7 +24,7 @@ class PUMLParser:
             return {}
 
         try:
-            with open(config_path, 'r') as file:
+            with open(config_path, "r") as file:
                 config = json.load(file)
                 self.weights = config.get("weights", {})
                 self.class_names = set(config.get("class_names", []))
@@ -46,25 +46,24 @@ class PUMLParser:
                 end_found = True
 
         return start_found and end_found
-    
+
     def remove_comments(self, file):
         file.seek(0)
         content = file.read()
-        
+
         content = re.sub(r"/\'.*?\'\/", "", content, flags=re.DOTALL)
-        
-        return content.split('\n')
-    
+
+        return content.split("\n")
 
     def parse_file(self, filepath) -> dict | list:
 
-        with open(filepath, 'r') as file:
+        with open(filepath, "r") as file:
             if not self.check_correct_puml(file):
                 print("File is not a correct PUML file.")
                 return []
-            
+
             lines = self.remove_comments(file)
-            
+
             classes = {}
             classesCount = 0
             edges = []
@@ -124,26 +123,29 @@ class PUMLParser:
 
         lines = []
 
-        with open(source_path, 'r') as file:
+        with open(source_path, "r") as file:
             for line in file:
 
                 appendLine = True
 
                 for weight_key, weight_value in self.weights.items():
                     if weight_key in line.strip():
-                        lineWithoutComments = re.sub(r"/\'.*?\'\/", "", line, flags=re.DOTALL).strip()
+                        lineWithoutComments = re.sub(
+                            r"/\'.*?\'\/", "", line, flags=re.DOTALL
+                        ).strip()
                         parts = lineWithoutComments.split(weight_key)
                         edge = self.extract_edge_info(parts)
                         if edge | {"weight": weight_value} not in new_data["edges"]:
                             appendLine = False
                             break
                         break
-                        
+
                 if appendLine:
                     lines.append(line)
-        
-        with open(output_path, 'w') as file:
+
+        with open(output_path, "w") as file:
             file.writelines(lines)
+
 
 if __name__ == "__main__":
     parser = PUMLParser("parser_config.json")

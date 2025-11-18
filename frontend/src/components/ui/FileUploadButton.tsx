@@ -4,7 +4,8 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useError } from "../../context/useError.jsx";
 import { useRef } from "react";
 import { useDispatch } from "react-redux";
-import { setFile } from "../../store/slices/fileSlice";
+import { setFile, setFileReduced } from "../../store/slices/fileSlice";
+import { useProcessPumlMutation } from "../../api/dbApi";
 
 const MAX_FILE_SIZE = 1024 * 1024 * 10; // 10 MB
 
@@ -27,6 +28,7 @@ const FileUploadButton = () => {
 
   const dispatch = useDispatch();
   const inputRef = useRef<HTMLInputElement>(null);
+  const [processPuml, { data, error, isLoading }] = useProcessPumlMutation();
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files == null || event.target.files.length === 0) {
@@ -37,7 +39,7 @@ const FileUploadButton = () => {
     handleFile(file);
   };
 
-  const handleFile = (file: File | null) => {
+  const handleFile = async (file: File | null) => {
     if (file == null) {
       showError("No file selected", "File selection error");
       return;
@@ -58,7 +60,23 @@ const FileUploadButton = () => {
       return;
     }
 
-    dispatch(setFile(file));
+    try {
+      const response = await processPuml({ file }).unwrap();
+      const result = response.result_puml;
+      dispatch(setFile(file));
+      dispatch(setFileReduced(new File([result], file.name)));
+    } catch (error: any) {
+      // might wanna clear out global store, or just keep the previous file like now
+      // console.log(error);
+      dispatch(setFile(null)); // this should not happen
+      dispatch(setFileReduced(null));
+      showError(error.data.detail, `Status: ${error.status}`);
+
+      if (inputRef.current) {
+        // clear out the input so we can trigger on change again if the user wants to upload the same file again (and fail)
+        inputRef.current.value = "";
+      }
+    }
   };
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
@@ -93,11 +111,12 @@ const FileUploadButton = () => {
       <Button
         component="label"
         role={undefined}
-        variant="contained"
+        variant="outlined"
+        color="inherit"
         tabIndex={-1}
         startIcon={<CloudUploadIcon />}
       >
-        Upload file
+        {isLoading ? "Processing file" : "Upload file"}
         <VisuallyHiddenInput
           ref={inputRef}
           type="file"
