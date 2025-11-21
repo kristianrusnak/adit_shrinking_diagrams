@@ -1,25 +1,25 @@
 """add default admin user
 
-Revision ID: 82ef554f43f0
-Revises: 18e8137e3e34
-Create Date: 2025-11-21 21:31:16.165261
+Revision ID: 5c2e78f2fbd1
+Revises: ce5688f45122
+Create Date: 2025-11-21 22:17:01.575891
 
 """
-import hashlib
 from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
+
 from sqlalchemy.sql import table, column
 from sqlalchemy import Integer, String
+import hashlib
 
 
 # revision identifiers, used by Alembic.
-revision: str = '82ef554f43f0'
-down_revision: Union[str, Sequence[str], None] = '18e8137e3e34'
+revision: str = '5c2e78f2fbd1'
+down_revision: Union[str, Sequence[str], None] = 'ce5688f45122'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
-
 
 def hash_password(password: str) -> str:
     return hashlib.sha256(password.encode("utf-8")).hexdigest()
