@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { selectFile, selectFileReduced } from "../../store/slices/fileSlice";
 import { useEffect, useState } from "react";
 import { useProcessPumlMutation, useSendMockMutation } from "../../api/dbApi";
-
+import { logger } from "../../utils/logger";
 import { useError } from "../../context/useError.jsx";
 import getSplitDiffRows, { SplitRow } from "../../utils/myersdiff";
 import DiffComponent from "./DiffComponent";
@@ -30,6 +30,8 @@ const FilePreview = () => {
         beforeProcessing.split("\n"),
         afterProcessing.split("\n"),
       );
+
+      logger.debug("_splitRows:", JSON.stringify(_splitRows));
 
       setSplitRows(_splitRows);
     };

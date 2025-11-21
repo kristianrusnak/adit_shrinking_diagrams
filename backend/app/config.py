@@ -5,10 +5,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     openai_api_key: str  # required
+    log_level: str = "INFO"
 
-    model_config = SettingsConfigDict(
-        env_file=Path(__file__).parent.parent / ".env"
-    )
+    model_config = SettingsConfigDict(env_file=Path(__file__).parent.parent / ".env")
 
 
 settings = Settings()
