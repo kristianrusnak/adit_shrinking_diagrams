@@ -8,6 +8,12 @@ from app.services.openai_service import OpenAIService
 from app.services.parse_puml_service import PUMLParser
 from app.services.kruskals_algorithm import Graph
 
+from fastapi import Depends
+from sqlalchemy.orm import Session
+
+from app.db import get_db
+from app.models.user import User
+
 app = FastAPI()
 
 app.add_middleware(
@@ -107,3 +113,7 @@ def process_puml(file: UploadFile):
                 os.remove(output_path)
             except:
                 pass
+
+@app.get("/users")
+def get_users(db: Session = Depends(get_db)):
+    return db.query(User).all()
