@@ -3,9 +3,10 @@ import { styled } from "@mui/material/styles";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useError } from "../../context/useError.jsx";
 import { useRef } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setFile, setFileReduced } from "../../store/slices/fileSlice";
 import { useProcessPumlMutation } from "../../api/dbApi";
+import { selectSelectedAlgorithm } from "@/store/slices/algorithmSlice.js";
 
 const MAX_FILE_SIZE = 1024 * 1024 * 10; // 10 MB
 
@@ -29,6 +30,8 @@ const FileUploadButton = () => {
   const dispatch = useDispatch();
   const inputRef = useRef<HTMLInputElement>(null);
   const [processPuml, { data, error, isLoading }] = useProcessPumlMutation();
+
+  const selectedAlgorithm = useSelector(selectSelectedAlgorithm);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files == null || event.target.files.length === 0) {
