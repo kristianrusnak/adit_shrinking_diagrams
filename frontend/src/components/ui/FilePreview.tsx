@@ -5,7 +5,10 @@ import { useEffect, useState } from "react";
 import { useProcessPumlMutation, useSendMockMutation } from "../../api/dbApi";
 import { logger } from "../../utils/logger";
 import { useError } from "../../context/useError.jsx";
-import getSplitDiffRows, { SplitRow } from "../../utils/myersdiff";
+import getSplitDiffRows, {
+  normalizeLineEndings,
+  SplitRow,
+} from "../../utils/myersdiff";
 import DiffComponent from "./DiffComponent";
 
 const FilePreview = () => {
@@ -26,10 +29,10 @@ const FilePreview = () => {
       const beforeProcessing = await selectedFile.text();
       const afterProcessing = await selectedFileReduced.text();
 
-      const _splitRows = getSplitDiffRows(
-        beforeProcessing.split("\n"),
-        afterProcessing.split("\n"),
-      );
+      const before = normalizeLineEndings(beforeProcessing).split("\n");
+      const after = normalizeLineEndings(afterProcessing).split("\n");
+
+      const _splitRows = getSplitDiffRows(before, after);
 
       logger.debug("_splitRows:", JSON.stringify(_splitRows));
 
