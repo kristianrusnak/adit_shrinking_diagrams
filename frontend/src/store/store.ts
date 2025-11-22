@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import fileReducer from "./slices/fileSlice";
 import authReducer from "./slices/authSlice";
+import algorithmReducer from "./slices/algorithmSlice";
 import { apiSlice } from "../api/apiSlice";
 
 export const store = configureStore({
@@ -8,6 +9,7 @@ export const store = configureStore({
     [apiSlice.reducerPath]: apiSlice.reducer,
     fileStore: fileReducer,
     authStore: authReducer,
+    algorithmStore: algorithmReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
