@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app.models.user import User
+from app.schemas.user import UserListItem
 
 app = FastAPI()
 
@@ -114,6 +115,6 @@ def process_puml(file: UploadFile):
             except:
                 pass
 
-@app.get("/users")
+@app.get("/users", response_model=list[UserListItem])
 def get_users(db: Session = Depends(get_db)):
     return db.query(User).all()
