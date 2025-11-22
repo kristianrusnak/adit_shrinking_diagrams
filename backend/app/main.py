@@ -2,7 +2,8 @@ import os
 import tempfile
 from typing import Union
 
-from fastapi import FastAPI, UploadFile, Form, HTTPException
+from app.util import logger
+from fastapi import FastAPI, UploadFile, Form, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from app.services.openai_service import OpenAIService
 from app.services.parse_puml_service import PUMLParser
@@ -16,6 +17,8 @@ from app.models.user import User
 from app.schemas.user import UserListItem
 
 app = FastAPI()
+logger.log("Starting FastAPI", level="info")
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -34,6 +37,18 @@ def read_root():
 @app.get("/items/{item_id}")
 def read_item(item_id: int, q: Union[str, None] = None):
     return {"item_id": item_id, "q": q}
+
+
+@app.post("/api/logs")
+async def log_endpoint(request: Request):
+    data = await request.json()
+    level = data.get("level", "info")
+    message = data.get("message", "")
+    extra = data.get("extra", [])
+    if extra:
+        message += " " + " ".join(map(str, extra))
+    logger.log(message, level=level)
+    return {"status": "ok"}
 
 
 # bounce back the file
@@ -71,6 +86,7 @@ def message_controller(file: UploadFile, message: str = Form(...)):
 
 @app.post("/api/processPUML")
 def process_puml(file: UploadFile):
+    logger.log("/api/processPUML", level="info")
     parser = PUMLParser("app/services/parser_config.json")
     source_path = None
     output_path = None
@@ -86,9 +102,12 @@ def process_puml(file: UploadFile):
         if not parsed:
             raise HTTPException(status_code=500, detail="Unable to parse PUML file")
 
+        logger.log(f"parse_file: {parsed}", level="debug")
         graph = Graph(parsed)
         reduced = graph.kruskals_algorithm()
+        logger.log(f"kruskals_algorithm: {reduced}", level="debug")
         reduced = graph.extract_solution(reduced)
+        logger.log(f"extract_solution: {reduced}", level="debug")
 
         with tempfile.NamedTemporaryFile(
             delete=False, suffix="_reduced.puml"

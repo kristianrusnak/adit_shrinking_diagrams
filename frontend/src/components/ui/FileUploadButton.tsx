@@ -6,6 +6,7 @@ import { useRef } from "react";
 import { useDispatch } from "react-redux";
 import { setFile, setFileReduced } from "../../store/slices/fileSlice";
 import { useProcessPumlMutation } from "../../api/dbApi";
+import { logger } from "../../utils/logger";
 
 const MAX_FILE_SIZE = 1024 * 1024 * 10; // 10 MB
 
@@ -60,9 +61,12 @@ const FileUploadButton = () => {
       return;
     }
 
+    logger.info("Inside of FileUploadButton.handleFile");
+
     try {
       const response = await processPuml({ file }).unwrap();
       const result = response.result_puml;
+      logger.debug(`response: ${response.result_puml}`);
       dispatch(setFile(file));
       dispatch(setFileReduced(new File([result], file.name)));
     } catch (error: any) {

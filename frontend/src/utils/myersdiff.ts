@@ -105,6 +105,10 @@ function buildEditScript(
   return ops.reverse();
 }
 
+export function normalizeLineEndings(text: string): string {
+  return text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+}
+
 export interface SplitRow {
   left: string;
   right: string;
