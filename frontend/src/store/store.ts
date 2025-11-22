@@ -1,11 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
 import fileReducer from "./slices/fileSlice";
+import algorithmReducer from "./slices/algorithmSlice";
 import { apiSlice } from "../api/apiSlice";
 
 export const store = configureStore({
   reducer: {
     [apiSlice.reducerPath]: apiSlice.reducer,
     fileStore: fileReducer,
+    algorithmStore: algorithmReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
