@@ -39,6 +39,30 @@ pip install -r requirements.txt
 
 This installs FastAPI, Uvicorn, and other utilities listed in `requirements.txt`.
 
+## Apply database migrations
+
+This project uses SQLite and Alembic for database migrations.
+The database file (app.db) is not stored in Git, so each developer must create it locally.
+After installing dependencies, from the repository root run:
+
+```bash
+cd backend
+alembic upgrade head
+```
+
+This will:
+- create the local app.db database
+- apply all migration files from alembic/versions/
+- create all tables (including users)
+- add the default admin user if a migration exists for it
+
+If you ever switch branches and see database-related errors (e.g. “no such table: users”), simply reset the database:
+
+```bash
+rm app.db
+alembic upgrade head
+```
+
 ## Run the development server
 
 Start the FastAPI application with Uvicorn:
