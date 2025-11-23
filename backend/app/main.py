@@ -15,7 +15,7 @@ from app.db import get_db
 from app.models.user import User
 from app.schemas.user import UserListItem, UserRegister, UserResponse
 
-from app.schemas.security import hash_password
+from app.services.security_service import hash_password
 
 app = FastAPI()
 
