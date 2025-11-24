@@ -7,3 +7,4 @@ pydantic-settings
 python-dotenv
 SQLAlchemy
 alembic
+python-jose[cryptography]
