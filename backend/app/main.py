@@ -2,6 +2,7 @@ import os
 import tempfile
 from typing import Union
 
+from datetime import datetime
 from app.util import logger
 from fastapi import FastAPI, UploadFile, Form, HTTPException, Request, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,7 +16,7 @@ from sqlalchemy.orm import Session
 from app.db import get_db
 from app.models.user import User
 from app.models.refresh_token import RefreshToken
-from app.schemas.user import UserListItem, UserRegister, UserResponse, UserLogin, TokenResponse
+from app.schemas.user import UserListItem, UserRegister, UserResponse, UserLogin, TokenResponse, RefreshRequest
 
 from app.services.security_service import hash_password
 from app.services.jwt_service import create_access_token, create_refresh_token, hash_refresh_token, verify_access_token, verify_refresh_token
@@ -159,7 +160,7 @@ def register_user(user_data: UserRegister, db: Session = Depends(get_db)):
     return user
 
 
-@app.post("/auth/login", response_model=TokenResponse, status_code=201)
+@app.post("/auth/login", response_model=TokenResponse, status_code=200)
 def login_user(user_data: UserLogin, db: Session = Depends(get_db)):
     user = (
         db.query(User) # pyright: ignore
@@ -204,8 +205,8 @@ def get_me(user: User = Depends(get_current_user)):
     return user
 
 @app.post("/auth/refresh")
-def refresh_access_token(refresh_token: str, db: Session = Depends(get_db)):
-    token_hash = hash_refresh_token(refresh_token)
+def refresh_access_token(request: RefreshRequest, db: Session = Depends(get_db)):
+    token_hash = hash_refresh_token(request.refresh_token)
 
     db_token = db.query(RefreshToken).filter(
         RefreshToken.token_hash == token_hash,
@@ -228,8 +229,8 @@ def refresh_access_token(refresh_token: str, db: Session = Depends(get_db)):
     }
 
 @app.post("/auth/logout")
-def logout(refresh_token: str, db: Session = Depends(get_db)):
-    token_hash = hash_refresh_token(refresh_token)
+def logout(request: RefreshRequest, db: Session = Depends(get_db)):
+    token_hash = hash_refresh_token(request.refresh_token)
 
     db_token = db.query(RefreshToken).filter(
         RefreshToken.token_hash == token_hash,

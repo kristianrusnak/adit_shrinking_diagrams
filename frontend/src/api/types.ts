@@ -7,6 +7,6 @@ type ProcessPumlResponse = {
 type UserInfo = {
   id: number;
   email: string;
-  accessToken: string;
-  refreshToken: string;
+  access_token: string;
+  refresh_token: string;
 };

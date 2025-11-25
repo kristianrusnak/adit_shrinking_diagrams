@@ -2,6 +2,13 @@ import { apiSlice } from "./apiSlice";
 
 const extendedApi = apiSlice.injectEndpoints({
   endpoints: (build) => ({
+    register: build.mutation<UserInfo, { email: string; password: string }>({
+      query: (data) => ({
+        url: "auth/register",
+        method: "POST",
+        body: data,
+      }),
+    }),
     login: build.mutation<UserInfo, { email: string; password: string }>({
       query: (data) => ({
         url: "auth/login",
@@ -43,6 +50,7 @@ const extendedApi = apiSlice.injectEndpoints({
 });
 
 export const {
+  useRegisterMutation,
   useLoginMutation,
   useLogoutMutation,
   useRefreshMutation,
