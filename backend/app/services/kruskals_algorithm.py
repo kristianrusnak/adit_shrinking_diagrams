@@ -1,4 +1,4 @@
-class Graph:
+class KruskalsAlgorithm:
     def __init__(self, PUML):
         self.PUML = PUML
         self.size = len(PUML["classes"])
@@ -8,8 +8,9 @@ class Graph:
         self.extract_puml_data(PUML)
     
     def extract_puml_data(self, PUML):
-        for class_name, index in PUML["classes"].items():
-            self.add_vertex_data(int(index), class_name)
+        for class_name, class_info in PUML["classes"].items():
+            index = class_info["id"]
+            self.add_vertex_data(index, class_name)
         
         for edge in PUML["edges"]:
 
@@ -18,8 +19,8 @@ class Graph:
             weight = int(edge["weight"])
 
             if source in PUML["classes"] and target in PUML["classes"]:
-                u = int(PUML["classes"][source])
-                v = int(PUML["classes"][target])
+                u = PUML["classes"][source]["id"]
+                v = PUML["classes"][target]["id"]
                 self.add_edge(u, v, weight)
 
     def add_edge(self, u, v, weight):
@@ -46,7 +47,7 @@ class Graph:
             parent[yroot] = xroot
             rank[xroot] += 1
 
-    def kruskals_algorithm(self):
+    def solve(self):
         result = []  # MST
         i = 0  # edge counter
 
@@ -67,8 +68,8 @@ class Graph:
             if x != y:
                 result.append((u, v, weight))
                 self.union(parent, rank, x, y)
-
-        return result
+                
+        return self.extract_solution(result)
 
     def extract_solution(self, sol):
         edges = []
