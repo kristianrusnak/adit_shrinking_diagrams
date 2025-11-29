@@ -273,14 +273,3 @@ class PUMLParser:
                 }
 
         return None
-
-if __name__ == "__main__":
-    parser = PUMLParser("parser_config.json")
-    result = parser.parse_file("example1.puml")
-    print(json.dumps(result, indent=4))
-
-    graph = KruskalsAlgorithm(result)
-    sol = graph.solve()
-    print(json.dumps(sol, indent=4))
-
-    parser.reparse_file("example1.puml", "output_file.puml", sol)
