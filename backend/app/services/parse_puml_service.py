@@ -110,7 +110,11 @@ class PUMLParser:
                     if weight_key in line_without_brackets:
                         parts = line_without_brackets.split(weight_key)
                         edge = self.extract_edge_info(parts)
-                        edges.append(edge | {"weight": weight_value})
+                        
+                        source = edge.get("source")
+                        target = edge.get("target")
+                        if source in classes and target in classes:
+                            edges.append(edge | {"weight": weight_value})
                         break
 
             return {"classes": classes, "edges": edges}
@@ -213,8 +217,15 @@ class PUMLParser:
                             lineWithoutComments = re.sub(r"/\'.*?'\/", "", line_without_brackets, flags=re.DOTALL).strip()
                             parts = lineWithoutComments.split(weight_key)
                             edge = self.extract_edge_info(parts)
-                            if edge | {"weight": weight_value} not in new_data.get("edges", []):
+                            
+                            edge_with_weight = edge | {"weight": weight_value}
+                            if edge_with_weight not in new_data.get("edges", []):
                                 appendLine = False
+                            else:
+                                source = edge.get("source")
+                                target = edge.get("target")
+                                if source not in new_data.get("classes", {}) or target not in new_data.get("classes", {}):
+                                    appendLine = False
                             break
 
                 if appendLine:
