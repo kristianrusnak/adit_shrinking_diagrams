@@ -7,7 +7,7 @@ from fastapi import FastAPI, UploadFile, Form, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from app.services.openai_service import OpenAIService
 from app.services.parse_puml_service import PUMLParser
-from app.services.kruskals_algorithm import Graph
+from app.services.shrinking_algorithms.factory import get_algorithm
 
 from fastapi import Depends, status
 from sqlalchemy.orm import Session
@@ -104,12 +104,9 @@ def process_puml(file: UploadFile):
         if not parsed:
             raise HTTPException(status_code=500, detail="Unable to parse PUML file")
 
-        logger.log(f"parse_file: {parsed}", level="debug")
-        graph = Graph(parsed)
-        reduced = graph.kruskals_algorithm()
-        logger.log(f"kruskals_algorithm: {reduced}", level="debug")
-        reduced = graph.extract_solution(reduced)
-        logger.log(f"extract_solution: {reduced}", level="debug")
+        algorithm = get_algorithm()
+        reduced = algorithm.compute(parsed)
+        logger.log(f"Reduced PUML: {reduced}", level="debug")
 
         with tempfile.NamedTemporaryFile(
             delete=False, suffix="_reduced.puml"
