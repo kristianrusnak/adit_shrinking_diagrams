@@ -43,14 +43,12 @@ const FilePreview = () => {
   return (
     <Box
       sx={{
-        position: "fixed",       // stick to viewport
-        top: 16,                 // distance from top
-        left: 0,
-        right: 0,
-        px: 2,                   // horizontal padding
+        position: "fixed",   // stick to viewport
+        top: 16,             // distance from top
+        right: 16,           // distance from right
+        px: 2,               // horizontal padding
         maxWidth: "800px",
-        margin: "0 auto",        // center horizontally
-        zIndex: 1000,            // make sure it's above other content
+        zIndex: 1000,        // make sure it's above other content
       }}
     >
       <Card
