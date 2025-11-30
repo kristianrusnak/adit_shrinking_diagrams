@@ -25,6 +25,8 @@ const DummyResponseComponent = () => {
   };
 
   const handleClick = async () => {
+    const LS_KEY = "chat_conversation";
+    
     try {
       // I added the kruskal's reduced file here but kept the old one as well
       // we might wanna send the original file too
@@ -41,19 +43,22 @@ const DummyResponseComponent = () => {
 
       appendToConversation("user", message);
 
-      const LS_KEY = "chat_conversation";
       const history = JSON.parse(localStorage.getItem(LS_KEY) || "[]");
 
       console.log("History:", history);
 
       const response = await sendMessage({
         file: fileReduced,
-        message: message,
         history: history,
       }).unwrap();
 
       appendToConversation("assistant", response);
     } catch (error: any) {
+      const history = JSON.parse(localStorage.getItem(LS_KEY) || "[]");
+      if (history.length > 0) {
+        history.pop();
+        localStorage.setItem(LS_KEY, JSON.stringify(history));
+      }
       showError(error.error, `Status: ${error.status}`);
     }
   };

@@ -1,5 +1,6 @@
 import os
 import tempfile
+import json
 from typing import Union
 
 from app.util import logger
@@ -69,18 +70,23 @@ def mock_controller(file: UploadFile):
 
 
 @app.post("/api/sendMessage")
-def message_controller(file: UploadFile, message: str = Form(...)):
+def message_controller(file: UploadFile, history: str = Form(None)):
+    
     try:
         content_bytes = file.file.read()
         content = content_bytes.decode("utf-8")
     except Exception:
         raise HTTPException(status_code=400, detail="Unable to read PUML file")
 
-    full_message = f"{content} | {message}"
     service = OpenAIService()
 
+    # Parse history
+    history_list = json.loads(history) if history else []
+    
+    # Build message with PUML content and history
+    full_message = f"PlantUML diagram:\n{content}\n\nConversation history:\n{json.dumps(history_list, indent=2)}\n\nThe message with the latest timestamp is the current request."
+    
     messages = [{"role": "user", "content": full_message}]
-
     response = service.chat(messages)
 
     return {"response": response}
