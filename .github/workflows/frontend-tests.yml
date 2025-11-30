@@ -1,6 +1,6 @@
 name: Frontend Tests
 
-# Run on every push and pull request
+# Run on every push
 on:
   push:
     branches:
