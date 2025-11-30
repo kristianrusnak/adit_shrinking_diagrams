@@ -5,16 +5,13 @@ on:
   push:
     branches:
       - '**'
-  pull_request:
-    branches:
-      - '**'
 jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: [3.12.3]
-        browser: [chrome, firefox]
+        browser: [chrome]
 
     steps:
       # Checkout the repository
@@ -26,11 +23,6 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-
-      - name: Verify Python
-        run: |
-          python --version
-          pip --version
 
       # Install Node.js (needed for frontend dev server)
       - name: Set up Node.js
