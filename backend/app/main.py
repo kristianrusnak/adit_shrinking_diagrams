@@ -153,7 +153,8 @@ def register_user(user_data: UserRegister, db: Session = Depends(get_db)):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email is already registered",
         )
-    user = User(email=user_data.email, password_hash=hash_password(user_data.password)) # pyright: ignore
+    user = User(email=user_data.email,
+                password_hash=hash_password(user_data.password)) # pyright: ignore
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -244,5 +245,4 @@ def logout(request: RefreshRequest, db: Session = Depends(get_db)):
     db.commit()
 
     return {"detail": "Logged out successfully"}
-
 
