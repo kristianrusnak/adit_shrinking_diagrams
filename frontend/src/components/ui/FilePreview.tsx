@@ -17,8 +17,6 @@ const FilePreview = () => {
   const [splitRows, setSplitRows] = useState<SplitRow[]>([]);
   // const [sendMock, { data, error, isLoading }] = useSendMockMutation();
 
-  // console.log(selectedFile);
-  //
 
   useEffect(() => {
     if (!selectedFile || !selectedFileReduced) {

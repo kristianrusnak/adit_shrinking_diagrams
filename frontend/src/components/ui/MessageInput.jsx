@@ -1,28 +1,48 @@
 import React from "react";
-import TextareaAutosize from "@mui/material/TextareaAutosize";
-import { useDispatch } from "react-redux";
-import { setMessage } from "../../store/slices/fileSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { setMessage, selectMessage } from "../../store/slices/fileSlice";
+import {InputAdornment, TextField} from "@mui/material";
+import FileUploadButton from "../../components/ui/FileUploadButton";
+import SendButton from "../../components/ui/SendButton";
 
 const MessageInput = () => {
   const dispatch = useDispatch();
-  // const message = useSelector(selectMessage);
-  //
-  // console.log(message);
-  //
+  const message = useSelector(selectMessage);
+
   const handleChange = (event) => {
     dispatch(setMessage(event.target.value));
   };
 
   return (
-    <TextareaAutosize
-      maxRows={8}
-      minRows={3}
-      placeholder="Type your message here..."
-      style={{
-        width: 600,
-        border: "1px solid #ccc",
-    }}
+    <TextField
+      id="outlined-basic"
+      variant="outlined"
+      multiline={true}
+      maxRows={5}
+      fullWidth={true}
+      placeholder={"Ask anything"}
+      value={message}
       onChange={handleChange}
+      sx={{
+        "& .MuiOutlinedInput-root": {
+          borderRadius: "16px",
+        },
+        "maxWidth": "600px"
+      }}
+      slotProps={{
+        input: {
+          startAdornment: (
+            <InputAdornment position="start">
+              <FileUploadButton/>
+            </InputAdornment>
+          ),
+          endAdornment: (
+            <InputAdornment position="end">
+              <SendButton/>
+            </InputAdornment>
+          )
+        },
+      }}
     />
   );
 };

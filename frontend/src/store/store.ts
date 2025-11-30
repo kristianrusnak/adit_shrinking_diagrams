@@ -1,5 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import fileReducer from "./slices/fileSlice";
+import messageReducer from "./slices/messageSlice";
 import authReducer from "./slices/authSlice";
 import { apiSlice } from "../api/apiSlice";
 
@@ -7,6 +8,7 @@ export const store = configureStore({
   reducer: {
     [apiSlice.reducerPath]: apiSlice.reducer,
     fileStore: fileReducer,
+    messageStore: messageReducer,
     authStore: authReducer,
   },
   middleware: (getDefaultMiddleware) =>

@@ -1,11 +1,12 @@
-import { Box, Button } from "@mui/material";
+import {Box, Button, IconButton} from "@mui/material";
 import { styled } from "@mui/material/styles";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useError } from "../../context/useError.jsx";
-import { useRef } from "react";
+import React, { useRef } from "react";
 import { useDispatch } from "react-redux";
 import { setFile, setFileReduced } from "../../store/slices/fileSlice";
 import { useProcessPumlMutation } from "../../api/dbApi";
+import AttachFileOutlinedIcon from "@mui/icons-material/AttachFileOutlined";
 import { logger } from "../../utils/logger";
 
 const MAX_FILE_SIZE = 1024 * 1024 * 10; // 10 MB
@@ -112,22 +113,23 @@ const FileUploadButton = () => {
 
   return (
     <Box onDrop={handleDrop} onDragOver={handleDragOver}>
-      <Button
+      <IconButton
         component="label"
-        role={undefined}
-        variant="outlined"
         color="inherit"
-        tabIndex={-1}
-        startIcon={<CloudUploadIcon />}
+        onClick={() => {console.log("send message")}}
+        sx={{
+          width: 36,
+          height: 36,
+        }}
       >
-        {isLoading ? "Processing file" : "Upload file"}
-        <VisuallyHiddenInput
-          ref={inputRef}
-          type="file"
-          accept=".puml"
-          onChange={handleChange}
-        />
-      </Button>
+      <AttachFileOutlinedIcon />
+      <VisuallyHiddenInput
+        ref={inputRef}
+        type="file"
+        accept=".puml"
+        onChange={handleChange}
+      />
+      </IconButton>
     </Box>
   );
 };

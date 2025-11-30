@@ -1,9 +1,8 @@
-import { ErrorProvider } from "../../context/ErrorProvider";
-import { Box } from "@mui/material";
-import FileUploadButton from "../../components/ui/FileUploadButton";
+import {ErrorProvider} from "../../context/ErrorProvider";
+import {Box} from "@mui/material";
 import FilePreview from "../../components/ui/FilePreview";
 import MessageInput from "../../components/ui/MessageInput";
-import DummyResponseComponent from "../../components/ui/DummyResponseComponent";
+import Chat from "../../components/ui/Chat";
 import styles from "./AppPage.module.css";
 
 export default function AppPage() {
@@ -11,13 +10,14 @@ export default function AppPage() {
     <>
       <title>Shrinking Diagrams</title>
       <div className={styles.page}>
-        <Box className={styles.content}>
-          <FileUploadButton />
-          <FilePreview />
-          <MessageInput />
-          <DummyResponseComponent />
-        </Box>
+        <ErrorProvider>
+          <Box className={styles.content}>
+            <FilePreview />
+            <Chat />
+            <MessageInput />
+          </Box>
+        </ErrorProvider>
       </div>
     </>
-  );
+  )
 }
