@@ -41,9 +41,15 @@ const DummyResponseComponent = () => {
 
       appendToConversation("user", message);
 
+      const LS_KEY = "chat_conversation";
+      const history = JSON.parse(localStorage.getItem(LS_KEY) || "[]");
+
+      console.log("History:", history);
+
       const response = await sendMessage({
         file: fileReduced,
         message: message,
+        history: history,
       }).unwrap();
 
       appendToConversation("assistant", response);
