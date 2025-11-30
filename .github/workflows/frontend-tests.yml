@@ -22,10 +22,15 @@ jobs:
         uses: actions/checkout@v3
 
       # Set up Python
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: 3.10
+
+      - name: Verify Python
+        run: |
+          python --version
+          pip --version
 
       # Install Node.js (needed for frontend dev server)
       - name: Set up Node.js
