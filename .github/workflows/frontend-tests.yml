@@ -1,0 +1,70 @@
+name: Frontend Tests
+
+# Run on every push and pull request
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.10]
+        browser: [chrome, firefox]
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Python
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # Install Node.js (needed for frontend dev server)
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      # Install frontend dependencies
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      # Install Python dependencies
+      - name: Install Python dependencies
+        working-directory: ./frontend/tests
+        run: pip install -r requirements.txt
+
+      # Start the frontend server in the background
+      - name: Start frontend server
+        working-directory: ./frontend
+        run: npm run dev &
+        env:
+          CI: true
+        # Run in background
+
+      # Wait for the server to start
+      - name: Wait for frontend to be ready
+        run: |
+          for i in {1..30}; do
+            if curl -sSf http://localhost:5173 > /dev/null; then
+              echo "Frontend ready!"
+              break
+            fi
+            echo "Waiting for frontend..."
+            sleep 2
+          done
+
+      # Run tests
+      - name: Run Selenium tests
+        working-directory: ./frontend/tests
+        run: |
+          pytest -v --browser=${{ matrix.browser }} --headless
