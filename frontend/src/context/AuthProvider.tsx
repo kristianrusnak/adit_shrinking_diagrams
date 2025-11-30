@@ -68,6 +68,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const handleLogin = async (email: string, password: string) => {
+    if (refreshToken) {
+      throw new Error("Already logged in");
+    }
+
     const response = await loginMutation({ email, password }).unwrap();
     setAccessToken(response.access_token);
     setRefreshToken(response.refresh_token);

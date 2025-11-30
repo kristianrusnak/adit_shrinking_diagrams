@@ -2,6 +2,7 @@ import { useAuth } from "@/context/AuthProvider";
 import { Box, Button, Stack, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useError } from "@/context/useError";
 
 // this is just an example that doesnt sanitize or check the inputs
 // maybe libraries like formik/yup could be used for forms/data validation
@@ -10,6 +11,9 @@ const TestRegisterLogin = () => {
   const [passwordRegister, setPasswordRegister] = useState("");
   const [emailLogin, setEmailLogin] = useState("");
   const [passwordLogin, setPasswordLogin] = useState("");
+  const { showError } = useError() as {
+    showError: (msg: string, title?: string) => void;
+  };
 
   const navigate = useNavigate();
 
@@ -17,22 +21,33 @@ const TestRegisterLogin = () => {
     useAuth();
 
   const handleRegister = async () => {
-    const response = await register(emailRegister, passwordRegister);
-    navigate("/testauth"); // handle redirects
-    console.log(response);
+    try {
+      const response = await register(emailRegister, passwordRegister);
+      navigate("/testauth"); // handle redirects
+      console.log(response);
+    } catch (error: any) {
+      showError(error.message);
+    }
   };
 
   const handleLogin = async () => {
-    const response = await login(emailLogin, passwordLogin);
-    navigate("/testauth");
-    console.log(response);
+    try {
+      const response = await login(emailLogin, passwordLogin);
+      navigate("/testauth");
+      console.log(response);
+    } catch (error: any) {
+      showError(error.message);
+    }
   };
 
   const handleLogout = async () => {
-    const response = await logout();
-    navigate("/"); // redirect to landing page
-
-    console.log(response);
+    try {
+      const response = await logout();
+      navigate("/"); // redirect to landing page
+      console.log(response);
+    } catch (error: any) {
+      showError(error.message);
+    }
   };
 
   return (
