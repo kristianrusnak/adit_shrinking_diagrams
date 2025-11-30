@@ -1,4 +1,4 @@
-import { Card, CircularProgress } from "@mui/material";
+import {Box, Card, CircularProgress} from "@mui/material";
 import { useSelector } from "react-redux";
 import { selectFile, selectFileReduced } from "../../store/slices/fileSlice";
 import { useEffect, useState } from "react";
@@ -41,11 +41,31 @@ const FilePreview = () => {
   }, [selectedFile, selectedFileReduced]);
 
   return (
-    <Card sx={{ minWidth: "800px", marginTop: 2, marginBottom: 2 }}>
-      {selectedFile && splitRows.length > 0 && (
-        <DiffComponent fileName={selectedFile.name} splitRows={splitRows} />
-      )}
-    </Card>
+    <Box
+      sx={{
+        position: "fixed",       // stick to viewport
+        top: 16,                 // distance from top
+        left: 0,
+        right: 0,
+        px: 2,                   // horizontal padding
+        maxWidth: "800px",
+        margin: "0 auto",        // center horizontally
+        zIndex: 1000,            // make sure it's above other content
+      }}
+    >
+      <Card
+        sx={{
+          minWidth: "800px",
+          p: 2,                   // padding inside card
+          backgroundColor: "background.paper", // theme-aware background
+          boxShadow: 3,           // optional floating effect
+        }}
+      >
+        {selectedFile && splitRows.length > 0 && (
+          <DiffComponent fileName={selectedFile.name} splitRows={splitRows} />
+        )}
+      </Card>
+    </Box>
   );
 };
 

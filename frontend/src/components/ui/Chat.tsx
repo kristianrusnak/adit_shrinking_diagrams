@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { selectMessages } from "../../store/slices/messageSlice";
@@ -8,13 +8,20 @@ const Chat = () => {
   const messages = useSelector((state: RootState) => selectMessages(state));
   const sortedMessages = [...messages].sort((a, b) => a.timestamp - b.timestamp);
 
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [sortedMessages]);
+
   return (
     <Stack
       spacing={2}
       sx={{
         overflowY: "auto",
         p: 2,
-        maxWidth: "800px"
+        maxWidth: "900px",
+        marginBottom: "100px",
     }}>
       {sortedMessages.map((msg) => (
         <Box
@@ -27,7 +34,7 @@ const Chat = () => {
               p: 1.5,
               maxWidth: "70%",
               backgroundColor: msg.role === "user" ? "primary.light" : "grey.200",
-              color: msg.role === "user" ? "black" : "inherit",
+              color: "black",
               borderRadius: 2,
             }}
           >
@@ -40,6 +47,7 @@ const Chat = () => {
           </Paper>
         </Box>
       ))}
+      <div ref={bottomRef} />
     </Stack>
   );
 };

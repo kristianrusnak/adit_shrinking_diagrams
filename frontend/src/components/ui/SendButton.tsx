@@ -1,4 +1,5 @@
-import { IconButton, CircularProgress } from "@mui/material";
+import { IconButton } from "@mui/material";
+import CircularProgress from '@mui/material/CircularProgress';
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -65,7 +66,7 @@ const SendButton = () => {
 
   return (
     <IconButton
-      component="button"
+      component="label"
       color="inherit"
       onClick={handleClick}
       sx={{

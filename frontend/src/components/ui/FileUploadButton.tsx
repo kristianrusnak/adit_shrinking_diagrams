@@ -1,12 +1,13 @@
-import {Box, Button, IconButton} from "@mui/material";
+import {Badge, Box, Button, IconButton} from "@mui/material";
 import { styled } from "@mui/material/styles";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useError } from "../../context/useError.jsx";
 import React, { useRef } from "react";
-import { useDispatch } from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import { setFile, setFileReduced } from "../../store/slices/fileSlice";
 import { useProcessPumlMutation } from "../../api/dbApi";
 import AttachFileOutlinedIcon from "@mui/icons-material/AttachFileOutlined";
+import {RootState} from "@/store/store";
 import { logger } from "../../utils/logger";
 
 const MAX_FILE_SIZE = 1024 * 1024 * 10; // 10 MB
@@ -31,6 +32,7 @@ const FileUploadButton = () => {
   const dispatch = useDispatch();
   const inputRef = useRef<HTMLInputElement>(null);
   const [processPuml, { data, error, isLoading }] = useProcessPumlMutation();
+  const uploadedFile = useSelector((state: RootState) => state.fileStore.file);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files == null || event.target.files.length === 0) {
@@ -113,23 +115,25 @@ const FileUploadButton = () => {
 
   return (
     <Box onDrop={handleDrop} onDragOver={handleDragOver}>
-      <IconButton
-        component="label"
-        color="inherit"
-        onClick={() => {console.log("send message")}}
-        sx={{
-          width: 36,
-          height: 36,
-        }}
-      >
-      <AttachFileOutlinedIcon />
-      <VisuallyHiddenInput
-        ref={inputRef}
-        type="file"
-        accept=".puml"
-        onChange={handleChange}
-      />
-      </IconButton>
+      <Badge badgeContent={uploadedFile ? 1 : undefined}  color="primary">
+        <IconButton
+          component="label"
+          color="inherit"
+          onClick={() => {console.log("send message")}}
+          sx={{
+            width: 36,
+            height: 36,
+          }}
+        >
+        <AttachFileOutlinedIcon />
+        <VisuallyHiddenInput
+          ref={inputRef}
+          type="file"
+          accept=".puml"
+          onChange={handleChange}
+        />
+        </IconButton>
+      </Badge>
     </Box>
   );
 };
