@@ -37,13 +37,34 @@ const DummyResponseComponent = () => {
         file = selectedFile;
         fileReduced = selectedFileReduced;
       }
-      await sendMessage({
+      const message = selectedMessage == "" ? PROMPT_DEFAULT : selectedMessage;
+
+      appendToConversation("user", message);
+
+      const response = await sendMessage({
         file: fileReduced,
-        message: selectedMessage == "" ? PROMPT_DEFAULT : selectedMessage,
+        message: message,
       }).unwrap();
+
+      appendToConversation("assistant", response);
     } catch (error: any) {
       showError(error.error, `Status: ${error.status}`);
     }
+  };
+
+  const appendToConversation = (role: string, text: string) => {
+    const LS_KEY = "chat_conversation";
+
+    const existing = JSON.parse(localStorage.getItem(LS_KEY) || "[]");
+
+    const newMessage = {
+      role,
+      text,
+      timestamp: Date.now(),
+    };
+
+    const updated = [...existing, newMessage];
+    localStorage.setItem(LS_KEY, JSON.stringify(updated));
   };
 
   return (
