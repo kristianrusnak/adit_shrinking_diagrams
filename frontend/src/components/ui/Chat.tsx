@@ -20,7 +20,7 @@ const Chat = () => {
       sx={{
         overflowY: "auto",
         p: 2,
-        maxWidth: "900px",
+        px: { xs: 0, sm: 0, md: 5, lg: 10, xl: 40},
         marginBottom: "50px",
     }}>
       {sortedMessages.map((msg) => (
