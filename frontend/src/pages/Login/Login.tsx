@@ -2,8 +2,8 @@ import { useAuth } from "@/context/AuthProvider";
 import { TextField, Button, Stack, Typography, Box } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { NAVBAR_HEIGHT, textFieldStyles } from "@/utils/layoutStyles";
 
-const NAVBAR_HEIGHT = 64;
 
 export default function LoginPage() {
   const { login, isLoggingIn } = useAuth();
@@ -24,28 +24,6 @@ export default function LoginPage() {
     } catch (error: any) {
       setErrorMsg("Invalid email or password");
     }
-  };
-
-  const textFieldStyles = {
-    InputLabelProps: {
-      sx: { color: "rgba(255,255,255,0.7)" },
-    },
-    InputProps: {
-      sx: { color: "white" },
-    },
-    sx: {
-      "& .MuiOutlinedInput-root": {
-        "& fieldset": {
-          borderColor: "rgba(255,255,255,0.5)",
-        },
-        "&:hover fieldset": {
-          borderColor: "white",
-        },
-        "&.Mui-focused fieldset": {
-          borderColor: "#90caf9",
-        },
-      },
-    },
   };
 
   return (
