@@ -216,14 +216,22 @@ class PUMLParser:
                             parts = lineWithoutComments.split(relation_key)
                             edge = self.extract_edge_info(parts)
                             
-                            edge_with_relation = edge | {"relation": relation_value}
-                            if edge_with_relation not in new_data.get("edges", []):
+                            source = edge.get("source")
+                            target = edge.get("target")
+                            
+                            # Check if this edge exists in new_data
+                            edge_exists = False
+                            for new_edge in new_data.get("edges", []):
+                                if (new_edge.get("source") == source and 
+                                    new_edge.get("target") == target and 
+                                    new_edge.get("relation") == relation_value):
+                                    edge_exists = True
+                                    break
+                            
+                            if not edge_exists:
                                 appendLine = False
-                            else:
-                                source = edge.get("source")
-                                target = edge.get("target")
-                                if source not in new_data.get("classes", {}) or target not in new_data.get("classes", {}):
-                                    appendLine = False
+                            elif source not in new_data.get("classes", {}) or target not in new_data.get("classes", {}):
+                                appendLine = False
                             break
 
                 if appendLine:

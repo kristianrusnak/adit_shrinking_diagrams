@@ -261,26 +261,3 @@ class GeneticAlgorithm(ShrinkingAlgorithm):
         """
         return self.decode_individual(individual)
 
-
-if __name__ == "__main__":
-    from parse_puml import PUMLParser
-    
-    parser = PUMLParser("parser_config.json")
-    puml_data = parser.parse_file("example1.puml")
-    
-    print("Original PUML data:")
-    print(json.dumps(puml_data, indent=4))
-    print(f"\nTotal elements: {len(puml_data['classes'])} classes, {len(puml_data['edges'])} edges")
-    
-    ga = GeneticAlgorithm(config_path="ga_config.json")
-    print(f"\nRunning GA with {ga.population_size} individuals for {ga.generations} generations")
-    
-    reduced_diagram = ga.compute(puml_data)
-    
-    print(f"\nBest fitness achieved: {ga.best_fitness:.4f}")
-    print("\nReduced PUML data:")
-    print(json.dumps(reduced_diagram, indent=4))
-    print(f"Reduced to: {len(reduced_diagram['classes'])} classes, {len(reduced_diagram['edges'])} edges")
-    
-    parser.reparse_file("example1.puml", "output_file.puml", reduced_diagram)
-    print("\nReduced diagram saved to output_file.puml")
