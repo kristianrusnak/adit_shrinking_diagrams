@@ -53,7 +53,7 @@ const TestRegisterLogin = () => {
   return (
     <Box
       sx={{
-        backgroundColor: "white",
+        backgroundColor: "background.default",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
