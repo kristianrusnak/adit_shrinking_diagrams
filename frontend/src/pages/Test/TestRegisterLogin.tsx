@@ -26,7 +26,7 @@ const TestRegisterLogin = () => {
       navigate("/testauth"); // handle redirects
       console.log(response);
     } catch (error: any) {
-      showError(error.message);
+      showError(error.data.detail);
     }
   };
 
@@ -36,7 +36,11 @@ const TestRegisterLogin = () => {
       navigate("/testauth");
       console.log(response);
     } catch (error: any) {
-      showError(error.message);
+      if (error.message) {
+        showError(error.message); // catch frontend already logged in error
+      } else {
+        showError(error.data.detail); // backend errors have different shape
+      }
     }
   };
 
@@ -46,7 +50,7 @@ const TestRegisterLogin = () => {
       navigate("/"); // redirect to landing page
       console.log(response);
     } catch (error: any) {
-      showError(error.message);
+      showError(error.data.detail);
     }
   };
 
