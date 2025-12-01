@@ -19,9 +19,8 @@ export default function AppRoutes() {
           <Route path="docs" element={<DocsPage />} />
           <Route path="/app" element={<AppPage />} />
           <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+          <Route path="/register" element={<Register />} />
         </Route>
-        {/*<Route path="/app" element={<AppPage />} />*/}
         <Route path="/testauth" element={<TestRegisterLogin />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
