@@ -7,11 +7,14 @@ DEFAULT_ALGO = "kruskal"
 ENV_VAR_NAME = "SHRINKING_ALGORITHM"
 
 
-def get_algorithm() -> ShrinkingAlgorithm:
+def get_algorithm(algorithm: str | None = None) -> ShrinkingAlgorithm:
     """
     Factory that reads env var and returns the right algorithm instance.
     """
-    name = os.getenv(ENV_VAR_NAME, DEFAULT_ALGO).lower()
+    if not algorithm:
+        name = os.getenv(ENV_VAR_NAME, DEFAULT_ALGO).lower()
+    else:
+        name = algorithm
 
     if name == "kruskal":
         return KruskalsAlgorithm()

@@ -19,9 +19,10 @@ export const EvolutionarySettings = ({
   // debounce commiting to the global state store
   const onChangeIterations = (e: any, value: number) => {
     setIterations(value);
+    console.log("changed itrations", value);
     dispatch(
       setAlgorithmSettings({
-        algorithmId: "evolutionary",
+        algorithmId: "evol",
         settings: { iterations: value },
       }),
     );
@@ -29,9 +30,10 @@ export const EvolutionarySettings = ({
 
   const onChangePopulation = (e: any, value: number) => {
     setPopulation(value);
+    console.log("changed population", value);
     dispatch(
       setAlgorithmSettings({
-        algorithmId: "evolutionary",
+        algorithmId: "evol",
         settings: { population: value },
       }),
     );
