@@ -87,7 +87,7 @@ def message_controller(file: UploadFile, history: str = Form(None)):
     history_list = json.loads(history) if history else []
     logger.log(f"Received history: {history_list}", level="debug")
 
-    if not history_list and history_list[-1]["role"] != "user":
+    if not history_list or history_list[-1]["role"] != "user":
         raise HTTPException(status_code=400, detail="no request found for processing")
 
     if content:
