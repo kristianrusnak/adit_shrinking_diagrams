@@ -67,6 +67,10 @@ const FileUploadButton = () => {
       const response = await processPuml({ file }).unwrap();
       const result = response.result_puml;
       logger.debug(`response: ${response.result_puml}`);
+      
+      const LS_KEY = "chat_conversation";
+      localStorage.removeItem(LS_KEY);
+      
       dispatch(setFile(file));
       dispatch(setFileReduced(new File([result], file.name)));
     } catch (error: any) {
