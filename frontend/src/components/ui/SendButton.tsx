@@ -5,9 +5,10 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {selectFile, selectFileReduced} from "../../store/slices/fileSlice";
 import { selectMessage, setMessage } from "../../store/slices/fileSlice";
-import { addMessage } from "../../store/slices/messageSlice";
+import messageSlice, {addMessage, ChatMessage, selectMessages} from "../../store/slices/messageSlice";
 import {useSendMessageMutation, useSendMockMutation} from "../../api/dbApi"; // or your real send function
 import { useError } from "../../context/useError.jsx";
+import {store} from "@/store/store";
 
 const SendButton = () => {
   const dispatch = useDispatch();
@@ -16,6 +17,7 @@ const SendButton = () => {
   const selectedFile = useSelector(selectFile);
   const selectedFileReduced = useSelector(selectFileReduced);
   const selectedMessage = useSelector(selectMessage);
+  // const selectedMessages = useSelector(selectMessages);
 
   const [sendMessage, { data, error, isLoading }] = useSendMessageMutation(); // backend API call
   const [localLoading, setLocalLoading] = useState(false);
@@ -42,11 +44,15 @@ const SendButton = () => {
       dispatch(setMessage(""));
 
       // 2) Send message and file to backend
+      const selectedMessages = store.getState().messageStore.messages;
+      console.log("selectedMessages:", selectedMessages);
       const PROMPT_DEFAULT = "Describe provided diagram in a few words.";
       const message = selectedMessage == "" ? PROMPT_DEFAULT : selectedMessage;
       const response = await sendMessage({
         file: selectedFileReduced,
-        message: message,
+        history: selectedMessages.length === 0 ?
+          ["Describe provided diagram in a few words."]
+          : selectedMessages,
       }).unwrap();
 
       // 3) Create agent message and save in Redux
