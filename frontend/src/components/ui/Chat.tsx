@@ -22,6 +22,7 @@ const Chat = () => {
         p: 2,
         px: { xs: 0, sm: 0, md: 5, lg: 10, xl: 40},
         marginBottom: "50px",
+        marginTop: "50px",
     }}>
       {sortedMessages.map((msg) => (
         <Box
