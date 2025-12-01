@@ -1,15 +1,19 @@
 import { Badge, Box, Button, IconButton } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useError } from "../../context/useError.jsx";
-import React, { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setFile, setFileReduced } from "../../store/slices/fileSlice";
 import { useProcessPumlMutation } from "../../api/dbApi";
 import AttachFileOutlinedIcon from "@mui/icons-material/AttachFileOutlined";
 import { RootState } from "@/store/store";
 import { logger } from "../../utils/logger";
-import { selectSelectedAlgorithm } from "@/store/slices/algorithmSlice.js";
+import {
+  selectSelectedAlgorithm,
+  selectCurrentAlgorithmSettings,
+} from "../../store/slices/algorithmSlice";
+
+import { selectFile } from "../../store/slices/fileSlice";
 
 const MAX_FILE_SIZE = 1024 * 1024 * 10; // 10 MB
 
@@ -36,6 +40,36 @@ const FileUploadButton = () => {
   const uploadedFile = useSelector((state: RootState) => state.fileStore.file);
 
   const selectedAlgorithm = useSelector(selectSelectedAlgorithm);
+  const selectedAlgorithmSettings = useSelector(selectCurrentAlgorithmSettings);
+  const selectedFile = useSelector(selectFile);
+
+  const lastProcessed = useRef<{
+    file: File;
+    algorithm: string;
+    settings: any;
+  } | null>(null);
+
+  // this is ugly but its the only way i could make it work for setting changes right ow
+  // without this check it causes endless rerender loop
+  useEffect(() => {
+    if (!selectedFile) return;
+
+    const shouldProcess =
+      !lastProcessed.current ||
+      lastProcessed.current.file !== selectedFile ||
+      lastProcessed.current.algorithm !== selectedAlgorithm ||
+      JSON.stringify(lastProcessed.current.settings) !==
+        JSON.stringify(selectedAlgorithmSettings);
+
+    if (shouldProcess) {
+      handleFile(selectedFile);
+      lastProcessed.current = {
+        file: selectedFile,
+        algorithm: selectedAlgorithm,
+        settings: selectedAlgorithmSettings,
+      };
+    }
+  }, [selectedFile, selectedAlgorithm, selectedAlgorithmSettings]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files == null || event.target.files.length === 0) {
@@ -43,6 +77,7 @@ const FileUploadButton = () => {
     }
 
     const file = event.target.files[0];
+
     handleFile(file);
   };
 
@@ -70,7 +105,11 @@ const FileUploadButton = () => {
     logger.info("Inside of FileUploadButton.handleFile");
 
     try {
-      const response = await processPuml({ file }).unwrap();
+      const response = await processPuml({
+        file: file,
+        algorithm: selectedAlgorithm,
+        settings: selectedAlgorithmSettings,
+      }).unwrap();
       const result = response.result_puml;
       logger.debug(`response: ${response.result_puml}`);
 

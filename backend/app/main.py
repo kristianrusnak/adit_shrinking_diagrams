@@ -5,7 +5,7 @@ from typing import Union
 
 from datetime import datetime
 from app.util import logger
-from fastapi import FastAPI, UploadFile, Form, HTTPException, Request, Depends, status
+from fastapi import FastAPI, UploadFile, Form, File, HTTPException, Request, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
 from app.services.openai_service import OpenAIService
@@ -110,11 +110,22 @@ def message_controller(file: UploadFile, history: str = Form(None)):
 
 
 @app.post("/api/processPUML")
-def process_puml(file: UploadFile):
+def process_puml(file: UploadFile = File(...), algorithm: str = Form(...), settings: str = Form(...)):
     logger.log("/api/processPUML", level="info")
     parser = PUMLParser("app/services/parser_config.json")
     source_path = None
     output_path = None
+
+
+
+    try:
+        algorithm_settings = json.loads(settings)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Unable to parse settings")
+
+    print(algorithm)
+    print(algorithm_settings)
+
     try:
         content = file.file.read()
         with tempfile.NamedTemporaryFile(delete=False, suffix=".puml") as tmp:
@@ -127,8 +138,18 @@ def process_puml(file: UploadFile):
         if not parsed:
             raise HTTPException(status_code=500, detail="Unable to parse PUML file")
 
-        algorithm = get_algorithm()
-        reduced = algorithm.compute(parsed)
+        # TODO: unify frontend/backend names too tired
+        if algorithm == "evol":
+            alg = get_algorithm("genetic")
+            alg.initialize(
+                population_size=algorithm_settings.get("population", 50),
+                generations=algorithm_settings.get("iterations", 100),
+            )
+        elif algorithm == "kruskals":
+            alg = get_algorithm("kruskal")
+            # TODO: add settigns
+
+        reduced = alg.compute(parsed)
         logger.log(f"Reduced PUML: {reduced}", level="debug")
 
         with tempfile.NamedTemporaryFile(
