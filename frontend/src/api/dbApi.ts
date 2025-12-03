@@ -2,11 +2,14 @@ import { apiSlice } from "./apiSlice";
 
 const extendedApi = apiSlice.injectEndpoints({
   endpoints: (build) => ({
-    sendMessage: build.mutation<string, { file: File; message: string }>({
+    sendMessage: build.mutation<string, { file: File; history?: any[] }>({
       query: (data) => {
         const formData = new FormData();
         formData.append("file", data.file);
-        formData.append("message", data.message);
+        
+        if (data.history) {
+          formData.append("history", JSON.stringify(data.history));
+        }
 
         return {
           url: "api/sendMessage",
