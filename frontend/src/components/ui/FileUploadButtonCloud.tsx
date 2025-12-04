@@ -1,13 +1,11 @@
-import { Badge, Box, Button, IconButton } from "@mui/material";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import { Box, Button } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useError } from "../../context/useError.jsx";
 import { useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setFile, setFileReduced } from "../../store/slices/fileSlice";
 import { useProcessPumlMutation } from "../../api/dbApi";
-import AttachFileOutlinedIcon from "@mui/icons-material/AttachFileOutlined";
-import { RootState } from "@/store/store";
 import { logger } from "../../utils/logger";
 import {
   selectSelectedAlgorithm,
@@ -30,16 +28,7 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-export enum ButtonType {
-  FULL = 1,
-  ICON = 2,
-}
-
-interface FileUploadButtonProps {
-  type: ButtonType;
-}
-
-const FileUploadButton = ({ type }: FileUploadButtonProps) => {
+const FileUploadButton = () => {
   const { showError } = useError() as {
     showError: (msg: string, title?: string) => void;
   };
@@ -47,7 +36,6 @@ const FileUploadButton = ({ type }: FileUploadButtonProps) => {
   const dispatch = useDispatch();
   const inputRef = useRef<HTMLInputElement>(null);
   const [processPuml, { data, error, isLoading }] = useProcessPumlMutation();
-  const uploadedFile = useSelector((state: RootState) => state.fileStore.file);
 
   const selectedAlgorithm = useSelector(selectSelectedAlgorithm);
   const selectedAlgorithmSettings = useSelector(selectCurrentAlgorithmSettings);
@@ -122,10 +110,6 @@ const FileUploadButton = ({ type }: FileUploadButtonProps) => {
       }).unwrap();
       const result = response.result_puml;
       logger.debug(`response: ${response.result_puml}`);
-
-      const LS_KEY = "chat_conversation";
-      localStorage.removeItem(LS_KEY);
-
       dispatch(setFile(file));
       dispatch(setFileReduced(new File([result], file.name)));
     } catch (error: any) {
@@ -171,47 +155,22 @@ const FileUploadButton = ({ type }: FileUploadButtonProps) => {
 
   return (
     <Box onDrop={handleDrop} onDragOver={handleDragOver}>
-      {type === ButtonType.ICON && (
-        <Badge badgeContent={uploadedFile ? 1 : undefined} color="primary">
-          <IconButton
-            component="label"
-            color="inherit"
-            onClick={() => {
-              console.log("send message");
-            }}
-            sx={{
-              width: 36,
-              height: 36,
-            }}
-          >
-            <AttachFileOutlinedIcon />
-            <VisuallyHiddenInput
-              ref={inputRef}
-              type="file"
-              accept=".puml"
-              onChange={handleChange}
-            />
-          </IconButton>
-        </Badge>
-      )}
-      {type === ButtonType.FULL && (
-        <Button
-          component="label"
-          role={undefined}
-          variant="outlined"
-          color="inherit"
-          tabIndex={-1}
-          startIcon={<CloudUploadIcon />}
-        >
-          {isLoading ? "Processing file" : "Upload file"}
-          <VisuallyHiddenInput
-            ref={inputRef}
-            type="file"
-            accept=".puml"
-            onChange={handleChange}
-          />
-        </Button>
-      )}
+      <Button
+        component="label"
+        role={undefined}
+        variant="outlined"
+        color="inherit"
+        tabIndex={-1}
+        startIcon={<CloudUploadIcon />}
+      >
+        {isLoading ? "Processing file" : "Upload file"}
+        <VisuallyHiddenInput
+          ref={inputRef}
+          type="file"
+          accept=".puml"
+          onChange={handleChange}
+        />
+      </Button>
     </Box>
   );
 };

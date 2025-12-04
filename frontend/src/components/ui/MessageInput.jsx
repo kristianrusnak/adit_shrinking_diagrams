@@ -1,8 +1,9 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setMessage, selectMessage } from "../../store/slices/fileSlice";
-import {Box, InputAdornment, TextField} from "@mui/material";
+import { Box, InputAdornment, TextField } from "@mui/material";
 import FileUploadButton from "../../components/ui/FileUploadButton";
+import { ButtonType } from "../../components/ui/FileUploadButton";
 import SendButton from "../../components/ui/SendButton";
 
 const MessageInput = () => {
@@ -16,15 +17,15 @@ const MessageInput = () => {
   return (
     <Box
       sx={{
-        position: "fixed",   // always fixed relative to viewport
-        bottom: 16,          // distance from bottom
+        position: "fixed", // always fixed relative to viewport
+        bottom: 16, // distance from bottom
         left: 0,
         right: 0,
-        px: 2,               // horizontal padding
+        px: 2, // horizontal padding
         maxWidth: "800px",
-        margin: "0 auto",    // center horizontally
+        margin: "0 auto", // center horizontally
         width: "100%",
-        zIndex: 1000,        // make sure it's above chat
+        zIndex: 1000, // make sure it's above chat
       }}
     >
       <TextField
@@ -40,7 +41,7 @@ const MessageInput = () => {
           "& .MuiOutlinedInput-root": {
             borderRadius: "16px",
             backgroundColor: "background.paper", // <-- inherit page background
-            color: "inherit",           // <-- inherit text color
+            color: "inherit", // <-- inherit text color
           },
           "& .MuiOutlinedInput-input::placeholder": {
             color: "black",
@@ -52,14 +53,14 @@ const MessageInput = () => {
           input: {
             startAdornment: (
               <InputAdornment position="start">
-                <FileUploadButton/>
+                <FileUploadButton type={ButtonType.ICON} />
               </InputAdornment>
             ),
             endAdornment: (
               <InputAdornment position="end">
-                <SendButton/>
+                <SendButton />
               </InputAdornment>
-            )
+            ),
           },
         }}
       />

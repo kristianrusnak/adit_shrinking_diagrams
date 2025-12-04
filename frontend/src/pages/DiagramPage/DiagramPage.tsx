@@ -1,9 +1,7 @@
-import FilePreview from "@/components/ui/FilePreview";
 import FileUploadButton from "@/components/ui/FileUploadButton";
 import { ErrorProvider } from "@/context/ErrorProvider";
 import { Box } from "@mui/material";
 import AlgorithmSelector from "@/components/ui/AlgorithmSelector";
-import { useState } from "react";
 import EvolutionarySettings from "@/components/ui/alg_settings/EvolutionarySettings";
 import AlgorithmSettingsLayout from "@/components/ui/alg_settings/AlgorithmSettingsLayout";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,8 +9,10 @@ import {
   selectSelectedAlgorithm,
   setSelectedAlgorithm,
 } from "@/store/slices/algorithmSlice";
+import { ButtonType } from "@/components/ui/FileUploadButton";
+import FilePreviewDiagrams from "@/components/ui/FilePreviewDiagrams";
 
-const algorithms = [
+export const algorithms = [
   {
     id: "kruskals",
     name: "Kruskal's algorithm",
@@ -51,7 +51,7 @@ export const DiagramPage = () => {
             alignItems: "center",
           }}
         >
-          <FileUploadButton />
+          <FileUploadButton type={ButtonType.FULL} />
           <Box
             sx={{
               display: "flex",
@@ -59,7 +59,7 @@ export const DiagramPage = () => {
               flexDirection: "column",
             }}
           >
-            <FilePreview />
+            <FilePreviewDiagrams />
             <AlgorithmSelector
               options={algorithms}
               value={selectedAlgorithm}
