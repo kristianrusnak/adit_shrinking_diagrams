@@ -1,19 +1,33 @@
+<<<<<<< HEAD:backend/app/services/kruskals_algorithm.py
+class KruskalsAlgorithm:
+    def __init__(self, PUML):
+=======
 from typing import Any, Dict, List, Tuple
 from app.services.shrinking_algorithms.base import ShrinkingAlgorithm
 
 class _Graph:
     def __init__(self, PUML: Dict[str, Any]):
+>>>>>>> main:backend/app/services/shrinking_algorithms/kruskal_algorithm.py
         self.PUML = PUML
         self.size = len(PUML["classes"])
         self.edges: List[Tuple[int, int, int]] = []  # (weight, u, v)
         self.vertex_data: List[str] = [""] * self.size
 
         self.extract_puml_data(PUML)
+<<<<<<< HEAD:backend/app/services/kruskals_algorithm.py
+    
+    def extract_puml_data(self, PUML):
+        for class_name, class_info in PUML["classes"].items():
+            index = class_info["id"]
+            self.add_vertex_data(index, class_name)
+        
+=======
 
     def extract_puml_data(self, PUML: Dict[str, Any]) -> None:
         for class_name, index in PUML["classes"].items():
             self.add_vertex_data(int(index), class_name)
 
+>>>>>>> main:backend/app/services/shrinking_algorithms/kruskal_algorithm.py
         for edge in PUML["edges"]:
 
             source = edge["source"]
@@ -21,8 +35,8 @@ class _Graph:
             weight = int(edge["weight"])
 
             if source in PUML["classes"] and target in PUML["classes"]:
-                u = int(PUML["classes"][source])
-                v = int(PUML["classes"][target])
+                u = PUML["classes"][source]["id"]
+                v = PUML["classes"][target]["id"]
                 self.add_edge(u, v, weight)
 
     def add_edge(self, u: int, v: int, weight: int) -> None:
@@ -49,7 +63,7 @@ class _Graph:
             parent[yroot] = xroot
             rank[xroot] += 1
 
-    def kruskals_algorithm(self):
+    def solve(self):
         result = []  # MST
         i = 0  # edge counter
 
@@ -70,8 +84,8 @@ class _Graph:
             if x != y:
                 result.append((u, v, weight))
                 self.union(parent, rank, x, y)
-
-        return result
+                
+        return self.extract_solution(result)
 
     def extract_solution(self, sol) -> Dict[str, Any]:
         edges = []
