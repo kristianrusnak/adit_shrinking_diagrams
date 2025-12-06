@@ -3,11 +3,16 @@ import { Box, Divider, Stack, Typography } from "@mui/material";
 import { grey } from "@mui/material/colors";
 export interface DiffComponentProps {
   fileName: string;
+  selectedAlgorithm: string;
   splitRows: SplitRow[];
 }
 
 // TODO: implement "replace". this happens when - is followed by + (a line is replaced by another)
-const DiffComponent = ({ splitRows, fileName }: DiffComponentProps) => {
+const DiffComponent = ({
+  splitRows,
+  selectedAlgorithm,
+  fileName,
+}: DiffComponentProps) => {
   const getDiffTexts = (splitRows: SplitRow[]): string[][] => {
     const before: string[] = [];
     const after: string[] = [];
@@ -96,7 +101,7 @@ const DiffComponent = ({ splitRows, fileName }: DiffComponentProps) => {
         }}
       >
         <Typography paddingLeft={2} variant="h6" gutterBottom>
-          Kruskal's reduction
+          {selectedAlgorithm}
         </Typography>
         <Divider />
 

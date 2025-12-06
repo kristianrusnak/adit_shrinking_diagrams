@@ -1,19 +1,25 @@
 import os
 from app.services.shrinking_algorithms.base import ShrinkingAlgorithm
-from app.services.shrinking_algorithms.kruskal_algorithm import KruskalAlgorithm
+from app.services.shrinking_algorithms.kruskal_algorithm import KruskalsAlgorithm
+from app.services.shrinking_algorithms.genetic_algorithm import GeneticAlgorithm
 
 DEFAULT_ALGO = "kruskal"
 ENV_VAR_NAME = "SHRINKING_ALGORITHM"
 
 
-def get_algorithm() -> ShrinkingAlgorithm:
+def get_algorithm(algorithm: str | None = None) -> ShrinkingAlgorithm:
     """
     Factory that reads env var and returns the right algorithm instance.
     """
-    name = os.getenv(ENV_VAR_NAME, DEFAULT_ALGO).lower()
+    if not algorithm:
+        name = os.getenv(ENV_VAR_NAME, DEFAULT_ALGO).lower()
+    else:
+        name = algorithm
 
     if name == "kruskal":
-        return KruskalAlgorithm()
+        return KruskalsAlgorithm()
+    if name == "genetic":
+        return GeneticAlgorithm()
 
     # later: add more algorithms here
     raise ValueError(f"Unknown algorithm: {name!r}")

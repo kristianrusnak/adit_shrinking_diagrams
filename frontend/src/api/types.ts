@@ -10,3 +10,9 @@ type UserInfo = {
   access_token: string;
   refresh_token: string;
 };
+
+type PumlPayload = {
+  file: File;
+  algorithm: string;
+  settings: Record<string, any>;
+};

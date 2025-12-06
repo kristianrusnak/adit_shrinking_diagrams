@@ -26,7 +26,7 @@ const DummyResponseComponent = () => {
 
   const handleClick = async () => {
     const LS_KEY = "chat_conversation";
-    
+
     try {
       // I added the kruskal's reduced file here but kept the old one as well
       // we might wanna send the original file too
@@ -79,14 +79,16 @@ const DummyResponseComponent = () => {
   };
 
   return (
-    <Box sx={{
-      minWidth: "300px",
-      paddingTop: 1,
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      flexDirection: "column"
-    }}>
+    <Box
+      sx={{
+        minWidth: "300px",
+        paddingTop: 1,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        flexDirection: "column",
+      }}
+    >
       <Button
         color="inherit"
         component="label"
@@ -99,7 +101,7 @@ const DummyResponseComponent = () => {
             borderColor: "white !important",
             color: "white !important",
             backgroundColor: "gray !important",
-          }
+          },
         }}
       >
         {isLoading ? "Processing request..." : "Send"}
