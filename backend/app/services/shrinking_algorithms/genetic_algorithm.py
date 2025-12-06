@@ -1,4 +1,5 @@
 import json
+import os
 import random
 from typing import Any, Dict, List, Tuple
 from app.services.shrinking_algorithms.base import ShrinkingAlgorithm
@@ -51,9 +52,13 @@ class GeneticAlgorithm(ShrinkingAlgorithm):
         self.best_fitness = -float('inf')
         
     def load_config(self, config_path):
-        """Load configuration from JSON file."""
+        """Load docker configuration from JSON file."""
+
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        full_path = os.path.join(base_path, config_path)
+
         try:
-            with open(config_path, "r") as file:
+            with open(full_path, "r") as file:
                 return json.load(file)
         except Exception as e:
             print(f"Error loading config file: {e}")
