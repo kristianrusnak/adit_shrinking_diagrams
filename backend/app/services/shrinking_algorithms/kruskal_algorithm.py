@@ -1,17 +1,33 @@
+<<<<<<< HEAD:backend/app/services/kruskals_algorithm.py
 class KruskalsAlgorithm:
     def __init__(self, PUML):
+=======
+from typing import Any, Dict, List, Tuple
+from app.services.shrinking_algorithms.base import ShrinkingAlgorithm
+
+class _Graph:
+    def __init__(self, PUML: Dict[str, Any]):
+>>>>>>> main:backend/app/services/shrinking_algorithms/kruskal_algorithm.py
         self.PUML = PUML
         self.size = len(PUML["classes"])
-        self.edges = []  # For storing edges as (weight, u, v)
-        self.vertex_data = [''] * self.size  # Store vertex names
+        self.edges: List[Tuple[int, int, int]] = []  # (weight, u, v)
+        self.vertex_data: List[str] = [""] * self.size
 
         self.extract_puml_data(PUML)
+<<<<<<< HEAD:backend/app/services/kruskals_algorithm.py
     
     def extract_puml_data(self, PUML):
         for class_name, class_info in PUML["classes"].items():
             index = class_info["id"]
             self.add_vertex_data(index, class_name)
         
+=======
+
+    def extract_puml_data(self, PUML: Dict[str, Any]) -> None:
+        for class_name, index in PUML["classes"].items():
+            self.add_vertex_data(int(index), class_name)
+
+>>>>>>> main:backend/app/services/shrinking_algorithms/kruskal_algorithm.py
         for edge in PUML["edges"]:
 
             source = edge["source"]
@@ -23,20 +39,20 @@ class KruskalsAlgorithm:
                 v = PUML["classes"][target]["id"]
                 self.add_edge(u, v, weight)
 
-    def add_edge(self, u, v, weight):
+    def add_edge(self, u: int, v: int, weight: int) -> None:
         if 0 <= u < self.size and 0 <= v < self.size:
-            self.edges.append((u, v, weight))  # Add edge with weight
-            
-    def add_vertex_data(self, vertex, data):
+            self.edges.append((u, v, weight))
+
+    def add_vertex_data(self, vertex: int, data: str) -> None:
         if 0 <= vertex < self.size:
             self.vertex_data[vertex] = data
 
-    def find(self, parent, i):
+    def find(self, parent, i) -> int:
         if parent[i] == i:
             return i
         return self.find(parent, parent[i])
 
-    def union(self, parent, rank, x, y):
+    def union(self, parent, rank, x, y) -> None:
         xroot = self.find(parent, x)
         yroot = self.find(parent, y)
         if rank[xroot] < rank[yroot]:
@@ -62,7 +78,7 @@ class KruskalsAlgorithm:
         while i < len(self.edges):
             u, v, weight = self.edges[i]
             i += 1
-            
+
             x = self.find(parent, u)
             y = self.find(parent, v)
             if x != y:
@@ -71,7 +87,7 @@ class KruskalsAlgorithm:
                 
         return self.extract_solution(result)
 
-    def extract_solution(self, sol):
+    def extract_solution(self, sol) -> Dict[str, Any]:
         edges = []
 
         for u, v, weight in sol:
@@ -82,3 +98,13 @@ class KruskalsAlgorithm:
             })
 
         return {"classes": self.PUML["classes"], "edges": edges}
+
+
+class KruskalAlgorithm(ShrinkingAlgorithm):
+    def initialize(self, **params: Any) -> None:
+        self.params = params
+
+    def compute(self, parsed_puml: Dict[str, Any]) -> Dict[str, Any]:
+        graph = _Graph(parsed_puml)
+        mst = graph.kruskals_algorithm()
+        return graph.extract_solution(mst)

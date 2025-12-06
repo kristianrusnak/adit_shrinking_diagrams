@@ -1,12 +1,15 @@
-import { Box, Button } from "@mui/material";
+import {Badge,Box, Button, IconButton} from "@mui/material";
 import { styled } from "@mui/material/styles";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useError } from "../../context/useError.jsx";
-import { useRef } from "react";
-import { useDispatch } from "react-redux";
+import React, { useRef } from "react";
+import {useDispatch, useSelector} from "react-redux";
 import { setFile, setFileReduced } from "../../store/slices/fileSlice";
-import { useProcessPumlMutation } from "../../api/dbApi";
+import AttachFileOutlinedIcon from "@mui/icons-material/AttachFileOutlined";
+import {RootState} from "@/store/store";
 import { logger } from "../../utils/logger";
+import {useProcessPumlMutation} from "@/api/dbApi";
+import {clearMessages} from "@/store/slices/messageSlice";
 
 const MAX_FILE_SIZE = 1024 * 1024 * 10; // 10 MB
 
@@ -30,6 +33,7 @@ const FileUploadButton = () => {
   const dispatch = useDispatch();
   const inputRef = useRef<HTMLInputElement>(null);
   const [processPuml, { data, error, isLoading }] = useProcessPumlMutation();
+  const uploadedFile = useSelector((state: RootState) => state.fileStore.file);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files == null || event.target.files.length === 0) {
@@ -67,6 +71,9 @@ const FileUploadButton = () => {
       const response = await processPuml({ file }).unwrap();
       const result = response.result_puml;
       logger.debug(`response: ${response.result_puml}`);
+
+      dispatch(clearMessages());
+
       dispatch(setFile(file));
       dispatch(setFileReduced(new File([result], file.name)));
     } catch (error: any) {
@@ -112,22 +119,25 @@ const FileUploadButton = () => {
 
   return (
     <Box onDrop={handleDrop} onDragOver={handleDragOver}>
-      <Button
-        component="label"
-        role={undefined}
-        variant="outlined"
-        color="inherit"
-        tabIndex={-1}
-        startIcon={<CloudUploadIcon />}
-      >
-        {isLoading ? "Processing file" : "Upload file"}
+      <Badge badgeContent={uploadedFile ? 1 : undefined}  color="primary">
+        <IconButton
+          component="label"
+          color="inherit"
+          onClick={() => {console.log("send message")}}
+          sx={{
+            width: 36,
+            height: 36,
+          }}
+        >
+        <AttachFileOutlinedIcon />
         <VisuallyHiddenInput
           ref={inputRef}
           type="file"
           accept=".puml"
           onChange={handleChange}
         />
-      </Button>
+        </IconButton>
+      </Badge>
     </Box>
   );
 };
