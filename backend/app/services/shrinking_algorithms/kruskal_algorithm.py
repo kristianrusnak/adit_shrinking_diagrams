@@ -93,7 +93,7 @@ class KruskalsAlgorithm(ShrinkingAlgorithm):
             return i
         return self.find(parent, parent[i])
 
-    def union(self, parent, rank, x, y):
+    def union(self, parent, rank, x, y) -> None:
         xroot = self.find(parent, x)
         yroot = self.find(parent, y)
         if rank[xroot] < rank[yroot]:
@@ -119,7 +119,6 @@ class KruskalsAlgorithm(ShrinkingAlgorithm):
         while i < len(self.edges):
             u, v, weight = self.edges[i]
             i += 1
-            
             x = self.find(parent, u)
             y = self.find(parent, v)
             if x != y:
