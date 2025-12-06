@@ -1,7 +1,6 @@
 import os
 import tempfile
 import json
-
 from typing import Union
 
 from datetime import datetime
@@ -74,19 +73,38 @@ def mock_controller(file: UploadFile):
 
 
 @app.post("/api/sendMessage")
-def message_controller(file: UploadFile, message: str = Form(...)):
+def message_controller(file: UploadFile, history: str = Form(None)):
+
     try:
         content_bytes = file.file.read()
         content = content_bytes.decode("utf-8")
     except Exception:
         raise HTTPException(status_code=400, detail="Unable to read PUML file")
 
-    full_message = f"{content} | {message}"
     service = OpenAIService()
 
-    messages = [{"role": "user", "content": full_message}]
+    # Parse history
+    history_list = json.loads(history) if history else []
+    logger.log(f"Received history: {history_list}", level="debug")
 
-    response = service.chat(messages)
+    if not history_list or history_list[-1]["role"] != "user":
+        raise HTTPException(status_code=400, detail="no request found for processing")
+
+    if content:
+        history_list.insert(-1,
+            {
+                "role": "user",
+                "content": f"Here is the PlantUML content:\n{content}",
+                "timestamp": history_list[-1].get("timestamp")
+            }
+        )
+
+    for entry in history_list:
+        if not entry.get("content"):
+            entry["content"] = entry["text"]
+
+    logger.log(f"Parsed prompt: {history_list}", level="debug")
+    response = service.chat(history_list)
 
     return {"response": response}
 
@@ -264,5 +282,4 @@ def logout(request: RefreshRequest, db: Session = Depends(get_db)):
     db.commit()
 
     return {"detail": "Logged out successfully"}
-
 

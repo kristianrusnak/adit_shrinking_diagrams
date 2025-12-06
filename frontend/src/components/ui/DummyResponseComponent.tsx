@@ -25,6 +25,8 @@ const DummyResponseComponent = () => {
   };
 
   const handleClick = async () => {
+    const LS_KEY = "chat_conversation";
+
     try {
       // I added the kruskal's reduced file here but kept the old one as well
       // we might wanna send the original file too
@@ -41,13 +43,22 @@ const DummyResponseComponent = () => {
 
       appendToConversation("user", message);
 
+      const history = JSON.parse(localStorage.getItem(LS_KEY) || "[]");
+
+      console.log("History:", history);
+
       const response = await sendMessage({
         file: fileReduced,
-        message: message,
+        history: history,
       }).unwrap();
 
       appendToConversation("assistant", response);
     } catch (error: any) {
+      const history = JSON.parse(localStorage.getItem(LS_KEY) || "[]");
+      if (history.length > 0) {
+        history.pop();
+        localStorage.setItem(LS_KEY, JSON.stringify(history));
+      }
       showError(error.error, `Status: ${error.status}`);
     }
   };
@@ -68,14 +79,16 @@ const DummyResponseComponent = () => {
   };
 
   return (
-    <Box sx={{
-      minWidth: "300px",
-      paddingTop: 1,
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      flexDirection: "column"
-    }}>
+    <Box
+      sx={{
+        minWidth: "300px",
+        paddingTop: 1,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        flexDirection: "column",
+      }}
+    >
       <Button
         color="inherit"
         component="label"
@@ -88,7 +101,7 @@ const DummyResponseComponent = () => {
             borderColor: "white !important",
             color: "white !important",
             backgroundColor: "gray !important",
-          }
+          },
         }}
       >
         {isLoading ? "Processing request..." : "Send"}

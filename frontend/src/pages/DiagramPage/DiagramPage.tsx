@@ -12,7 +12,10 @@ import {
   setSelectedAlgorithm,
 } from "@/store/slices/algorithmSlice";
 
-const algorithms = [
+import { ButtonType } from "@/components/ui/FileUploadButton";
+import FilePreviewDiagrams from "@/components/ui/FilePreviewDiagrams";
+
+export const algorithms = [
   {
     id: "kruskals",
     name: "Kruskal's algorithm",
@@ -51,7 +54,7 @@ export const DiagramPage = () => {
             alignItems: "center",
           }}
         >
-          <FileUploadButton />
+          <FileUploadButton type={ButtonType.FULL} />
           <Box
             sx={{
               display: "flex",
@@ -59,7 +62,7 @@ export const DiagramPage = () => {
               flexDirection: "column",
             }}
           >
-            <FilePreview />
+            <FilePreviewDiagrams />
             <AlgorithmSelector
               options={algorithms}
               value={selectedAlgorithm}
