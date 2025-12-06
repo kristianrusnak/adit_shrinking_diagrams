@@ -1,11 +1,11 @@
-import { Badge, Box, Button, IconButton } from "@mui/material";
+import {Badge, Box, Button, IconButton} from "@mui/material";
+import { styled } from "@mui/material/styles";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { styled } from "@mui/material/styles";
 import { useError } from "../../context/useError.jsx";
 import { useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setFile, setFileReduced } from "../../store/slices/fileSlice";
-import { useProcessPumlMutation } from "../../api/dbApi";
 import AttachFileOutlinedIcon from "@mui/icons-material/AttachFileOutlined";
 import { RootState } from "@/store/store";
 import { logger } from "../../utils/logger";
@@ -15,6 +15,8 @@ import {
 } from "../../store/slices/algorithmSlice";
 
 import { selectFile } from "../../store/slices/fileSlice";
+import {useProcessPumlMutation} from "@/api/dbApi";
+import {clearMessages} from "@/store/slices/messageSlice";
 
 const MAX_FILE_SIZE = 1024 * 1024 * 10; // 10 MB
 
@@ -125,6 +127,7 @@ const FileUploadButton = ({ type }: FileUploadButtonProps) => {
 
       const LS_KEY = "chat_conversation";
       localStorage.removeItem(LS_KEY);
+      dispatch(clearMessages());
 
       dispatch(setFile(file));
       dispatch(setFileReduced(new File([result], file.name)));

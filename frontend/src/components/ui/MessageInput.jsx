@@ -5,6 +5,7 @@ import { Box, InputAdornment, TextField } from "@mui/material";
 import FileUploadButton from "../../components/ui/FileUploadButton";
 import { ButtonType } from "../../components/ui/FileUploadButton";
 import SendButton from "../../components/ui/SendButton";
+import ShrinkButton from "../../components/ui/ShrinkButton.js";
 
 const MessageInput = () => {
   const dispatch = useDispatch();
@@ -17,8 +18,10 @@ const MessageInput = () => {
   return (
     <Box
       sx={{
-        position: "fixed", // always fixed relative to viewport
-        bottom: 16, // distance from bottom
+        display: "flex",
+        alignItems: "center",
+        position: "fixed",   // always fixed relative to viewport
+        bottom: 16,          // distance from bottom
         left: 0,
         right: 0,
         px: 2, // horizontal padding
@@ -52,15 +55,20 @@ const MessageInput = () => {
         slotProps={{
           input: {
             startAdornment: (
-              <InputAdornment position="start">
-                <FileUploadButton type={ButtonType.ICON} />
-              </InputAdornment>
+              <>
+                <InputAdornment position="start">
+                  <FileUploadButton/>
+                </InputAdornment>
+                <ShrinkButton position="start" />
+              </>
             ),
             endAdornment: (
-              <InputAdornment position="end">
-                <SendButton />
-              </InputAdornment>
-            ),
+              <>
+                <InputAdornment position="end">
+                  <SendButton />
+                </InputAdornment>
+              </>
+            )
           },
         }}
       />
