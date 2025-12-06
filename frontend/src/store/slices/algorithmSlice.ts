@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction, createSelector } from "@reduxjs/toolkit";
 
 interface AlgorithmSettingsMap {
   [algorithmId: string]: Record<string, any>; // each algorithm has different settings
@@ -14,10 +14,11 @@ export const selectSelectedAlgorithm = (state: any): string =>
   state.algorithmStore.selectedAlgorithm;
 export const selectAlgorithmSettingsMap = (state: any) =>
   state.algorithmStore.algorithmSettings;
-export const selectCurrentAlgorithmSettings = (state: any) => {
-  const selected = state.algorithmStore.selectedAlgorithm;
-  return state.algorithmStore.algorithmSettings[selected] || {};
-};
+export const selectCurrentAlgorithmSettings = createSelector(
+  [selectSelectedAlgorithm, selectAlgorithmSettingsMap],
+  (selectedAlgorithm, algorithmSettings) => 
+    algorithmSettings[selectedAlgorithm] || {}
+);
 
 // TODO: consider kruskals as well
 // we can let the user specify the edge weights from frontend

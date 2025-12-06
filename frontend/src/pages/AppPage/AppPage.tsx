@@ -4,6 +4,7 @@ import MessageInput from "../../components/ui/MessageInput";
 import Chat from "../../components/ui/Chat";
 import styles from "./AppPage.module.css";
 import Sidebar from "../../components/ui/Sidebar";
+import { ErrorProvider } from "../../context/ErrorProvider";
 
 export default function AppPage() {
   return (
