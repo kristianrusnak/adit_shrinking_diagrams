@@ -1,6 +1,5 @@
 import json
 import re
-from app.services.kruskals_algorithm import Graph
 
 # TODO:
 # Add support for class visibility
@@ -98,7 +97,7 @@ class PUMLParser:
         if len(parts) == 2:
             source = parts[0]
             target = parts[1]
-            
+
             if ':' in target:
                 target = target.split(':')[0].strip()
 
@@ -145,17 +144,3 @@ class PUMLParser:
 
         with open(output_path, "w") as file:
             file.writelines(lines)
-
-
-if __name__ == "__main__":
-    parser = PUMLParser("parser_config.json")
-    result = parser.parse_file("test_class.puml")
-    print(json.dumps(result, indent=4))
-
-    graph = Graph(result)
-    sol = graph.kruskals_algorithm()
-
-    sol = graph.extract_solution(sol)
-    print(json.dumps(sol, indent=4))
-
-    parser.reparse_file("test_class.puml", "output_file.puml", sol)

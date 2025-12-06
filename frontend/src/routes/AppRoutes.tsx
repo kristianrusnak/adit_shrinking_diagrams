@@ -17,11 +17,11 @@ export default function AppRoutes() {
           <Route path="" element={<IntroPage />} />
           <Route path="about" element={<AboutPage />} />
           <Route path="docs" element={<DocsPage />} />
-          <Route path="/app" element={<AppPage />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="app" element={<AppPage />} />
+          <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
         </Route>
-        <Route path="/testauth" element={<TestRegisterLogin />} />
+        <Route path="testauth" element={<TestRegisterLogin />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </>

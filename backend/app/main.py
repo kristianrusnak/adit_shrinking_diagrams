@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
 from app.services.openai_service import OpenAIService
 from app.services.parse_puml_service import PUMLParser
-from app.services.kruskals_algorithm import Graph
+from app.services.shrinking_algorithms.factory import get_algorithm
 
 from sqlalchemy.orm import Session
 
@@ -74,7 +74,7 @@ def mock_controller(file: UploadFile):
 
 @app.post("/api/sendMessage")
 def message_controller(file: UploadFile, history: str = Form(None)):
-    
+
     try:
         content_bytes = file.file.read()
         content = content_bytes.decode("utf-8")
@@ -85,12 +85,26 @@ def message_controller(file: UploadFile, history: str = Form(None)):
 
     # Parse history
     history_list = json.loads(history) if history else []
-    
-    # Build message with PUML content and history
-    full_message = f"PlantUML diagram:\n{content}\n\nConversation history:\n{json.dumps(history_list, indent=2)}\n\nThe message with the latest timestamp is the current request."
-    
-    messages = [{"role": "user", "content": full_message}]
-    response = service.chat(messages)
+    logger.log(f"Received history: {history_list}", level="debug")
+
+    if not history_list or history_list[-1]["role"] != "user":
+        raise HTTPException(status_code=400, detail="no request found for processing")
+
+    if content:
+        history_list.insert(-1,
+            {
+                "role": "user",
+                "content": f"Here is the PlantUML content:\n{content}",
+                "timestamp": history_list[-1].get("timestamp")
+            }
+        )
+
+    for entry in history_list:
+        if not entry.get("content"):
+            entry["content"] = entry["text"]
+
+    logger.log(f"Parsed prompt: {history_list}", level="debug")
+    response = service.chat(history_list)
 
     return {"response": response}
 
@@ -113,12 +127,9 @@ def process_puml(file: UploadFile):
         if not parsed:
             raise HTTPException(status_code=500, detail="Unable to parse PUML file")
 
-        logger.log(f"parse_file: {parsed}", level="debug")
-        graph = Graph(parsed)
-        reduced = graph.kruskals_algorithm()
-        logger.log(f"kruskals_algorithm: {reduced}", level="debug")
-        reduced = graph.extract_solution(reduced)
-        logger.log(f"extract_solution: {reduced}", level="debug")
+        algorithm = get_algorithm()
+        reduced = algorithm.compute(parsed)
+        logger.log(f"Reduced PUML: {reduced}", level="debug")
 
         with tempfile.NamedTemporaryFile(
             delete=False, suffix="_reduced.puml"
@@ -159,7 +170,8 @@ def register_user(user_data: UserRegister, db: Session = Depends(get_db)):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email is already registered",
         )
-    user = User(email=user_data.email, password_hash=hash_password(user_data.password)) # pyright: ignore
+    user = User(email=user_data.email,
+                password_hash=hash_password(user_data.password)) # pyright: ignore
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -250,5 +262,4 @@ def logout(request: RefreshRequest, db: Session = Depends(get_db)):
     db.commit()
 
     return {"detail": "Logged out successfully"}
-
 
