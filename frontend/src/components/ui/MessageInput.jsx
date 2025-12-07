@@ -20,8 +20,8 @@ const MessageInput = () => {
       sx={{
         display: "flex",
         alignItems: "center",
-        position: "fixed",   // always fixed relative to viewport
-        bottom: 16,          // distance from bottom
+        position: "fixed", // always fixed relative to viewport
+        bottom: 16, // distance from bottom
         left: 0,
         right: 0,
         px: 2, // horizontal padding
@@ -57,7 +57,7 @@ const MessageInput = () => {
             startAdornment: (
               <>
                 <InputAdornment position="start">
-                  <FileUploadButton/>
+                  <FileUploadButton />
                 </InputAdornment>
                 <ShrinkButton position="start" />
               </>
@@ -68,7 +68,7 @@ const MessageInput = () => {
                   <SendButton />
                 </InputAdornment>
               </>
-            )
+            ),
           },
         }}
       />
