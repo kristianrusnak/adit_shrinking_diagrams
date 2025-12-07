@@ -48,9 +48,8 @@ const Sidebar: FC = () => {
 
       <List sx={{ padding: 0 }}>
         {conversations.map((c) => (
-          <Tooltip title={c.name} placement="right" arrow>
+          <Tooltip key={c.id} title={c.name} placement="right" arrow>
             <ListItemButton
-              key={c.id}
               onClick={() => handleConversationClick(c.name)}
               sx={{
                 borderRadius: "8px",

@@ -1,16 +1,14 @@
 import json
 import re
-from app.services.kruskals_algorithm import KruskalsAlgorithm
-
 
 class PUMLParser:
     def __init__(self, config_path="parser_config.json"):
-        self.weights = {}
+        self.relations = {}
         self.class_names = set()
         self.parse_config(config_path)
 
-        if not self.weights:
-            print("No weights loaded, using default settings.")
+        if not self.relations:
+            print("No relations loaded, using default settings.")
             return
 
     def parse_config(self, config_path):
@@ -21,7 +19,7 @@ class PUMLParser:
         try:
             with open(config_path, "r") as file:
                 config = json.load(file)
-                self.weights = config.get("weights", {})
+                self.relations = config.get("relations", {})
                 self.class_names = set(config.get("class_names", []))
                 return config
 
@@ -105,16 +103,16 @@ class PUMLParser:
                                 "signature": member["signature"]
                             })
 
-                for weight_key, weight_value in self.weights.items():
+                for relation_key, relation_value in self.relations.items():
                     line_without_brackets = re.sub(r'\[.*?\]', '', line.strip())
-                    if weight_key in line_without_brackets:
-                        parts = line_without_brackets.split(weight_key)
+                    if relation_key in line_without_brackets:
+                        parts = line_without_brackets.split(relation_key)
                         edge = self.extract_edge_info(parts)
                         
                         source = edge.get("source")
                         target = edge.get("target")
                         if source in classes and target in classes:
-                            edges.append(edge | {"weight": weight_value})
+                            edges.append(edge | {"relation": relation_value})
                         break
 
             return {"classes": classes, "edges": edges}
@@ -129,7 +127,7 @@ class PUMLParser:
         if len(parts) == 2:
             source = parts[0]
             target = parts[1]
-
+            
             if ':' in target:
                 target = target.split(':')[0].strip()
 
@@ -211,21 +209,29 @@ class PUMLParser:
                                 appendLine = False
 
                 if not is_class_declaration:
-                    for weight_key, weight_value in self.weights.items():
+                    for relation_key, relation_value in self.relations.items():
                         line_without_brackets = re.sub(r'\[.*?\]', '', stripped_line)
-                        if weight_key in line_without_brackets:
+                        if relation_key in line_without_brackets:
                             lineWithoutComments = re.sub(r"/\'.*?'\/", "", line_without_brackets, flags=re.DOTALL).strip()
-                            parts = lineWithoutComments.split(weight_key)
+                            parts = lineWithoutComments.split(relation_key)
                             edge = self.extract_edge_info(parts)
                             
-                            edge_with_weight = edge | {"weight": weight_value}
-                            if edge_with_weight not in new_data.get("edges", []):
+                            source = edge.get("source")
+                            target = edge.get("target")
+                            
+                            # Check if this edge exists in new_data
+                            edge_exists = False
+                            for new_edge in new_data.get("edges", []):
+                                if (new_edge.get("source") == source and 
+                                    new_edge.get("target") == target and 
+                                    new_edge.get("relation") == relation_value):
+                                    edge_exists = True
+                                    break
+                            
+                            if not edge_exists:
                                 appendLine = False
-                            else:
-                                source = edge.get("source")
-                                target = edge.get("target")
-                                if source not in new_data.get("classes", {}) or target not in new_data.get("classes", {}):
-                                    appendLine = False
+                            elif source not in new_data.get("classes", {}) or target not in new_data.get("classes", {}):
+                                appendLine = False
                             break
 
                 if appendLine:
