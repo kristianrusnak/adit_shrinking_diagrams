@@ -160,4 +160,3 @@ class KruskalsAlgorithm(ShrinkingAlgorithm):
                 edges.append(original_edge)
 
         return {"classes": self.PUML["classes"], "edges": edges}
-
