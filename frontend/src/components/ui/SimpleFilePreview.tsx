@@ -12,11 +12,12 @@ import { grey } from "@mui/material/colors";
 import { algorithms } from "../../pages/DiagramPage/DiagramPage";
 
 interface SimpleFilePreviewProps {
+  title?: string;
   sx?: any;
 }
 // only preview the "reduced" file
 // TODO: in future we wanna convert puml to png and hsow it here
-const SimpleFilePreview = ({ sx }: SimpleFilePreviewProps) => {
+const SimpleFilePreview = ({ title, sx }: SimpleFilePreviewProps) => {
   const selectedFile = useSelector(selectFile)?.name ?? "";
   const selectedFileReduced = useSelector(selectFileReduced);
   const selectedAlgorithmId = useSelector(selectSelectedAlgorithm);
@@ -68,7 +69,7 @@ const SimpleFilePreview = ({ sx }: SimpleFilePreviewProps) => {
           ...sx, // override sx so we can reuse this component
         }}
       >
-        <Typography variant="h6">{selectedFile}</Typography>
+        <Typography variant="h6">{title ? title : selectedFile}</Typography>
         <Typography
           variant="body2"
           gutterBottom
