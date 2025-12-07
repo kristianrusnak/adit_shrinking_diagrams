@@ -1,10 +1,10 @@
-import {ErrorProvider} from "../../context/ErrorProvider";
-import {Box} from "@mui/material";
+import { Box } from "@mui/material";
 import FilePreview from "../../components/ui/FilePreview";
 import MessageInput from "../../components/ui/MessageInput";
 import Chat from "../../components/ui/Chat";
 import styles from "./AppPage.module.css";
 import Sidebar from "../../components/ui/Sidebar";
+import { ErrorProvider } from "../../context/ErrorProvider";
 
 export default function AppPage() {
   return (
@@ -26,5 +26,5 @@ export default function AppPage() {
         </ErrorProvider>
       </div>
     </>
-  )
+  );
 }

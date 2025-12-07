@@ -127,7 +127,7 @@ class PUMLParser:
         if len(parts) == 2:
             source = parts[0]
             target = parts[1]
-
+            
             if ':' in target:
                 target = target.split(':')[0].strip()
 

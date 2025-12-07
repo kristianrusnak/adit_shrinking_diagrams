@@ -38,10 +38,17 @@ const extendedApi = apiSlice.injectEndpoints({
       },
       invalidatesTags: [],
     }),
-    processPuml: build.mutation<ProcessPumlResponse, { file: File }>({
+    processPuml: build.mutation<ProcessPumlResponse, PumlPayload>({
       query: (data) => {
         const formData = new FormData();
         formData.append("file", data.file);
+        formData.append("algorithm", data.algorithm);
+        formData.append("settings", JSON.stringify(data.settings));
+
+        // debug
+        for (const [key, value] of formData.entries()) {
+          console.log(key, value);
+        }
 
         return {
           url: "api/processPUML",

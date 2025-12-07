@@ -1,7 +1,7 @@
 import json
 import os
 import random
-from typing import Any, Dict, List, Tuple
+https://github.com/kristianrusnak/adit_shrinking_diagrams/pull/39/conflict?name=backend%252Fapp%252Fservices%252Fshrinking_algorithms%252Fgenetic_algorithm.py&base_oid=da7ebdaab40ac0b860b0b664e31279530d88755a&head_oid=0a3c3ace657adc7b109f42d7fa7d4cb9da319427from typing import Any, Dict, List, Tuple
 from app.services.shrinking_algorithms.base import ShrinkingAlgorithm
 
 
