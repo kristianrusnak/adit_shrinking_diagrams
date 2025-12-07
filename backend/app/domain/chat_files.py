@@ -1,4 +1,5 @@
 from __future__ import annotations
+import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
 
@@ -19,7 +20,7 @@ class ChatFileDomain:
         if file_content is None or file_content.strip() == "":
             raise ValueError("File content cannot be empty.")
         if file_name is None or file_name.strip() == "":
-            fine_name = "untitled.puml"
+            fine_name = str(uuid.uuid4()) + ".puml"
 
         return cls(
             message_id=message_id,

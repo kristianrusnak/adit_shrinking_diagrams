@@ -41,25 +41,24 @@ def _to_chat_file_domain(chat_file: ChatFiles) -> ChatFileDomain:
     )
 
 def _to_ai_message_list(messages: list[ChatMessage]) -> list[dict]:
-    ai_messages: list[dict] = []
+    ai_messages = []
 
     for msg in messages:
-        ai_msg = {
+
+        full_content = msg.content
+
+        if msg.files:
+            for f in msg.files:
+                full_content += (
+                    f"\n\n--- FILE: {f.file_name} ---\n"
+                    f"{f.file_content}\n"
+                    f"--- END FILE ---"
+                )
+
+        ai_messages.append({
             "role": msg.role.value if hasattr(msg.role, "value") else msg.role,
-            "content": msg.content,
-            "files": []
-        }
-
-        if hasattr(msg, "files") and msg.files:
-            ai_msg["files"] = [
-                {
-                    "name": f.file_name,
-                    "content": f.file_content
-                }
-                for f in msg.files
-            ]
-
-        ai_messages.append(ai_msg)
+            "content": full_content
+        })
 
     return ai_messages
 
@@ -213,7 +212,6 @@ class ChatService:
                 timestamp=output_message.created_at
             )
 
-            # Return the AI's output message
             return output_message
 
 
@@ -598,7 +596,6 @@ class ChatService:
                 timestamp=output_message.created_at
             )
 
-            # Return the AI's output message
             return output_message
 
     def sent_to_ai(self,
