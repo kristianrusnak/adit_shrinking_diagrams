@@ -1,4 +1,4 @@
-import FilePreview from "@/components/ui/FilePreview";
+import SimpleFilePreview from "@/components/ui/SimpleFilePreview";
 import FileUploadButton from "@/components/ui/FileUploadButton";
 import { ErrorProvider } from "@/context/ErrorProvider";
 import { Box } from "@mui/material";
@@ -19,12 +19,17 @@ export const algorithms = [
   {
     id: "kruskals",
     name: "Kruskal's algorithm",
-    description: "Some short placeholder description",
+    description: "Use Kruskal's algorithm for diagram shrinking.",
   },
   {
     id: "evol",
     name: "Evolutionary algorithm",
-    description: "Some short placeholder description",
+    description: "Use Evolutionary algorithm for diagram shrinking.",
+  },
+  {
+    id: "none",
+    name: "No algorithm",
+    description: "Use no algorithm for diagram shrinking.",
   },
 ];
 
@@ -60,9 +65,11 @@ export const DiagramPage = () => {
               display: "flex",
               justifyContent: "center",
               flexDirection: "column",
+              marginTop: 3,
             }}
           >
-            <FilePreviewDiagrams />
+            {selectedAlgorithm === "none" && <SimpleFilePreview />}
+            {selectedAlgorithm !== "none" && <FilePreviewDiagrams />}
             <AlgorithmSelector
               options={algorithms}
               value={selectedAlgorithm}
