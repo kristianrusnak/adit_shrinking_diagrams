@@ -27,3 +27,6 @@ class ChatThread(Base):
     @classmethod
     def get_updatable_fields(cls) -> set[str]:
         return cls.__updatable_fields__
+
+    def __repr__(self):
+        return f"<ChatThread(id={self.id}, user_id={self.user_id}, title={self.title})>"

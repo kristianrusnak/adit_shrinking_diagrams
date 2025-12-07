@@ -34,7 +34,7 @@ class ChatFilesRepository:
         )
 
         self.db.add(new_file)
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(new_file)
         return new_file
 

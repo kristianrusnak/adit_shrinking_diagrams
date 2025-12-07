@@ -1,6 +1,6 @@
 from typing import Optional
 from sqlalchemy import asc, desc
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from app.models.chat_messages import ChatMessage
 
 class ChatMessageRepository:
@@ -36,7 +36,7 @@ class ChatMessageRepository:
         )
 
         self.db.add(new_message)
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(new_message)
         return new_message
 
@@ -56,6 +56,7 @@ class ChatMessageRepository:
         """
         return (
             self.db.query(ChatMessage)
+            .options(selectinload(ChatMessage.files))
             .filter(ChatMessage.id == message_id)
             .first()
         )
@@ -83,8 +84,8 @@ class ChatMessageRepository:
 
         return (
             self.db.query(ChatMessage)
-            .filter(
-                ChatMessage.thread_id == thread_id
-            ).order_by(ordering)
+            .options(selectinload(ChatMessage.files))
+            .filter(ChatMessage.thread_id == thread_id)
+            .order_by(ordering)
             .all()
         )

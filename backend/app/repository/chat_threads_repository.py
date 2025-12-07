@@ -33,7 +33,7 @@ class ChatThreadRepository:
         )
 
         self.db.add(new_thread)
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(new_thread)
         return new_thread
 
@@ -108,7 +108,7 @@ class ChatThreadRepository:
             return False
 
         self.db.delete(thread)
-        self.db.commit()
+        self.db.flush()
         return True
 
     def update(self,
@@ -140,6 +140,6 @@ class ChatThreadRepository:
 
             setattr(thread, key, value)
 
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(thread)
         return thread
