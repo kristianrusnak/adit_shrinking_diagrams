@@ -22,7 +22,7 @@ class ChatThread(Base):
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     updated_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     last_message_at = Column(DateTime, nullable=True)
-    last_diagram_file_id = Column(Integer, ForeignKey("chat_files.id"), nullable=True)
+    last_diagram_file_id = Column(Integer, ForeignKey("chat_files.id", use_alter=True), nullable=True)
 
     @classmethod
     def get_updatable_fields(cls) -> set[str]:
