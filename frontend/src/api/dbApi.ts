@@ -6,7 +6,7 @@ const extendedApi = apiSlice.injectEndpoints({
       query: (data) => {
         const formData = new FormData();
         formData.append("file", data.file);
-        
+
         if (data.history) {
           formData.append("history", JSON.stringify(data.history));
         }
@@ -61,6 +61,13 @@ const extendedApi = apiSlice.injectEndpoints({
       },
       invalidatesTags: [],
     }),
+    getAlgConfig: build.query<any, { algorithm: string }>({
+      query: (body) => ({
+        url: "/api/getAlgConfig",
+        method: "POST",
+        body,
+      }),
+    }),
   }),
   overrideExisting: false,
 });
@@ -69,4 +76,5 @@ export const {
   useSendMessageMutation,
   useSendMockMutation,
   useProcessPumlMutation,
+  useGetAlgConfigQuery,
 } = extendedApi;
