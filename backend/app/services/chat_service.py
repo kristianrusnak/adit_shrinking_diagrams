@@ -93,7 +93,8 @@ class ChatService:
 
     def create_thread(self,
                       user_id: int,
-                      title: str | None) -> ChatThread:
+                      title: str | None,
+                      commit: bool = False) -> ChatThread:
         """
         Create a new chat thread for a user.
 
@@ -121,6 +122,9 @@ class ChatService:
             user_id=domain_thread.user_id,
             title=domain_thread.title
         )
+
+        if commit:
+            self.db_session.commit()
 
         return model
 
@@ -217,7 +221,8 @@ class ChatService:
 
     def delete_thread(self,
                       user_id: int,
-                      thread_id: str) -> None:
+                      thread_id: str,
+                      commit: bool = False) -> None:
         """
         Delete a chat thread for a user.
 
@@ -242,10 +247,14 @@ class ChatService:
         if not result:
             raise RuntimeError("Failed to delete thread.")
 
+        if commit:
+            self.db_session.commit()
+
     def update_last_message_in_thread(self,
                                       user_id: int,
                                       thread_id: str,
-                                      timestamp: datetime) -> ChatThread:
+                                      timestamp: datetime,
+                                      commit: bool = False) -> ChatThread:
         """
         Update the last message timestamp in a chat thread.
 
@@ -273,21 +282,27 @@ class ChatService:
         domain_thread = _to_chat_thread_domain(thread)
 
         domain_thread.change_last_message_at(timestamp)
+        domain_thread.change_updated_at(timestamp)
 
         updated_model = repo.update(
             thread_id=thread_id,
-            last_message_at=domain_thread.last_message_at
+            last_message_at=domain_thread.last_message_at,
+            last_updated_at=domain_thread.updated_at
         )
 
         if not updated_model:
             raise RuntimeError("Failed to update thread.")
+
+        if commit:
+            self.db_session.commit()
 
         return updated_model
 
     def update_last_file_in_thread(self,
                                    user_id: int,
                                    thread_id: str,
-                                   file_id: int) -> ChatThread:
+                                   file_id: int,
+                                   commit: bool = False) -> ChatThread:
         """
         Update the last diagram file ID in a chat thread.
 
@@ -326,12 +341,16 @@ class ChatService:
         if not updated_model:
             raise RuntimeError("Failed to update thread.")
 
+        if commit:
+            self.db_session.commit()
+
         return updated_model
 
     def rename_thread(self,
                       user_id: int,
                       thread_id: str,
-                      title: str | None) -> ChatThread:
+                      title: str | None,
+                      commit: bool = False) -> ChatThread:
         """
         Update a chat thread's title.
 
@@ -369,6 +388,9 @@ class ChatService:
 
         if not updated_model:
             raise RuntimeError("Failed to update thread.")
+
+        if commit:
+            self.db_session.commit()
 
         return updated_model
 
@@ -415,7 +437,8 @@ class ChatService:
                        user_id: int,
                        thread_id: str,
                        role: str,
-                       content: str) -> ChatMessage:
+                       content: str,
+                       commit: bool = False) -> ChatMessage:
         """
         Record a new chat message in a thread.
 
@@ -459,13 +482,17 @@ class ChatService:
             content=domain_message.content
         )
 
+        if commit:
+            self.db_session.commit()
+
         return model
 
     def record_file(self,
                     user_id: int,
                     message_id: int,
                     file_content: str,
-                    file_name: str | None) -> ChatFiles:
+                    file_name: str | None,
+                    commit: bool = False) -> ChatFiles:
         """
         Record a new chat file associated with a message.
 
@@ -517,6 +544,9 @@ class ChatService:
             file_name=domain_file.file_name,
             file_content=domain_file.file_content
         )
+
+        if commit:
+            self.db_session.commit()
 
         return file
 

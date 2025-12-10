@@ -18,9 +18,12 @@ from app.db import get_db
 from app.models.user import User
 from app.models.refresh_token import RefreshToken
 from app.schemas.user import UserListItem, UserRegister, UserResponse, UserLogin, TokenResponse, RefreshRequest
+from app.schemas.chat_thread import ChatThreadSchema, ThreadRenameRequest
+from app.schemas.chat_message import ChatMessageSchema
 
 from app.services.security_service import hash_password
 from app.services.jwt_service import create_access_token, create_refresh_token, hash_refresh_token, verify_access_token, verify_refresh_token
+from app.services.chat_service import ChatService
 
 app = FastAPI()
 logger.log("Starting FastAPI", level="info")
@@ -70,7 +73,6 @@ def mock_controller(file: UploadFile):
     except Exception:
         raise HTTPException(status_code=400, detail="Unable to read PUML file")
     return {"response": content}
-
 
 @app.post("/api/sendMessage")
 def message_controller(file: UploadFile, history: str = Form(None)):
@@ -237,6 +239,80 @@ def get_current_user(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
+
+@app.get("/api/threads", response_model=list[ChatThreadSchema])
+def threads_controller(user: User = Depends(get_current_user),
+                       db: Session = Depends(get_db)):
+    chat_service = ChatService(db)
+
+    try:
+        return chat_service.retrieve_threads(
+            user_id=user.id,
+            order="DESC"
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@app.get("/api/threads/{thread_id}", response_model=list[ChatMessageSchema])
+def thread_chat_controller(thread_id: str,
+                           user: User = Depends(get_current_user),
+                           db: Session = Depends(get_db)):
+    chat_service = ChatService(db)
+
+    try:
+        return chat_service.retrieve_messages(
+            user_id=user.id,
+            thread_id=thread_id,
+            order="ASC"
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/threads/rename", response_model=ChatThreadSchema)
+def rename_thread_controller(data: ThreadRenameRequest,
+                             user: User = Depends(get_current_user),
+                             db: Session = Depends(get_db)):
+    chat_service = ChatService(db)
+
+    try:
+        return chat_service.rename_thread(
+            user_id=user.id,
+            thread_id=data.thread_id,
+            title=data.new_title,
+            commit=True
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/threads/delete/{thread_id}")
+def delete_thread_controller(thread_id: str,
+                             user: User = Depends(get_current_user),
+                             db: Session = Depends(get_db)):
+    chat_service = ChatService(db)
+
+    try:
+        chat_service.delete_thread(
+            user_id=user.id,
+            thread_id=thread_id,
+            commit=True
+        )
+        return {"detail": "Thread deleted successfully"}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/auth/me")
 def get_me(user: User = Depends(get_current_user)):
