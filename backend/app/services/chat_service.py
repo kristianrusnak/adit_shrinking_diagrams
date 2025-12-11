@@ -163,60 +163,61 @@ class ChatService:
         # )
         # return model
 
-        with self.db_session.begin():
-            # Create new thread
-            thread = self.create_thread(
+        # Create new thread
+        thread = self.create_thread(
+            user_id=user_id,
+            title=title
+        )
+
+        # Create initial prompt message in the thread
+        input_message = self.record_message(
+            user_id=user_id,
+            thread_id=thread.id,
+            role=RoleEnum.user.value,
+            content=prompt_message
+        )
+
+        # if there is a prompt file, create it
+        if prompt_file:
+            # Create file associated with the input message
+            file = self.record_file(
                 user_id=user_id,
-                title=title
+                message_id=input_message.id,
+                file_content=prompt_file,
+                file_name=prompt_file_name
             )
 
-            # Create initial prompt message in the thread
-            input_message = self.record_message(
-                user_id=user_id,
-                thread_id=thread.id,
-                role=RoleEnum.user.value,
-                content=prompt_message
-            )
-
-            # if there is a prompt file, create it
-            if prompt_file:
-                # Create file associated with the input message
-                file = self.record_file(
-                    user_id=user_id,
-                    message_id=input_message.id,
-                    file_content=prompt_file,
-                    file_name=prompt_file_name
-                )
-
-                # Update the last_diagram_file_id in the thread
-                self.update_last_file_in_thread(
-                    user_id=user_id,
-                    thread_id=thread.id,
-                    file_id=file.id
-                )
-
-            # Send to AI and get response
-            generated_message = self.sent_to_ai(
-                user_id=user_id,
-                thread_id=thread.id
-            )
-
-            # Record AI response message in the thread
-            output_message = self.record_message(
+            # Update the last_diagram_file_id in the thread
+            self.update_last_file_in_thread(
                 user_id=user_id,
                 thread_id=thread.id,
-                role=RoleEnum.assistant.value,
-                content=generated_message
+                file_id=file.id
             )
 
-            # Update the last_message_at in the thread
-            self.update_last_message_in_thread(
-                user_id=user_id,
-                thread_id=thread.id,
-                timestamp=output_message.created_at
-            )
+        # Send to AI and get response
+        generated_message = self.sent_to_ai(
+            user_id=user_id,
+            thread_id=thread.id
+        )
 
-            return thread, output_message
+        # Record AI response message in the thread
+        output_message = self.record_message(
+            user_id=user_id,
+            thread_id=thread.id,
+            role=RoleEnum.assistant.value,
+            content=generated_message
+        )
+
+        # Update the last_message_at in the thread
+        self.update_last_message_in_thread(
+            user_id=user_id,
+            thread_id=thread.id,
+            timestamp=output_message.created_at
+        )
+
+        self.db_session.commit()
+
+        return thread, output_message
 
 
     def delete_thread(self,
@@ -578,55 +579,56 @@ class ChatService:
             AI generated response.
         """
 
-        with self.db_session.begin():
 
-            # Create initial prompt message in the thread
-            input_message = self.record_message(
+        # Create initial prompt message in the thread
+        input_message = self.record_message(
+            user_id=user_id,
+            thread_id=thread_id,
+            role=RoleEnum.user.value,
+            content=prompt_message
+        )
+
+        # if there is a prompt file, create it
+        if prompt_file:
+            # Create file associated with the input message
+            file = self.record_file(
+                user_id=user_id,
+                message_id=input_message.id,
+                file_content=prompt_file,
+                file_name=prompt_file_name
+            )
+
+            # Update the last_diagram_file_id in the thread
+            self.update_last_file_in_thread(
                 user_id=user_id,
                 thread_id=thread_id,
-                role=RoleEnum.user.value,
-                content=prompt_message
+                file_id=file.id
             )
 
-            # if there is a prompt file, create it
-            if prompt_file:
-                # Create file associated with the input message
-                file = self.record_file(
-                    user_id=user_id,
-                    message_id=input_message.id,
-                    file_content=prompt_file,
-                    file_name=prompt_file_name
-                )
+        # Send to AI and get response
+        generated_message = self.sent_to_ai(
+            user_id=user_id,
+            thread_id=thread_id
+        )
 
-                # Update the last_diagram_file_id in the thread
-                self.update_last_file_in_thread(
-                    user_id=user_id,
-                    thread_id=thread_id,
-                    file_id=file.id
-                )
+        # Record AI response message in the thread
+        output_message = self.record_message(
+            user_id=user_id,
+            thread_id=thread_id,
+            role=RoleEnum.assistant.value,
+            content=generated_message
+        )
 
-            # Send to AI and get response
-            generated_message = self.sent_to_ai(
-                user_id=user_id,
-                thread_id=thread_id
-            )
+        # Update the last_message_at in the thread
+        self.update_last_message_in_thread(
+            user_id=user_id,
+            thread_id=thread_id,
+            timestamp=output_message.created_at
+        )
 
-            # Record AI response message in the thread
-            output_message = self.record_message(
-                user_id=user_id,
-                thread_id=thread_id,
-                role=RoleEnum.assistant.value,
-                content=generated_message
-            )
+        self.db_session.commit()
 
-            # Update the last_message_at in the thread
-            self.update_last_message_in_thread(
-                user_id=user_id,
-                thread_id=thread_id,
-                timestamp=output_message.created_at
-            )
-
-            return output_message
+        return output_message
 
     def sent_to_ai(self,
                    user_id: int,

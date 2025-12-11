@@ -383,7 +383,7 @@ def create_thread_and_send_message_controller(
 
 @app.post("/api/chat/send", response_model=ChatMessageSchema)
 def send_message_controller(
-    file: UploadFile = File(...),
+    file: UploadFile = File(None),
     message: str = Form(None),
     thread_id: str = Form(None),
     user: User = Depends(get_current_user),
