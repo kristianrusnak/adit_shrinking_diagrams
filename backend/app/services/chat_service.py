@@ -133,7 +133,7 @@ class ChatService:
                       title: str | None,
                       prompt_message: str,
                       prompt_file: str | None = None,
-                      prompt_file_name: str | None = None) -> ChatMessage:
+                      prompt_file_name: str | None = None) -> tuple[ChatThread, ChatMessage]:
         """
         Create a new chat thread for a user.
 
@@ -216,7 +216,7 @@ class ChatService:
                 timestamp=output_message.created_at
             )
 
-            return output_message
+            return thread, output_message
 
 
     def delete_thread(self,
@@ -287,7 +287,7 @@ class ChatService:
         updated_model = repo.update(
             thread_id=thread_id,
             last_message_at=domain_thread.last_message_at,
-            last_updated_at=domain_thread.updated_at
+            updated_at=domain_thread.updated_at
         )
 
         if not updated_model:
@@ -554,8 +554,8 @@ class ChatService:
                        user_id: int,
                        thread_id: str,
                        prompt_message: str,
-                       prompt_file: str | None,
-                       prompt_file_name: str | None) -> ChatMessage:
+                       prompt_file: str | None = None,
+                       prompt_file_name: str | None = None) -> ChatMessage:
         """
         Send a prompt message to AI and get the response.
 
