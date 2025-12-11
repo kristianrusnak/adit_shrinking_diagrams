@@ -16,7 +16,7 @@ from fastapi import (
     status,
 )
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from app.services.openai_service import OpenAIService
 from app.services.parse_puml_service import PUMLParser
 from app.services.shrinking_algorithms.factory import get_algorithm
@@ -235,13 +235,53 @@ def register_user(user_data: UserRegister, db: Session = Depends(get_db)):
     return user
 
 
+# Old version using JSON payload for email/password
+# @app.post("/auth/login", response_model=TokenResponse, status_code=200)
+# def login_user(user_data: UserLogin, db: Session = Depends(get_db)):
+#     user = (
+#         db.query(User)  # pyright: ignore
+#         .filter(
+#             User.email == user_data.email,
+#             hash_password(user_data.password) == User.password_hash,
+#         )
+#         .first()
+#     )
+#     if not user:
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid email or password"
+#         )
+#
+#     access_token = create_access_token(subject=str(user.id))
+#     refresh_token = create_refresh_token()
+#
+#     token_entry = RefreshToken(
+#         user_id=user.id,
+#         token_hash=hash_password(refresh_token),
+#         expires_at=RefreshToken.generate_expiration(),
+#     )
+#     db.add(token_entry)
+#     db.commit()
+#
+#     return {
+#         "access_token": access_token,
+#         "refresh_token": refresh_token,
+#         "token_type": "bearer",
+#     }
+
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+
+# new version using the OAuth2 spec for username/password
+# this means we can now use localhost:8000/docs authorize button to test the endpoints that require authorization
+
 @app.post("/auth/login", response_model=TokenResponse, status_code=200)
-def login_user(user_data: UserLogin, db: Session = Depends(get_db)):
+def login_user(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+
     user = (
         db.query(User)  # pyright: ignore
         .filter(
-            User.email == user_data.email,
-            hash_password(user_data.password) == User.password_hash,
+            User.email == form_data.username,
+            hash_password(form_data.password) == User.password_hash,
         )
         .first()
     )
@@ -267,8 +307,6 @@ def login_user(user_data: UserLogin, db: Session = Depends(get_db)):
         "token_type": "bearer",
     }
 
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
 def get_current_user(
