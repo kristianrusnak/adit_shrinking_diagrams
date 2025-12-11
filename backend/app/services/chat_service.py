@@ -287,7 +287,7 @@ class ChatService:
         updated_model = repo.update(
             thread_id=thread_id,
             last_message_at=domain_thread.last_message_at,
-            last_updated_at=domain_thread.updated_at
+            updated_at=domain_thread.updated_at
         )
 
         if not updated_model:

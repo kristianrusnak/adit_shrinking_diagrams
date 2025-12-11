@@ -9,6 +9,7 @@ import TestRegisterLogin from "@/pages/Test/TestRegisterLogin";
 import DiagramPage from "../pages/DiagramPage/DiagramPage";
 import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
+import ProtectedRoute from "./ProtectedRoute";
 
 export default function AppRoutes() {
   return (
@@ -22,6 +23,12 @@ export default function AppRoutes() {
           <Route path="app" element={<AppPage />} />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
+          <Route element={<ProtectedRoute redirectTo="/app" />}>
+            <Route
+              path="chat/:id"
+              element={<div>Placeholder SUPERCHAT =)</div>}
+            />
+          </Route>
         </Route>
         <Route path="testauth" element={<TestRegisterLogin />} />
         <Route path="*" element={<NotFoundPage />} />

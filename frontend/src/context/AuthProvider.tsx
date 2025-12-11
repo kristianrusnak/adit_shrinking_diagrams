@@ -21,6 +21,9 @@ interface AuthContextInterface {
   isRegistering: boolean;
   isLoggingIn: boolean;
   isLoggingOut: boolean;
+  isUserLoading: boolean;
+  isUserFetching: boolean;
+  isUserUninitialized: boolean;
   register: (email: string, password: string) => Promise<UserInfo>;
   login: (email: string, password: string) => Promise<UserInfo>;
   logout: () => Promise<void>;
@@ -49,7 +52,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // console.log(accessToken);
 
-  const { data } = useGetUserInfoQuery(accessToken ? undefined : skipToken);
+  const {
+    data,
+    isLoading: isUserLoading,
+    isFetching: isUserFetching,
+    isUninitialized: isUserUninitialized,
+  } = useGetUserInfoQuery(accessToken ? undefined : skipToken);
 
   // these might throw errors but we bubble them up and handle them using the useError provider further up
   // it is up to whoever uses this to handle errors
@@ -113,6 +121,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         isRegistering,
         isLoggingIn,
         isLoggingOut,
+        isUserLoading,
+        isUserFetching,
+        isUserUninitialized,
         register: handleRegister,
         login: handleLogin,
         logout: handleLogout,
