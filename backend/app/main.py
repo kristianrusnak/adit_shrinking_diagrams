@@ -132,6 +132,8 @@ def message_controller(file: UploadFile, history: str = Form(None)):
         )
 
     for entry in history_list:
+        # if entry.get("role") == "agent": # why is this even happening???
+        #     entry["role"] = "assistant"
         if not entry.get("content"):
             entry["content"] = entry["text"]
 
