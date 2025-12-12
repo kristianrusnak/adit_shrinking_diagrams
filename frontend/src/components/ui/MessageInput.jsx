@@ -57,7 +57,7 @@ const MessageInput = () => {
             startAdornment: (
               <>
                 <InputAdornment position="start">
-                  <FileUploadButton />
+                  <FileUploadButton type={ButtonType.ICON} />
                 </InputAdornment>
                 <ShrinkButton position="start" />
               </>

@@ -7,7 +7,11 @@ import Sidebar from "../../components/ui/Sidebar";
 import { ErrorProvider } from "../../context/ErrorProvider";
 import SimpleFilePreview from "@/components/ui/SimpleFilePreview";
 
-export default function AppPage() {
+interface AppPageProps {
+  children?: React.ReactNode;
+}
+
+export default function AppPage({ children = <Chat /> }: AppPageProps) {
   return (
     <>
       <title>Shrinking Diagrams</title>
@@ -30,7 +34,7 @@ export default function AppPage() {
               }}
             >
               <Box className={styles.content}>
-                <Chat />
+                {children}
                 <MessageInput />
               </Box>
             </Grid>

@@ -64,6 +64,11 @@ const FileUploadButton = ({ type }: FileUploadButtonProps) => {
   // without this check it causes endless rerender loop
   useEffect(() => {
     if (!selectedFile) return;
+    // TODO:
+    // the selectedFile is being set by the DB query so we dont want any processing done to it here
+    // if this is allowed to go through then it will run the PUML shrinking algorithm on the file
+    // which is already reduced? it should be clarified what exactly are we storing on the backend
+    if (type == ButtonType.ICON) return;
 
     const shouldProcess =
       !lastProcessed.current ||
