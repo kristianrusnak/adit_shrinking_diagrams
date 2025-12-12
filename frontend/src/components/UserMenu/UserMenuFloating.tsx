@@ -5,7 +5,7 @@ export default function UserMenuFloating() {
     <div
       style={{
         position: "fixed",
-        top: 30,
+        top: 34,
         right: 16,
         zIndex: 1000,
       }}>

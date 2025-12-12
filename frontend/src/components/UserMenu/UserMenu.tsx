@@ -42,7 +42,7 @@ export default function UserMenu() {
   return (
     <>
       <IconButton onClick={handleOpen} size="small">
-        <Avatar sx={{ width: 32, height: 32 }}>
+        <Avatar sx={{ width: 45, height: 45 }}>
           {email[0].toUpperCase()}
         </Avatar>
       </IconButton>
