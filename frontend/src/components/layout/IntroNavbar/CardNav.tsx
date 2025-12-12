@@ -2,6 +2,9 @@ import React, { useLayoutEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { GoArrowUpRight } from 'react-icons/go';
 import { useNavigate } from 'react-router-dom';
+import UserMenu from "@/components/UserMenu/UserMenu";
+import { useAuth } from "@/context/AuthProvider";
+
 
 type CardNavLink = {
   label: string;
@@ -156,11 +159,11 @@ const CardNav: React.FC<CardNavProps> = ({
   };
 
   const navigate = useNavigate();
-
   return (
     <div
       className={`card-nav-container absolute left-1/2 -translate-x-1/2 w-[90%] max-w-[800px] z-[99] top-[1.2em] md:top-[2em] ${className}`}
     >
+
       <nav
         ref={navRef}
         className={`card-nav ${isExpanded ? 'open' : ''} block h-[60px] p-0 rounded-xl shadow-md relative overflow-hidden will-change-[height]`}
@@ -201,7 +204,6 @@ const CardNav: React.FC<CardNavProps> = ({
             Go to App
           </button>
         </div>
-
         <div
           className={`card-nav-content absolute left-0 right-0 top-[60px] bottom-0 p-2 flex flex-col items-stretch gap-2 justify-start z-[1] ${
             isExpanded ? 'visible pointer-events-auto' : 'invisible pointer-events-none'
