@@ -14,7 +14,7 @@ import {
 } from "../../store/slices/algorithmSlice";
 
 import { selectFile } from "../../store/slices/fileSlice";
-import { useProcessPumlMutation } from "@/api/dbApi";
+import { useProcessPumlMutation } from "@/api/api";
 import { clearMessages } from "@/store/slices/messageSlice";
 
 const MAX_FILE_SIZE = 1024 * 1024 * 10; // 10 MB

@@ -14,7 +14,7 @@ import {
 
 import { ButtonType } from "@/components/ui/FileUploadButton";
 import FilePreviewDiagrams from "@/components/ui/FilePreviewDiagrams";
-import { useGetAlgConfigQuery } from "@/api/dbApi";
+import { useGetAlgConfigQuery } from "@/api/api";
 
 export const algorithms = [
   {

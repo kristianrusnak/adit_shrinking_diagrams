@@ -1,18 +1,24 @@
 import { IconButton } from "@mui/material";
-import CircularProgress from '@mui/material/CircularProgress';
+import CircularProgress from "@mui/material/CircularProgress";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {selectFile, selectFileReduced} from "../../store/slices/fileSlice";
+import { selectFile, selectFileReduced } from "../../store/slices/fileSlice";
 import { selectMessage, setMessage } from "../../store/slices/fileSlice";
-import messageSlice, {addMessage, ChatMessage, selectMessages} from "../../store/slices/messageSlice";
-import {useSendMessageMutation, useSendMockMutation} from "../../api/dbApi"; // or your real send function
+import messageSlice, {
+  addMessage,
+  ChatMessage,
+  selectMessages,
+} from "../../store/slices/messageSlice";
+import { useSendMessageMutation, useSendMockMutation } from "../../api/api"; // or your real send function
 import { useError } from "../../context/useError.jsx";
-import {store} from "@/store/store";
+import { store } from "@/store/store";
 
 const SendButton = () => {
   const dispatch = useDispatch();
-  const { showError } = useError() as { showError: (msg: string, title?: string) => void };
+  const { showError } = useError() as {
+    showError: (msg: string, title?: string) => void;
+  };
 
   const selectedFile = useSelector(selectFile);
   const selectedFileReduced = useSelector(selectFileReduced);
@@ -37,7 +43,7 @@ const SendButton = () => {
           role: "user",
           text: selectedMessage,
           file: selectedFileReduced || null,
-        })
+        }),
       );
 
       // clear MessageInput after sending
@@ -50,9 +56,10 @@ const SendButton = () => {
       const message = selectedMessage == "" ? PROMPT_DEFAULT : selectedMessage;
       const response = await sendMessage({
         file: selectedFileReduced,
-        history: selectedMessages.length === 0 ?
-          ["Describe provided diagram in a few words."]
-          : selectedMessages,
+        history:
+          selectedMessages.length === 0
+            ? ["Describe provided diagram in a few words."]
+            : selectedMessages,
       }).unwrap();
 
       // 3) Create agent message and save in Redux
@@ -61,10 +68,13 @@ const SendButton = () => {
           role: "agent",
           text: response || "",
           file: null,
-        })
+        }),
       );
     } catch (error: any) {
-      showError(error.data?.detail || error.error || "Unknown error", "Send error");
+      showError(
+        error.data?.detail || error.error || "Unknown error",
+        "Send error",
+      );
     } finally {
       setLocalLoading(false);
     }
@@ -81,7 +91,11 @@ const SendButton = () => {
       }}
       disabled={localLoading || isLoading}
     >
-      {localLoading || isLoading ? <CircularProgress size={20} color="inherit" /> : <SendOutlinedIcon />}
+      {localLoading || isLoading ? (
+        <CircularProgress size={20} color="inherit" />
+      ) : (
+        <SendOutlinedIcon />
+      )}
     </IconButton>
   );
 };
