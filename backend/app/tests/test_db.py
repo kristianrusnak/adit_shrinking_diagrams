@@ -112,14 +112,3 @@ def add_file_to_message():
 
     print("Added file to message")
     return file
-if __name__ == "__main__":
-
-    # print(Base.metadata.tables.keys())
-    # create_empty_thread()
-    # create_new_thread_with_prompt()
-    # test_db_connection()
-    # test_db_tables()
-    # create_thread_with_one_message()
-    # add_message_to_existing_thread()
-    add_file_to_message()
-
