@@ -16,3 +16,12 @@ type PumlPayload = {
   algorithm: string;
   settings: Record<string, any>;
 };
+
+type ChatMessage = {
+  id: number;
+  thread_id: number;
+  role: "user" | "assistant";
+  content: string;
+  created_at: string;
+  files: any[];
+};

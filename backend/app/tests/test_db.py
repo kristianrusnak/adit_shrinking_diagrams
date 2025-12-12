@@ -96,6 +96,22 @@ def add_message_to_existing_thread():
 
     return msg
 
+def add_file_to_message():
+    db = next(get_db())
+    chat_service = ChatService(db)
+
+    # 6   2fb39d39-3b12-40c4-9936-ad3106304bc4  user       Hello, this is a test 2                                                  2025-12-11 20:31:27.701139
+
+    file = chat_service.record_file(
+        user_id=2,
+        message_id=6,
+        file_content="some file content here " * 100,
+        file_name="test_file.puml",
+        commit=True
+    )
+
+    print("Added file to message")
+    return file
 if __name__ == "__main__":
 
     # print(Base.metadata.tables.keys())
@@ -104,5 +120,6 @@ if __name__ == "__main__":
     # test_db_connection()
     # test_db_tables()
     # create_thread_with_one_message()
-    add_message_to_existing_thread()
+    # add_message_to_existing_thread()
+    add_file_to_message()
 
