@@ -10,7 +10,7 @@ import messageSlice, {
   ChatMessage,
   selectMessages,
 } from "../../store/slices/messageSlice";
-import { useSendMessageMutation, useSendMockMutation } from "../../api/dbApi"; // or your real send function
+import { useSendMessageMutation, useSendMockMutation } from "../../api/api"; // or your real send function
 import { useError } from "../../context/useError.jsx";
 import { store } from "@/store/store";
 
