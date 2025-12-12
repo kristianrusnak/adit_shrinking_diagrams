@@ -1,5 +1,5 @@
 import { Box, Button, Typography } from "@mui/material";
-import { useSendMessageMutation } from "../../api/dbApi";
+import { useSendMessageMutation } from "../../api/api";
 import { useState } from "react";
 import { useError } from "../../context/useError";
 import {
