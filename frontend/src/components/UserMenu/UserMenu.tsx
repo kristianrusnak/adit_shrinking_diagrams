@@ -19,10 +19,7 @@ export default function UserMenu() {
 
   const isAuthenticated = Boolean(accessToken);
 
-  const email =
-    isAuthenticated && userInfo?.email
-      ? userInfo.email
-      : "Unknown";
+  const email = isAuthenticated && userInfo?.email ? userInfo.email : "Unknown";
 
   const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
