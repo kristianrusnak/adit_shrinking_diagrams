@@ -339,7 +339,7 @@ def create_thread_controller(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/threads/createAndSend", response_model=ThreadCreateResponse)
+@app.post("/api/threads/createThreadAndSendPrompt", response_model=ThreadCreateResponse)
 def create_thread_and_send_message_controller(
     file: UploadFile = File(None),
     message: str = Form(None),
@@ -381,7 +381,7 @@ def create_thread_and_send_message_controller(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/chat/send", response_model=ChatMessageSchema)
+@app.post("/api/chat/sendPrompt", response_model=ChatMessageSchema)
 def send_message_controller(
     file: UploadFile = File(None),
     message: str = Form(None),
