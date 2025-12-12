@@ -1,6 +1,15 @@
 import CardNav from "./CardNav";
+import { useSelector } from "react-redux";
+import { selectAccessToken } from "@/store/slices/authSlice";
+import { useAuth } from "@/context/AuthProvider";
+import { useNavigate } from "react-router-dom";
+
 
 export default function IntroNavbar() {
+  const navigate = useNavigate();
+  const accessToken = useSelector(selectAccessToken);
+  const isAuthenticated = Boolean(accessToken);
+  const { logout } = useAuth();
   const items = [
     {
       label: "About",
@@ -29,10 +38,24 @@ export default function IntroNavbar() {
       label: "Account",
       bgColor: "#271E37",
       textColor: "#fff",
-      links: [
-        { label: "Log in", ariaLabel: "Log in", href: "login" },
-        { label: "Register", ariaLabel: "Register", href: "register" },
-      ],
+      links: isAuthenticated
+        ? [
+            {
+              label: "Logout",
+              ariaLabel: "Logout",
+              href: "#",
+              onClick: async (e: React.MouseEvent) => {
+                e.preventDefault();
+                await logout();
+                // await navigate("/");
+                window.location.reload();
+              },
+            },
+          ]
+        : [
+            { label: "Log in", ariaLabel: "Log in", href: "/login" },
+            { label: "Register", ariaLabel: "Register", href: "/register" },
+          ],
     },
   ];
 

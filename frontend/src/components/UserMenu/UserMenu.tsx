@@ -36,6 +36,7 @@ export default function UserMenu() {
     handleClose();
     if (isAuthenticated) {
       await logout();
+      window.location.reload();
     }
   };
 
