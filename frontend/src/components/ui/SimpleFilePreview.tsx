@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { selectFile, selectFileReduced } from "../../store/slices/fileSlice";
 import { selectSelectedAlgorithm } from "../../store/slices/algorithmSlice";
 import { useEffect, useState } from "react";
-import { useProcessPumlMutation, useSendMockMutation } from "../../api/dbApi";
+import { useProcessPumlMutation, useSendMockMutation } from "../../api/api";
 import { logger } from "../../utils/logger";
 import { useError } from "../../context/useError.jsx";
 
