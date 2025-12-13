@@ -1,7 +1,11 @@
-import { FC, useCallback } from "react";
-import { Box, Button, List, ListItemButton, ListItemText, Tooltip, Typography, CircularProgress} from "@mui/material";
+import { FC, useCallback, useState } from "react";
+import { Box, Button, List, ListItemButton, ListItemText, Tooltip, Typography, CircularProgress, IconButton, TextField} from "@mui/material";
 import AddOutlinedIcon from "@mui/icons-material/Add";
-import { useGetChatThreadsQuery } from "@/api/dbApi";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
+import { useGetChatThreadsQuery, useRenameThreadMutation, useDeleteThreadMutation } from "@/api/dbApi";
 import { useNavigate, useParams } from "react-router-dom";
 import type { ChatThread } from "@/api/types";
 
@@ -10,6 +14,11 @@ const Sidebar: FC = () => {
   const { threadId } = useParams<{ threadId?: string }>();
   
   const { data: threads, isLoading, error } = useGetChatThreadsQuery();
+  const [renameThread] = useRenameThreadMutation();
+  const [deleteThread] = useDeleteThreadMutation();
+  
+  const [editingThreadId, setEditingThreadId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState<string>("");
 
   const handleNewChat = useCallback(() => {
     navigate("/app");
@@ -36,6 +45,45 @@ const Sidebar: FC = () => {
     if (diffInDays < 7) return `${diffInDays} days ago`;
     return date.toLocaleDateString();
   };
+
+  const handleStartEdit = useCallback((thread: ChatThread, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingThreadId(thread.id);
+    setEditingTitle(thread.title);
+  }, []);
+
+  const handleCancelEdit = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingThreadId(null);
+    setEditingTitle("");
+  }, []);
+
+  const handleSaveEdit = useCallback(async (threadId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (editingTitle.trim()) {
+      try {
+        await renameThread({ thread_id: threadId, new_title: editingTitle.trim() }).unwrap();
+        setEditingThreadId(null);
+        setEditingTitle("");
+      } catch (error) {
+        console.error("Failed to rename thread:", error);
+      }
+    }
+  }, [editingTitle, renameThread]);
+
+  const handleDelete = useCallback(async (threadId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm("Are you sure you want to delete this chat?")) {
+      try {
+        await deleteThread(threadId).unwrap();
+        if (threadId === threadId) {
+          navigate("/app");
+        }
+      } catch (error) {
+        console.error("Failed to delete thread:", error);
+      }
+    }
+  }, [deleteThread, navigate, threadId]);
 
   return (
     <Box
@@ -80,13 +128,16 @@ const Sidebar: FC = () => {
 
       <List sx={{ padding: 0, overflow: "auto" }}>
         {threads?.map((thread: ChatThread) => (
-          <Tooltip key={thread.id} title={thread.title} placement="right" arrow>
+          <Tooltip key={thread.id} title={editingThreadId === thread.id ? "" : thread.title} placement="right" arrow>
             <ListItemButton
-              onClick={() => handleThreadClick(thread.id)}
+              onClick={() => editingThreadId !== thread.id && handleThreadClick(thread.id)}
               selected={threadId === thread.id}
               sx={{
                 borderRadius: "8px",
                 marginBottom: "4px",
+                flexDirection: "column",
+                alignItems: "flex-start",
+                padding: "8px 12px",
                 "&.Mui-selected": {
                   backgroundColor: "rgba(144, 202, 249, 0.16)",
                   "&:hover": {
@@ -95,20 +146,82 @@ const Sidebar: FC = () => {
                 },
               }}
             >
-              <ListItemText
-                primary={truncate(thread.title, 25)}
-                secondary={
-                  thread.last_message_at
-                    ? formatDate(thread.last_message_at)
-                    : formatDate(thread.updated_at)
-                }
-                slotProps={{
-                  secondary: {
-                    variant: "caption",
-                    sx: { opacity: 0.6 },
-                  },
-                }}
-              />
+              {editingThreadId === thread.id ? (
+                <>
+                  <Box sx={{ width: "100%" }}>
+                    <TextField
+                      value={editingTitle}
+                      onChange={(e) => setEditingTitle(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          handleSaveEdit(thread.id, e as any);
+                        } else if (e.key === "Escape") {
+                          handleCancelEdit(e as any);
+                        }
+                      }}
+                      size="small"
+                      autoFocus
+                      fullWidth
+                    />
+                  </Box>
+                  <Box sx={{ display: "flex", gap: 0.5, marginTop: "4px" }}>
+                    <IconButton
+                      size="small"
+                      onClick={(e) => handleSaveEdit(thread.id, e)}
+                      sx={{ padding: "2px" }}
+                    >
+                      <CheckIcon sx={{ fontSize: "16px" }} />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      onClick={handleCancelEdit}
+                      sx={{ padding: "2px" }}
+                    >
+                      <CloseIcon sx={{ fontSize: "16px" }} />
+                    </IconButton>
+                  </Box>
+                </>
+              ) : (
+                <>
+                  <Box sx={{ width: "100%" }}>
+                    <ListItemText
+                      primary={truncate(thread.title, 25)}
+                      secondary={
+                        thread.last_message_at
+                          ? formatDate(thread.last_message_at)
+                          : formatDate(thread.updated_at)
+                      }
+                      slotProps={{
+                        primary: {
+                          sx: { marginBottom: "2px" },
+                        },
+                        secondary: {
+                          variant: "caption",
+                          sx: { opacity: 0.6 },
+                        },
+                      }}
+                      sx={{ margin: 0 }}
+                    />
+                  </Box>
+                  <Box sx={{ display: "flex", gap: 0.5, opacity: 0.5, marginTop: "4px" }}>
+                    <IconButton
+                      size="small"
+                      onClick={(e) => handleStartEdit(thread, e)}
+                      sx={{ padding: "2px" }}
+                    >
+                      <EditOutlinedIcon sx={{ fontSize: "16px" }} />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      onClick={(e) => handleDelete(thread.id, e)}
+                      sx={{ padding: "2px" }}
+                    >
+                      <DeleteOutlineIcon sx={{ fontSize: "16px" }} />
+                    </IconButton>
+                  </Box>
+                </>
+              )}
             </ListItemButton>
           </Tooltip>
         ))}
