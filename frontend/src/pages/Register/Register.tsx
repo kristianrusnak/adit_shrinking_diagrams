@@ -3,6 +3,8 @@ import { TextField, Button, Stack, Typography, Box } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { NAVBAR_HEIGHT, textFieldStyles } from "@/utils/layoutStyles";
+import { Link as RouterLink } from "react-router-dom";
+import { Link } from "@mui/material";
 
 
 export default function RegisterPage() {
@@ -63,6 +65,14 @@ export default function RegisterPage() {
         <Button variant="contained" onClick={handleSubmit} disabled={isRegistering}>
           Register
         </Button>
+        <Link
+          component={RouterLink}
+          to="/login"
+          underline="hover"
+          textAlign="center"
+          sx={{ color: "white", fontSize: 14 }}>
+          Already have an account? Login
+        </Link>
         {errorMsg && (
           <Typography color="error" fontSize={14} textAlign="center">
             {errorMsg}
