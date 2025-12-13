@@ -44,15 +44,18 @@ const UserChat = () => {
   }
 
   if (threadMessages && threadMessages.length > 0) {
-    console.log(threadMessages[0]);
-    const filetmp = threadMessages[0].files[threadMessages[0].files.length - 1];
-    const file = new File([filetmp.file_content], filetmp.file_name);
-    // placeholder until it is clear what we want to show
-    // this sets the file to the one that was initially sent to the backend
-    // by default it will
-    // dispatch(setFile(file));
-    dispatch(setFile(file));
-    dispatch(setFileReduced(file));
+    if (threadMessages[0].files.length > 0) {
+      console.log(threadMessages[0]);
+      const filetmp =
+        threadMessages[0].files[threadMessages[0].files.length - 1];
+      const file = new File([filetmp.file_content], filetmp.file_name);
+      // placeholder until it is clear what we want to show
+      // this sets the file to the one that was initially sent to the backend
+      // by default it will
+      // dispatch(setFile(file));
+      dispatch(setFile(file));
+      dispatch(setFileReduced(file));
+    }
   }
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
