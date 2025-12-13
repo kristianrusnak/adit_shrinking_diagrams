@@ -1,4 +1,5 @@
 import { apiSlice } from "./apiSlice";
+import type { ProcessPumlResponse, PumlPayload, ChatThread, ChatMessage, ThreadRenameRequest, ThreadCreateResponse } from "./types";
 
 const extendedApi = apiSlice.injectEndpoints({
   endpoints: (build) => ({
@@ -68,6 +69,97 @@ const extendedApi = apiSlice.injectEndpoints({
         body,
       }),
     }),
+    getChatThreads: build.query<ChatThread[], void>({
+      query: () => ({
+        url: "api/threads",
+        method: "GET",
+      }),
+      providesTags: ["ChatThreads"],
+    }),
+    getChatThread: build.query<ChatMessage[], string>({
+      query: (threadId) => ({
+        url: `api/threads/${threadId}`,
+        method: "GET",
+      }),
+      providesTags: (result, error, threadId) => [
+        { type: "ChatThread", id: threadId },
+      ],
+    }),
+    renameThread: build.mutation<ChatThread, ThreadRenameRequest>({
+      query: (data) => ({
+        url: "api/threads/rename",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["ChatThreads"],
+    }),
+    deleteThread: build.mutation<void, string>({
+      query: (threadId) => ({
+        url: `api/threads/delete/${threadId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["ChatThreads"],
+    }),
+    createThread: build.mutation<ChatThread, { title?: string }>({
+      query: (data) => {
+        const formData = new FormData();
+        if (data.title) {
+          formData.append("title", data.title);
+        }
+        return {
+          url: "api/threads/create",
+          method: "POST",
+          body: formData,
+        };
+      },
+      invalidatesTags: ["ChatThreads"],
+    }),
+    createThreadAndSendPrompt: build.mutation<
+      ThreadCreateResponse,
+      { file?: File; message?: string; title?: string }
+    >({
+      query: (data) => {
+        const formData = new FormData();
+        if (data.file) {
+          formData.append("file", data.file);
+        }
+        if (data.message) {
+          formData.append("message", data.message);
+        }
+        if (data.title) {
+          formData.append("title", data.title);
+        }
+        return {
+          url: "api/threads/createThreadAndSendPrompt",
+          method: "POST",
+          body: formData,
+        };
+      },
+      invalidatesTags: ["ChatThreads"],
+    }),
+    sendPromptToThread: build.mutation<
+      ChatMessage,
+      { threadId: string; file?: File; message?: string }
+    >({
+      query: (data) => {
+        const formData = new FormData();
+        if (data.file) {
+          formData.append("file", data.file);
+        }
+        if (data.message) {
+          formData.append("message", data.message);
+        }
+        formData.append("thread_id", data.threadId);
+        return {
+          url: "api/chat/sendPrompt",
+          method: "POST",
+          body: formData,
+        };
+      },
+      invalidatesTags: (result, error, { threadId }) => [
+        { type: "ChatThread", id: threadId },
+      ],
+    }),
   }),
   overrideExisting: false,
 });
@@ -77,4 +169,11 @@ export const {
   useSendMockMutation,
   useProcessPumlMutation,
   useGetAlgConfigQuery,
+  useGetChatThreadsQuery,
+  useGetChatThreadQuery,
+  useRenameThreadMutation,
+  useDeleteThreadMutation,
+  useCreateThreadMutation,
+  useCreateThreadAndSendPromptMutation,
+  useSendPromptToThreadMutation,
 } = extendedApi;

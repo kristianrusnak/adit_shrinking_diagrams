@@ -22,6 +22,7 @@ export default function AppRoutes() {
           <Route path="docs" element={<DocsPage />} />
           <Route path="diagrams" element={<DiagramPage />} />
           <Route path="app" element={<AppPage />} />
+          <Route path="app/chat/:threadId" element={<AppPage />} />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
           <Route element={<ProtectedRoute redirectTo="/app" />}>
