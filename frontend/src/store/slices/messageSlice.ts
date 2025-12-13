@@ -5,7 +5,7 @@ export interface ChatMessage {
   id: string;
   role: "user" | "agent";
   text: string;
-  file?: File | null; // optional file (not stored in localStorage)
+  file?: File | { name: string; content: string } | null; // optional file (not stored in localStorage)
   timestamp: number;
 }
 

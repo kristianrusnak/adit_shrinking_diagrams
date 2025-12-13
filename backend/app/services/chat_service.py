@@ -194,6 +194,16 @@ class ChatService:
                 file_id=file.id
             )
 
+            # Flush to persist file to database
+            self.db_session.flush()
+            
+            # Refresh the message to load the relationship with files
+            self.db_session.refresh(input_message)
+            
+            # Verify file is attached
+            if not input_message.files or len(input_message.files) == 0:
+                raise RuntimeError("File was not properly attached to message")
+
         # Send to AI and get response
         generated_message = self.sent_to_ai(
             user_id=user_id,
@@ -604,6 +614,16 @@ class ChatService:
                 thread_id=thread_id,
                 file_id=file.id
             )
+
+            # Flush to persist file to database
+            self.db_session.flush()
+            
+            # Refresh the message to load the relationship with files
+            self.db_session.refresh(input_message)
+            
+            # Verify file is attached
+            if not input_message.files or len(input_message.files) == 0:
+                raise RuntimeError("File was not properly attached to message")
 
         # Send to AI and get response
         generated_message = self.sent_to_ai(
