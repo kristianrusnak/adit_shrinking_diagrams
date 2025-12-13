@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { selectMessages } from "../../store/slices/messageSlice";
 import { Box, Typography, Paper, Stack } from "@mui/material";
+import ReactMarkdown from "react-markdown";
 
 const Chat = () => {
   const messages = useSelector((state: RootState) => selectMessages(state));
@@ -22,12 +23,10 @@ const Chat = () => {
       sx={{
         overflowY: "auto",
         p: 2,
-        // px: { xs: 0, sm: 0, md: 5, lg: 10, xl: 40 },
-        marginBottom: "50px",
-        marginTop: 12,
-        paddingTop: 0,
-      }}
-    >
+        width: "100%",
+        marginBottom: "2em",
+        marginTop: "2em",
+    }}>
       {sortedMessages.map((msg) => (
         <Box
           key={msg.id}
@@ -44,7 +43,7 @@ const Chat = () => {
               borderRadius: 2,
             }}
           >
-            <Typography variant="body1">{msg.text}</Typography>
+            <ReactMarkdown>{msg.text}</ReactMarkdown>
             {msg.file && (
               <Typography variant="caption" sx={{ display: "block", mt: 0.5 }}>
                 File attached: {msg.file.name}
