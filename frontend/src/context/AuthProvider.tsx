@@ -72,7 +72,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       throw new Error("Already logged in");
     }
 
-    const response = await loginMutation({ email, password }).unwrap();
+    const response = await loginMutation({
+      username: email,
+      password,
+    }).unwrap();
     setAccessToken(response.access_token);
     setRefreshToken(response.refresh_token);
 
