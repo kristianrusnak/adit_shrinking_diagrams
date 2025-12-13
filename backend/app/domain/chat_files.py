@@ -25,4 +25,5 @@ class ChatFileDomain:
         return cls(
             message_id=message_id,
             file_name=file_name,
-            file_content=file_content)
+            file_content=file_content
+        )

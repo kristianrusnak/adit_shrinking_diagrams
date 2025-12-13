@@ -20,6 +20,7 @@ from app.models.refresh_token import RefreshToken
 from app.schemas.user import UserListItem, UserRegister, UserResponse, UserLogin, TokenResponse, RefreshRequest
 from app.schemas.chat_thread import ChatThreadSchema, ThreadRenameRequest
 from app.schemas.chat_message import ChatMessageSchema
+from app.schemas.thread_create_response import ThreadCreateResponse
 
 from app.services.security_service import hash_password
 from app.services.jwt_service import create_access_token, create_refresh_token, hash_refresh_token, verify_access_token, verify_refresh_token
@@ -305,6 +306,111 @@ def delete_thread_controller(thread_id: str,
             commit=True
         )
         return {"detail": "Thread deleted successfully"}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/threads/create")
+def create_thread_controller(
+    title: str = Form(None),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    chat_service = ChatService(db)
+
+    try:
+        thread = chat_service.create_thread(
+            user_id=user.id,
+            title=title,
+            commit=True
+        )
+        return thread
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/threads/createThreadAndSendPrompt", response_model=ThreadCreateResponse)
+def create_thread_and_send_message_controller(
+    file: UploadFile = File(None),
+    message: str = Form(None),
+    title: str = Form(None),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    chat_service = ChatService(db)
+
+    file_content: str | None = None
+    file_name: str | None = None
+
+    if file is not None:
+        try:
+            content_bytes = file.file.read()
+            file_content = content_bytes.decode("utf-8")
+            file_name = file.filename
+        except Exception:
+            raise HTTPException(status_code=400, detail="Unable to read PUML file")
+
+    try:
+        new_thread, response = chat_service.create_new_thread_with_prompt(
+            title=title,
+            user_id=user.id,
+            prompt_message=message,
+            prompt_file=file_content,
+            prompt_file_name=file_name,
+        )
+        return ThreadCreateResponse(
+            thread=ChatThreadSchema.model_validate(new_thread),
+            response=ChatMessageSchema.model_validate(response),
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/chat/sendPrompt", response_model=ChatMessageSchema)
+def send_message_controller(
+    file: UploadFile = File(None),
+    message: str = Form(None),
+    thread_id: str = Form(None),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    chat_service = ChatService(db)
+
+    file_content: str | None = None
+    file_name: str | None = None
+
+    if file is not None:
+        try:
+            content_bytes = file.file.read()
+            file_content = content_bytes.decode("utf-8")
+            file_name = file.filename
+        except Exception:
+            raise HTTPException(status_code=400, detail="Unable to read PUML file")
+
+    try:
+        response = chat_service.prompt_message(
+            user_id=user.id,
+            thread_id=thread_id,
+            prompt_message=message,
+            prompt_file=file_content,
+            prompt_file_name=file_name,
+        )
+        return response
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except PermissionError as e:
