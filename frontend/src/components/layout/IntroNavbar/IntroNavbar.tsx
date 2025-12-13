@@ -8,8 +8,9 @@ import { useNavigate } from "react-router-dom";
 export default function IntroNavbar() {
   const navigate = useNavigate();
   const accessToken = useSelector(selectAccessToken);
-  const isAuthenticated = Boolean(accessToken);
-  const { logout } = useAuth();
+  const { userInfo, logout } = useAuth();
+  const isAuthenticated = Boolean(accessToken && userInfo);
+
   const items = [
     {
       label: "About",

@@ -17,7 +17,7 @@ export default function UserMenu() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
-  const isAuthenticated = Boolean(accessToken);
+  const isAuthenticated = Boolean(accessToken && userInfo);
 
   const email = isAuthenticated && userInfo?.email ? userInfo.email : "Unknown";
 
