@@ -5,17 +5,23 @@ import Chat from "../../components/ui/Chat";
 import styles from "./AppPage.module.css";
 import Sidebar from "../../components/ui/Sidebar";
 import { ErrorProvider } from "../../context/ErrorProvider";
+import { useAuth } from "../../context/AuthProvider";
 import SimpleFilePreview from "@/components/ui/SimpleFilePreview";
 
 export default function AppPage() {
+  const { userInfo } = useAuth();
+  const isAuthenticated = !!userInfo;
+
   return (
     <>
       <title>Shrinking Diagrams</title>
       <div className={styles.page}>
         <div className={styles.layout}>
-          <Box className={styles.sidebar}>
-            <Sidebar />
-          </Box>
+          {isAuthenticated && (
+            <Box className={styles.sidebar}>
+              <Sidebar />
+            </Box>
+          )}
           <Grid
             container
             spacing={1}

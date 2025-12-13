@@ -1,27 +1,41 @@
 import { FC, useCallback } from "react";
-import {Box, Button, List, ListItemButton, ListItemText, Tooltip, Typography} from "@mui/material";
+import { Box, Button, List, ListItemButton, ListItemText, Tooltip, Typography, CircularProgress} from "@mui/material";
 import AddOutlinedIcon from "@mui/icons-material/Add";
-
-interface Conversation {
-  id: number;
-  name: string;
-}
+import { useGetChatThreadsQuery } from "@/api/dbApi";
+import { useNavigate, useParams } from "react-router-dom";
+import type { ChatThread } from "@/api/types";
 
 const Sidebar: FC = () => {
-  // Will be replaced with real conversation, when implemented
-  const conversations: Conversation[] = [
-    { id: 1, name: "UML bankovy system" },
-    { id: 2, name: "Ako rychlo zarobit 1000 eur" },
-    { id: 3, name: "Kedy skonci hmla v Bratislave" },
-    { id: 4, name: "Domaca uloha collision detection" }
-  ];
+  const navigate = useNavigate();
+  const { threadId } = useParams<{ threadId?: string }>();
+  
+  const { data: threads, isLoading, error } = useGetChatThreadsQuery();
 
-  const handleConversationClick = useCallback((name: string) => {
-    console.log(name);
-  }, []);
+  const handleNewChat = useCallback(() => {
+    navigate("/app");
+  }, [navigate]);
+
+  const handleThreadClick = useCallback(
+    (threadIdentifier: string) => {
+      navigate(`/app/chat/${threadIdentifier}`);
+    },
+    [navigate]
+  );
 
   const truncate = (text: string, max: number) =>
     text.length > max ? text.slice(0, max - 3) + "..." : text;
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMs = now.getTime() - date.getTime();
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+    if (diffInDays === 0) return "Today";
+    if (diffInDays === 1) return "Yesterday";
+    if (diffInDays < 7) return `${diffInDays} days ago`;
+    return date.toLocaleDateString();
+  };
 
   return (
     <Box
@@ -37,7 +51,7 @@ const Sidebar: FC = () => {
         variant="text"
         color="inherit"
         startIcon={<AddOutlinedIcon />}
-        onClick={() => console.log("New chat")}
+        onClick={handleNewChat}
       >
         New Chat
       </Button>
@@ -46,19 +60,54 @@ const Sidebar: FC = () => {
         Your chats
       </Typography>
 
-      <List sx={{ padding: 0 }}>
-        {conversations.map((c) => (
-          <Tooltip key={c.id} title={c.name} placement="right" arrow>
+      {isLoading && (
+        <Box sx={{ display: "flex", justifyContent: "center", padding: "2rem" }}>
+          <CircularProgress size={24} />
+        </Box>
+      )}
+
+      {error && (
+        <Typography variant="body2" color="error" sx={{ padding: "1rem" }}>
+          Failed to load chats
+        </Typography>
+      )}
+
+      {threads && threads.length === 0 && (
+        <Typography variant="body2" sx={{ opacity: 0.6, padding: "1rem" }}>
+          No chats yet
+        </Typography>
+      )}
+
+      <List sx={{ padding: 0, overflow: "auto" }}>
+        {threads?.map((thread: ChatThread) => (
+          <Tooltip key={thread.id} title={thread.title} placement="right" arrow>
             <ListItemButton
-              onClick={() => handleConversationClick(c.name)}
+              onClick={() => handleThreadClick(thread.id)}
+              selected={threadId === thread.id}
               sx={{
                 borderRadius: "8px",
                 marginBottom: "4px",
+                "&.Mui-selected": {
+                  backgroundColor: "rgba(144, 202, 249, 0.16)",
+                  "&:hover": {
+                    backgroundColor: "rgba(144, 202, 249, 0.24)",
+                  },
+                },
               }}
             >
               <ListItemText
-                primary={truncate(c.name, 25)}
-
+                primary={truncate(thread.title, 25)}
+                secondary={
+                  thread.last_message_at
+                    ? formatDate(thread.last_message_at)
+                    : formatDate(thread.updated_at)
+                }
+                slotProps={{
+                  secondary: {
+                    variant: "caption",
+                    sx: { opacity: 0.6 },
+                  },
+                }}
               />
             </ListItemButton>
           </Tooltip>
