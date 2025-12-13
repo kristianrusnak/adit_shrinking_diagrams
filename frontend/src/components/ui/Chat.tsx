@@ -6,7 +6,9 @@ import { Box, Typography, Paper, Stack } from "@mui/material";
 
 const Chat = () => {
   const messages = useSelector((state: RootState) => selectMessages(state));
-  const sortedMessages = [...messages].sort((a, b) => a.timestamp - b.timestamp);
+  const sortedMessages = [...messages].sort(
+    (a, b) => a.timestamp - b.timestamp,
+  );
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
@@ -20,10 +22,12 @@ const Chat = () => {
       sx={{
         overflowY: "auto",
         p: 2,
-        px: { xs: 0, sm: 0, md: 5, lg: 10, xl: 40},
+        // px: { xs: 0, sm: 0, md: 5, lg: 10, xl: 40 },
         marginBottom: "50px",
-        marginTop: "50px",
-    }}>
+        marginTop: 12,
+        paddingTop: 0,
+      }}
+    >
       {sortedMessages.map((msg) => (
         <Box
           key={msg.id}
@@ -34,7 +38,8 @@ const Chat = () => {
             sx={{
               p: 1.5,
               maxWidth: "70%",
-              backgroundColor: msg.role === "user" ? "primary.light" : "grey.200",
+              backgroundColor:
+                msg.role === "user" ? "primary.light" : "grey.200",
               color: "black",
               borderRadius: 2,
             }}
