@@ -17,19 +17,19 @@
     "struct"
   ],
 
-  "weights": {
-    " --> ": 1,
-    " <-- ": 1,
-    " --|> ": 3,
-    " <|-- ": 3,
-    " ..> ": 3,
-    " <.. ": 3,
-    " o-- ": 2,
-    " --o ": 2,
-    " *-- ": 2,
-    " --* ": 2,
-    " -- ": 1,
-    " .. ": 1
+  "relations": {
+    " --> ": "dependency-right",
+    " <-- ": "dependency-left",
+    " --|> ": "extension-right",
+    " <|-- ": "extension-left",
+    " ..> ": "implementation-right",
+    " <.. ": "implementation-left",
+    " --o ": "aggregation-right",
+    " o-- ": "aggregation-left",
+    " --* ": "composition-right",
+    " *-- ": "composition-left",
+    " -- ": "association",
+    " .. ": "association"
   }
 
 }

@@ -7,7 +7,9 @@ import ReactMarkdown from "react-markdown";
 
 const Chat = () => {
   const messages = useSelector((state: RootState) => selectMessages(state));
-  const sortedMessages = [...messages].sort((a, b) => a.timestamp - b.timestamp);
+  const sortedMessages = [...messages].sort(
+    (a, b) => a.timestamp - b.timestamp,
+  );
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
@@ -35,7 +37,8 @@ const Chat = () => {
             sx={{
               p: 1.5,
               maxWidth: "70%",
-              backgroundColor: msg.role === "user" ? "primary.light" : "grey.200",
+              backgroundColor:
+                msg.role === "user" ? "primary.light" : "grey.200",
               color: "black",
               borderRadius: 2,
             }}

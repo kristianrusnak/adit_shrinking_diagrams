@@ -5,7 +5,7 @@ from typing import Union
 
 from datetime import datetime
 from app.util import logger
-from fastapi import FastAPI, UploadFile, Form, HTTPException, Request, Depends, status
+from fastapi import FastAPI, UploadFile, Form, File, HTTPException, Request, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
 from app.services.openai_service import OpenAIService
@@ -18,9 +18,13 @@ from app.db import get_db
 from app.models.user import User
 from app.models.refresh_token import RefreshToken
 from app.schemas.user import UserListItem, UserRegister, UserResponse, UserLogin, TokenResponse, RefreshRequest
+from app.schemas.chat_thread import ChatThreadSchema, ThreadRenameRequest
+from app.schemas.chat_message import ChatMessageSchema
+from app.schemas.thread_create_response import ThreadCreateResponse
 
 from app.services.security_service import hash_password
 from app.services.jwt_service import create_access_token, create_refresh_token, hash_refresh_token, verify_access_token, verify_refresh_token
+from app.services.chat_service import ChatService
 
 app = FastAPI()
 logger.log("Starting FastAPI", level="info")
@@ -71,7 +75,6 @@ def mock_controller(file: UploadFile):
         raise HTTPException(status_code=400, detail="Unable to read PUML file")
     return {"response": content}
 
-
 @app.post("/api/sendMessage")
 def message_controller(file: UploadFile, history: str = Form(None)):
 
@@ -110,11 +113,22 @@ def message_controller(file: UploadFile, history: str = Form(None)):
 
 
 @app.post("/api/processPUML")
-def process_puml(file: UploadFile):
+def process_puml(file: UploadFile = File(...), algorithm: str = Form(...), settings: str = Form(...)):
     logger.log("/api/processPUML", level="info")
     parser = PUMLParser("app/services/parser_config.json")
     source_path = None
     output_path = None
+
+
+
+    try:
+        algorithm_settings = json.loads(settings)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Unable to parse settings")
+
+    print(algorithm)
+    print(algorithm_settings)
+
     try:
         content = file.file.read()
         with tempfile.NamedTemporaryFile(delete=False, suffix=".puml") as tmp:
@@ -127,8 +141,18 @@ def process_puml(file: UploadFile):
         if not parsed:
             raise HTTPException(status_code=500, detail="Unable to parse PUML file")
 
-        algorithm = get_algorithm()
-        reduced = algorithm.compute(parsed)
+        # TODO: unify frontend/backend names too tired
+        if algorithm == "evol":
+            alg = get_algorithm("genetic")
+            alg.initialize(
+                population_size=algorithm_settings.get("population", 50),
+                generations=algorithm_settings.get("iterations", 100),
+            )
+        elif algorithm == "kruskals":
+            alg = get_algorithm("kruskal")
+            # TODO: add settigns
+
+        reduced = alg.compute(parsed)
         logger.log(f"Reduced PUML: {reduced}", level="debug")
 
         with tempfile.NamedTemporaryFile(
@@ -170,8 +194,7 @@ def register_user(user_data: UserRegister, db: Session = Depends(get_db)):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email is already registered",
         )
-    user = User(email=user_data.email,
-                password_hash=hash_password(user_data.password)) # pyright: ignore
+    user = User(email=user_data.email, password_hash=hash_password(user_data.password)) # pyright: ignore
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -217,6 +240,185 @@ def get_current_user(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
+
+@app.get("/api/threads", response_model=list[ChatThreadSchema])
+def threads_controller(user: User = Depends(get_current_user),
+                       db: Session = Depends(get_db)):
+    chat_service = ChatService(db)
+
+    try:
+        return chat_service.retrieve_threads(
+            user_id=user.id,
+            order="DESC"
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@app.get("/api/threads/{thread_id}", response_model=list[ChatMessageSchema])
+def thread_chat_controller(thread_id: str,
+                           user: User = Depends(get_current_user),
+                           db: Session = Depends(get_db)):
+    chat_service = ChatService(db)
+
+    try:
+        return chat_service.retrieve_messages(
+            user_id=user.id,
+            thread_id=thread_id,
+            order="ASC"
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/threads/rename", response_model=ChatThreadSchema)
+def rename_thread_controller(data: ThreadRenameRequest,
+                             user: User = Depends(get_current_user),
+                             db: Session = Depends(get_db)):
+    chat_service = ChatService(db)
+
+    try:
+        return chat_service.rename_thread(
+            user_id=user.id,
+            thread_id=data.thread_id,
+            title=data.new_title,
+            commit=True
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/threads/delete/{thread_id}")
+def delete_thread_controller(thread_id: str,
+                             user: User = Depends(get_current_user),
+                             db: Session = Depends(get_db)):
+    chat_service = ChatService(db)
+
+    try:
+        chat_service.delete_thread(
+            user_id=user.id,
+            thread_id=thread_id,
+            commit=True
+        )
+        return {"detail": "Thread deleted successfully"}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/threads/create")
+def create_thread_controller(
+    title: str = Form(None),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    chat_service = ChatService(db)
+
+    try:
+        thread = chat_service.create_thread(
+            user_id=user.id,
+            title=title,
+            commit=True
+        )
+        return thread
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/threads/createThreadAndSendPrompt", response_model=ThreadCreateResponse)
+def create_thread_and_send_message_controller(
+    file: UploadFile = File(None),
+    message: str = Form(None),
+    title: str = Form(None),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    chat_service = ChatService(db)
+
+    file_content: str | None = None
+    file_name: str | None = None
+
+    if file is not None:
+        try:
+            content_bytes = file.file.read()
+            file_content = content_bytes.decode("utf-8")
+            file_name = file.filename
+        except Exception:
+            raise HTTPException(status_code=400, detail="Unable to read PUML file")
+
+    try:
+        new_thread, response = chat_service.create_new_thread_with_prompt(
+            title=title,
+            user_id=user.id,
+            prompt_message=message,
+            prompt_file=file_content,
+            prompt_file_name=file_name,
+        )
+        return ThreadCreateResponse(
+            thread=ChatThreadSchema.model_validate(new_thread),
+            response=ChatMessageSchema.model_validate(response),
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/chat/sendPrompt", response_model=ChatMessageSchema)
+def send_message_controller(
+    file: UploadFile = File(None),
+    message: str = Form(None),
+    thread_id: str = Form(None),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    chat_service = ChatService(db)
+
+    file_content: str | None = None
+    file_name: str | None = None
+
+    if file is not None:
+        try:
+            content_bytes = file.file.read()
+            file_content = content_bytes.decode("utf-8")
+            file_name = file.filename
+        except Exception:
+            raise HTTPException(status_code=400, detail="Unable to read PUML file")
+
+    try:
+        response = chat_service.prompt_message(
+            user_id=user.id,
+            thread_id=thread_id,
+            prompt_message=message,
+            prompt_file=file_content,
+            prompt_file_name=file_name,
+        )
+        return response
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/auth/me")
 def get_me(user: User = Depends(get_current_user)):

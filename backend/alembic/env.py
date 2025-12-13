@@ -6,7 +6,7 @@ from sqlalchemy import pool
 from alembic import context
 
 from app.db import Base
-from app.models import user, refresh_token
+from app.models import user, refresh_token, chat_threads, chat_messages, chat_files
 
 
 # this is the Alembic Config object, which provides
