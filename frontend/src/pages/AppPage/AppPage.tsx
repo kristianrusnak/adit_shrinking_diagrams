@@ -6,6 +6,7 @@ import styles from "./AppPage.module.css";
 import Sidebar from "../../components/ui/Sidebar";
 import { ErrorProvider } from "../../context/ErrorProvider";
 import { useAuth } from "../../context/AuthProvider";
+import { useAuth } from "../../context/AuthProvider";
 import SimpleFilePreview from "@/components/ui/SimpleFilePreview";
 import UserChat from "@/components/ui/UserChat";
 

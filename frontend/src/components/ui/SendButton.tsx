@@ -11,9 +11,14 @@ import { useError } from "../../context/useError.jsx";
 import {store} from "@/store/store";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthProvider";
+import { useParams, useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthProvider";
 
 const SendButton = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { threadId } = useParams<{ threadId?: string }>();
+  const { userInfo } = useAuth();
   const navigate = useNavigate();
   const { threadId } = useParams<{ threadId?: string }>();
   const { userInfo } = useAuth();
@@ -25,6 +30,8 @@ const SendButton = () => {
   // const selectedMessages = useSelector(selectMessages);
 
   const [sendMessage, { data, error, isLoading }] = useSendMessageMutation(); // backend API call
+  const [createThreadAndSendPrompt] = useCreateThreadAndSendPromptMutation();
+  const [sendPromptToThread] = useSendPromptToThreadMutation();
   const [createThreadAndSendPrompt] = useCreateThreadAndSendPromptMutation();
   const [sendPromptToThread] = useSendPromptToThreadMutation();
   const [localLoading, setLocalLoading] = useState(false);
