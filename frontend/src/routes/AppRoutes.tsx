@@ -27,11 +27,7 @@ export default function AppRoutes() {
           <Route element={<ProtectedRoute redirectTo="/app" />}>
             <Route
               path="chat/:id"
-              element={
-                <AppPage>
-                  <UserChat />
-                </AppPage>
-              }
+              element={<AppPage isUserLoggedIn={true} />}
             />
           </Route>
         </Route>

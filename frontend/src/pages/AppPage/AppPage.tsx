@@ -6,12 +6,13 @@ import styles from "./AppPage.module.css";
 import Sidebar from "../../components/ui/Sidebar";
 import { ErrorProvider } from "../../context/ErrorProvider";
 import SimpleFilePreview from "@/components/ui/SimpleFilePreview";
+import UserChat from "@/components/ui/UserChat";
 
 interface AppPageProps {
-  children?: React.ReactNode;
+  isUserLoggedIn?: boolean;
 }
 
-export default function AppPage({ children = <Chat /> }: AppPageProps) {
+export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
   return (
     <>
       <title>Shrinking Diagrams</title>
@@ -34,8 +35,8 @@ export default function AppPage({ children = <Chat /> }: AppPageProps) {
               }}
             >
               <Box className={styles.content}>
-                {children}
-                <MessageInput />
+                {isUserLoggedIn ? <UserChat /> : <Chat />}
+                <MessageInput isUserLoggedIn={isUserLoggedIn} />
               </Box>
             </Grid>
             <Grid

@@ -9,6 +9,8 @@ import { useError } from "../../context/useError.jsx";
 import { useDispatch } from "react-redux";
 import { setFile, setFileReduced } from "@/store/slices/fileSlice";
 
+import { skipToken } from "@reduxjs/toolkit/query";
+
 const UserChat = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -22,7 +24,7 @@ const UserChat = () => {
     data: threadMessages,
     error,
     isLoading,
-  } = useGetThreadByIdQuery(id ?? "");
+  } = useGetThreadByIdQuery(id ?? skipToken);
 
   if (error) {
     if ("status" in error) {

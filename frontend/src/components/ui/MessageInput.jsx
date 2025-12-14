@@ -6,8 +6,9 @@ import FileUploadButton from "../../components/ui/FileUploadButton";
 import { ButtonType } from "../../components/ui/FileUploadButton";
 import SendButton from "../../components/ui/SendButton";
 import ShrinkButton from "../../components/ui/ShrinkButton.js";
+import UserSendButton from "../../components/ui/UserSendButton";
 
-const MessageInput = () => {
+const MessageInput = ({ isUserLoggedIn = false }) => {
   const dispatch = useDispatch();
   const message = useSelector(selectMessage);
 
@@ -65,7 +66,7 @@ const MessageInput = () => {
             endAdornment: (
               <>
                 <InputAdornment position="end">
-                  <SendButton />
+                  {isUserLoggedIn ? <UserSendButton /> : <SendButton />}
                 </InputAdornment>
               </>
             ),
