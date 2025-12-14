@@ -5,22 +5,27 @@ import Chat from "../../components/ui/Chat";
 import styles from "./AppPage.module.css";
 import Sidebar from "../../components/ui/Sidebar";
 import { ErrorProvider } from "../../context/ErrorProvider";
+import { useAuth } from "../../context/AuthProvider";
 import SimpleFilePreview from "@/components/ui/SimpleFilePreview";
-import UserChat from "@/components/ui/UserChat";
 
 interface AppPageProps {
   isUserLoggedIn?: boolean;
 }
 
 export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
+  const { userInfo } = useAuth();
+  const isLoggedIn = isUserLoggedIn || !!userInfo;
+
   return (
     <>
       <title>Shrinking Diagrams</title>
       <div className={styles.page}>
         <div className={styles.layout}>
-          <Box className={styles.sidebar}>
-            <Sidebar />
-          </Box>
+          {isLoggedIn && (
+            <Box className={styles.sidebar}>
+              <Sidebar />
+            </Box>
+          )}
           <Grid
             container
             spacing={1}
@@ -35,8 +40,8 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
               }}
             >
               <Box className={styles.content}>
-                {isUserLoggedIn ? <UserChat /> : <Chat />}
-                <MessageInput isUserLoggedIn={isUserLoggedIn} />
+                <Chat />
+                <MessageInput/>
               </Box>
             </Grid>
             <Grid

@@ -6,6 +6,6 @@ import baseQueryWithReauth from "./authBaseQuery";
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["Thread"], // this can be used for caching later
+  tagTypes: ["Thread", "ChatThreads", "ChatThread"], // this can be used for caching later
   endpoints: (builder) => ({}),
 });

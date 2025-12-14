@@ -1,11 +1,46 @@
 import React, { useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../store/store";
-import { selectMessages } from "../../store/slices/messageSlice";
-import { Box, Typography, Paper, Stack } from "@mui/material";
+import { selectMessages, setMessages, clearMessages } from "../../store/slices/messageSlice";
+import { Box, Typography, Paper, Stack, CircularProgress } from "@mui/material";
+import { useParams } from "react-router-dom";
+import { useGetChatThreadQuery } from "@/api/api";
+import { skipToken } from "@reduxjs/toolkit/query";
 
 const Chat = () => {
+  const dispatch = useDispatch();
+  const { threadId } = useParams<{ threadId?: string }>();
   const messages = useSelector((state: RootState) => selectMessages(state));
+  
+  // Load messages from backend if we're in a thread
+  const { data: threadMessages, isLoading, isFetching } = useGetChatThreadQuery(
+    threadId ?? skipToken
+  );
+
+  // When thread messages are loaded, update Redux
+  useEffect(() => {
+    if (threadMessages && threadId) {
+      const formattedMessages = threadMessages.map((msg) => ({
+        id: String(msg.id),
+        role: msg.role === "user" ? "user" : "agent",
+        text: msg.content,
+        file: msg.files && msg.files.length > 0 
+          ? { name: msg.files[0].file_name, content: msg.files[0].file_content } 
+          : null,
+        timestamp: new Date(msg.created_at).getTime(),
+      }));
+      dispatch(setMessages(formattedMessages as any));
+    }
+  }, [threadMessages, threadId, dispatch]);
+
+  // Clear messages when leaving a thread
+  useEffect(() => {
+    if (!threadId) {
+      // Only clear if we're not in a thread anymore
+      // This allows local messages to persist when not in thread mode
+    }
+  }, [threadId]);
+
   const sortedMessages = [...messages].sort(
     (a, b) => a.timestamp - b.timestamp,
   );
@@ -15,6 +50,26 @@ const Chat = () => {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [sortedMessages]);
+
+  if (isLoading || isFetching) {
+    return (
+      <Stack
+        spacing={2}
+        sx={{
+          overflowY: "auto",
+          p: 2,
+          marginBottom: "50px",
+          marginTop: 12,
+          paddingTop: 0,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <CircularProgress />
+      </Stack>
+    );
+  }
 
   return (
     <Stack
