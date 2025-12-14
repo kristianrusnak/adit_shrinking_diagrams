@@ -1,4 +1,5 @@
 import { apiSlice } from "./apiSlice";
+import type { ChatMessage } from "./types";
 
 const extendedApi = apiSlice.injectEndpoints({
   endpoints: (build) => ({

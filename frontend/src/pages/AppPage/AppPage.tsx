@@ -7,7 +7,6 @@ import Sidebar from "../../components/ui/Sidebar";
 import { ErrorProvider } from "../../context/ErrorProvider";
 import { useAuth } from "../../context/AuthProvider";
 import SimpleFilePreview from "@/components/ui/SimpleFilePreview";
-import UserChat from "@/components/ui/UserChat";
 
 interface AppPageProps {
   isUserLoggedIn?: boolean;
@@ -41,8 +40,8 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
               }}
             >
               <Box className={styles.content}>
-                {isLoggedIn ? <UserChat /> : <Chat />}
-                <MessageInput isUserLoggedIn={isLoggedIn} />
+                <Chat />
+                <MessageInput/>
               </Box>
             </Grid>
             <Grid

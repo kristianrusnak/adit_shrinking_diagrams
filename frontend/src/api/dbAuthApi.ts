@@ -1,4 +1,5 @@
 import { apiSlice } from "./apiSlice";
+import type { UserInfo } from "./types";
 
 const extendedApi = apiSlice.injectEndpoints({
   endpoints: (build) => ({
