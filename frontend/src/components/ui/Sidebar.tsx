@@ -8,9 +8,13 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useGetChatThreadsQuery, useRenameThreadMutation, useDeleteThreadMutation } from "@/api/api";
 import { useNavigate, useParams } from "react-router-dom";
 import type { ChatThread } from "@/api/types";
+import { useDispatch } from "react-redux";
+import { clearMessages } from "@/store/slices/messageSlice";
+import { setFile, setFileReduced, setMessage } from "@/store/slices/fileSlice";
 
 const Sidebar: FC = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { threadId } = useParams<{ threadId?: string }>();
   
   const { data: threads, isLoading, error } = useGetChatThreadsQuery();
@@ -21,8 +25,12 @@ const Sidebar: FC = () => {
   const [editingTitle, setEditingTitle] = useState<string>("");
 
   const handleNewChat = useCallback(() => {
+    dispatch(clearMessages());
+    dispatch(setFile(null));
+    dispatch(setFileReduced(null));
+    dispatch(setMessage(""));
     navigate("/app");
-  }, [navigate]);
+  }, [navigate, dispatch]);
 
   const handleThreadClick = useCallback(
     (threadIdentifier: string) => {
