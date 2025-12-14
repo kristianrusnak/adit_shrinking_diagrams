@@ -160,6 +160,16 @@ const extendedApi = apiSlice.injectEndpoints({
         { type: "ChatThread", id: threadId },
       ],
     }),
+    changePassword: build.mutation<
+      { detail: string },
+      { current_password: string; new_password: string }
+    >({
+      query: (body) => ({
+        url: "/auth/change-password",
+        method: "POST",
+        body,
+      }),
+    }),
   }),
   overrideExisting: false,
 });
@@ -176,4 +186,5 @@ export const {
   useCreateThreadMutation,
   useCreateThreadAndSendPromptMutation,
   useSendPromptToThreadMutation,
+  useChangePasswordMutation,
 } = extendedApi;
