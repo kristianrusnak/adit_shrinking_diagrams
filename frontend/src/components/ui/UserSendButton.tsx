@@ -60,7 +60,7 @@ const UserSendButton = () => {
         file: selectedFileReduced,
       }).unwrap();
 
-      console.log(response);
+      // console.log(response);
 
       // 3) Create agent message and save in Redux
       dispatch(
@@ -74,7 +74,7 @@ const UserSendButton = () => {
       // clear MessageInput after sending
       dispatch(setMessage(""));
     } catch (error: any) {
-      console.log(error);
+      // console.log(error);
       showError(
         error.data?.detail || error.error || "Unknown error",
         "Send error",

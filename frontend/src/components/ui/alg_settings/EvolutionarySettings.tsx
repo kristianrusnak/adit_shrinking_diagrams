@@ -12,7 +12,6 @@ export const EvolutionarySettings = ({
   maxIterations = 100,
   maxPopulation = 100,
 }: EvolutionarySettingsProps) => {
-  console.log("EvolutionarySettings", maxIterations, maxPopulation);
   const [iterations, setIterations] = useState(maxIterations);
   const [population, setPopulation] = useState(maxPopulation);
   const dispatch = useDispatch();
@@ -26,7 +25,6 @@ export const EvolutionarySettings = ({
   // debounce commiting to the global state store
   const onChangeIterations = (e: any, value: number) => {
     setIterations(value);
-    console.log("changed itrations", value);
     dispatch(
       setAlgorithmSettings({
         algorithmId: "evol",
@@ -37,7 +35,6 @@ export const EvolutionarySettings = ({
 
   const onChangePopulation = (e: any, value: number) => {
     setPopulation(value);
-    console.log("changed population", value);
     dispatch(
       setAlgorithmSettings({
         algorithmId: "evol",

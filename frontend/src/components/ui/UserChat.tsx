@@ -28,14 +28,13 @@ const UserChat = () => {
 
   if (error) {
     if ("status" in error) {
-      console.log("got here");
       switch (error.status) {
         case 401:
           navigate("/login");
           break;
         case 403:
         case 404:
-          console.log("no chat found");
+          // console.log("no chat found");
           navigate("/app");
       }
     } else {
@@ -55,7 +54,7 @@ const UserChat = () => {
     if (threadMessages[last].role === "assistant") last -= 1;
 
     if (threadMessages[last].files.length > 0) {
-      console.log(threadMessages[last]);
+      // console.log(threadMessages[last]);
       const filetmp = threadMessages[last].files[0];
       const file = new File([filetmp.file_content], filetmp.file_name);
       // placeholder until it is clear what we want to show
@@ -72,8 +71,6 @@ const UserChat = () => {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [threadMessages]);
-
-  console.log(threadMessages);
 
   return (
     <Stack
