@@ -4,7 +4,7 @@ import { RootState } from "../../store/store";
 import { selectMessages, setMessages, clearMessages } from "../../store/slices/messageSlice";
 import { Box, Typography, Paper, Stack, CircularProgress } from "@mui/material";
 import { useParams } from "react-router-dom";
-import { useGetChatThreadQuery } from "@/api/dbApi";
+import { useGetChatThreadQuery } from "@/api/api";
 import { skipToken } from "@reduxjs/toolkit/query";
 
 const Chat = () => {

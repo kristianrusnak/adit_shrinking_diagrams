@@ -5,7 +5,7 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
-import { useGetChatThreadsQuery, useRenameThreadMutation, useDeleteThreadMutation } from "@/api/dbApi";
+import { useGetChatThreadsQuery, useRenameThreadMutation, useDeleteThreadMutation } from "@/api/api";
 import { useNavigate, useParams } from "react-router-dom";
 import type { ChatThread } from "@/api/types";
 
