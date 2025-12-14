@@ -28,6 +28,7 @@ const UserSendButton = () => {
   // const selectedMessages = useSelector(selectMessages);
   //
 
+  // console.log(selectedFileReduced);
   const [sendMessage, { data, error, isLoading }] = useSendPromptMutation(); // backend API call
   const [localLoading, setLocalLoading] = useState(false);
 
@@ -61,6 +62,8 @@ const UserSendButton = () => {
       }).unwrap();
 
       // console.log(response);
+
+      //
 
       // 3) Create agent message and save in Redux
       dispatch(

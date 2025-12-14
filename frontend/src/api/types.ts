@@ -19,7 +19,7 @@ type PumlPayload = {
 
 type ChatMessage = {
   id: number;
-  thread_id: number;
+  thread_id: string;
   role: "user" | "assistant";
   content: string;
   created_at: string;
