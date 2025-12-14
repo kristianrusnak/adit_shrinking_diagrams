@@ -46,10 +46,17 @@ const UserChat = () => {
   }
 
   if (threadMessages && threadMessages.length > 0) {
-    if (threadMessages[0].files.length > 0) {
-      console.log(threadMessages[0]);
-      const filetmp =
-        threadMessages[0].files[threadMessages[0].files.length - 1];
+    let last = threadMessages.length - 1;
+
+    // this should be always true but IF for whatever reason there is exactly 1 message and it is
+    // from the user then last would become -1 and thats BAD
+    // the thread is a back and forth between user and assistant
+    // assistant never has any files attached so we get the most recent file from the user
+    if (threadMessages[last].role === "assistant") last -= 1;
+
+    if (threadMessages[last].files.length > 0) {
+      console.log(threadMessages[last]);
+      const filetmp = threadMessages[last].files[0];
       const file = new File([filetmp.file_content], filetmp.file_name);
       // placeholder until it is clear what we want to show
       // this sets the file to the one that was initially sent to the backend
