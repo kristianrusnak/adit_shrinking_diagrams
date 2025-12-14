@@ -1,6 +1,6 @@
 import os
 import json
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict
 from app.services.shrinking_algorithms.base import ShrinkingAlgorithm
 
 class KruskalsAlgorithm(ShrinkingAlgorithm):
@@ -134,7 +134,7 @@ class KruskalsAlgorithm(ShrinkingAlgorithm):
 
     def extract_solution(self, sol):
         edges = []
-        
+
         edge_lookup = {}
         for edge in self.PUML["edges"]:
             source = edge["source"]

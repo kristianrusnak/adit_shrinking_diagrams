@@ -8,3 +8,6 @@ python-dotenv
 SQLAlchemy
 alembic
 python-jose[cryptography]
+httpx
+numpy
+-e ./embedding
