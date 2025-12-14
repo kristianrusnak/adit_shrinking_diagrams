@@ -6,8 +6,13 @@ import styles from "./AppPage.module.css";
 import Sidebar from "../../components/ui/Sidebar";
 import { ErrorProvider } from "../../context/ErrorProvider";
 import SimpleFilePreview from "@/components/ui/SimpleFilePreview";
+import UserChat from "@/components/ui/UserChat";
 
-export default function AppPage() {
+interface AppPageProps {
+  isUserLoggedIn?: boolean;
+}
+
+export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
   return (
     <>
       <title>Shrinking Diagrams</title>
@@ -30,8 +35,8 @@ export default function AppPage() {
               }}
             >
               <Box className={styles.content}>
-                <Chat />
-                <MessageInput />
+                {isUserLoggedIn ? <UserChat /> : <Chat />}
+                <MessageInput isUserLoggedIn={isUserLoggedIn} />
               </Box>
             </Grid>
             <Grid

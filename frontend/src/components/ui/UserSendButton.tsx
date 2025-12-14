@@ -10,11 +10,13 @@ import messageSlice, {
   ChatMessage,
   selectMessages,
 } from "../../store/slices/messageSlice";
-import { useSendMessageMutation, useSendMockMutation } from "../../api/api"; // or your real send function
 import { useError } from "../../context/useError.jsx";
 import { store } from "@/store/store";
+import { useSendPromptMutation } from "@/api/dbChatApi";
+import { useParams } from "react-router-dom";
 
-const SendButton = () => {
+const UserSendButton = () => {
+  const { id } = useParams();
   const dispatch = useDispatch();
   const { showError } = useError() as {
     showError: (msg: string, title?: string) => void;
@@ -24,8 +26,10 @@ const SendButton = () => {
   const selectedFileReduced = useSelector(selectFileReduced);
   const selectedMessage = useSelector(selectMessage);
   // const selectedMessages = useSelector(selectMessages);
+  //
 
-  const [sendMessage, { data, error, isLoading }] = useSendMessageMutation(); // backend API call
+  // console.log(selectedFileReduced);
+  const [sendMessage, { data, error, isLoading }] = useSendPromptMutation(); // backend API call
   const [localLoading, setLocalLoading] = useState(false);
 
   const handleClick = async () => {
@@ -46,31 +50,34 @@ const SendButton = () => {
         }),
       );
 
-      // clear MessageInput after sending
-      dispatch(setMessage(""));
-
       // 2) Send message and file to backend
-      const selectedMessages = store.getState().messageStore.messages;
-      console.log("selectedMessages:", selectedMessages);
+
       const PROMPT_DEFAULT = "Describe provided diagram in a few words.";
       const message = selectedMessage == "" ? PROMPT_DEFAULT : selectedMessage;
+
       const response = await sendMessage({
+        message: message,
+        thread_id: id ?? "",
         file: selectedFileReduced,
-        history:
-          selectedMessages.length === 0
-            ? ["Describe provided diagram in a few words."]
-            : selectedMessages,
       }).unwrap();
+
+      // console.log(response);
+
+      //
 
       // 3) Create agent message and save in Redux
       dispatch(
         addMessage({
           role: "assistant",
-          text: response || "",
+          text: response.content || "",
           file: null,
         }),
       );
+
+      // clear MessageInput after sending
+      dispatch(setMessage(""));
     } catch (error: any) {
+      // console.log(error);
       showError(
         error.data?.detail || error.error || "Unknown error",
         "Send error",
@@ -100,4 +107,4 @@ const SendButton = () => {
   );
 };
 
-export default SendButton;
+export default UserSendButton;
