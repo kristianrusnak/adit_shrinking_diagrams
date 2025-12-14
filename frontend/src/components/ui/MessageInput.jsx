@@ -7,7 +7,7 @@ import { ButtonType } from "../../components/ui/FileUploadButton";
 import SendButton from "../../components/ui/SendButton";
 import ShrinkButton from "../../components/ui/ShrinkButton.js";
 
-const MessageInput = () => {
+const MessageInput = ({ isUserLoggedIn = false }) => {
   const dispatch = useDispatch();
   const message = useSelector(selectMessage);
 
@@ -44,20 +44,19 @@ const MessageInput = () => {
           "& .MuiOutlinedInput-root": {
             borderRadius: "16px",
             backgroundColor: "background.paper", // <-- inherit page background
-            color: "inherit", // <-- inherit text color
+            color: "text.primary", // <-- adapt to theme
           },
           "& .MuiOutlinedInput-input::placeholder": {
-            color: "black",
-            opacity: 0.5,
+            color: "text.secondary",
+            opacity: 0.7,
           },
-          color: "black",
         }}
         slotProps={{
           input: {
             startAdornment: (
               <>
                 <InputAdornment position="start">
-                  <FileUploadButton />
+                  <FileUploadButton type={ButtonType.ICON} />
                 </InputAdornment>
                 <ShrinkButton position="start" />
               </>

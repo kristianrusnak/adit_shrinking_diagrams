@@ -5,7 +5,7 @@ import { useError } from "../../context/useError.jsx";
 import { useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setFile, setFileReduced } from "../../store/slices/fileSlice";
-import { useProcessPumlMutation } from "../../api/dbApi";
+import { useProcessPumlMutation } from "../../api/api.js";
 import { logger } from "../../utils/logger";
 import {
   selectSelectedAlgorithm,

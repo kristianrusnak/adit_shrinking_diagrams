@@ -1,5 +1,5 @@
 import { Box, Slider, Stack, Typography } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setAlgorithmSettings } from "@/store/slices/algorithmSlice";
 
@@ -16,10 +16,15 @@ export const EvolutionarySettings = ({
   const [population, setPopulation] = useState(maxPopulation);
   const dispatch = useDispatch();
 
+  // reflect config change in the UI
+  useEffect(() => {
+    setIterations(maxIterations);
+    setPopulation(maxPopulation);
+  }, [maxIterations, maxPopulation]);
+
   // debounce commiting to the global state store
   const onChangeIterations = (e: any, value: number) => {
     setIterations(value);
-    console.log("changed itrations", value);
     dispatch(
       setAlgorithmSettings({
         algorithmId: "evol",
@@ -30,7 +35,6 @@ export const EvolutionarySettings = ({
 
   const onChangePopulation = (e: any, value: number) => {
     setPopulation(value);
-    console.log("changed population", value);
     dispatch(
       setAlgorithmSettings({
         algorithmId: "evol",
