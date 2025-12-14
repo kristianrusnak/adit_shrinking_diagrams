@@ -6,10 +6,17 @@ import FileUploadButton from "../../components/ui/FileUploadButton";
 import { ButtonType } from "../../components/ui/FileUploadButton";
 import SendButton from "../../components/ui/SendButton";
 import ShrinkButton from "../../components/ui/ShrinkButton.js";
+import { useAuth } from "../../context/AuthProvider";
+import { useParams } from "react-router-dom";
 
 const MessageInput = ({ isUserLoggedIn = false }) => {
   const dispatch = useDispatch();
   const message = useSelector(selectMessage);
+  const { userInfo } = useAuth();
+  const { threadId } = useParams();
+  
+  const isLoggedIn = isUserLoggedIn || !!userInfo;
+  const placeholder = isLoggedIn && !threadId ? "Start a new chat..." : "Ask anything";
 
   const handleChange = (event) => {
     dispatch(setMessage(event.target.value));
@@ -37,7 +44,7 @@ const MessageInput = ({ isUserLoggedIn = false }) => {
         multiline={true}
         maxRows={5}
         fullWidth={true}
-        placeholder={"Ask anything"}
+        placeholder={placeholder}
         value={message}
         onChange={handleChange}
         sx={{
