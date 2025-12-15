@@ -1,15 +1,14 @@
-import { Box, Grid, Stack, IconButton, useMediaQuery, useTheme } from "@mui/material";
+import { Box, IconButton, useMediaQuery, useTheme, Drawer } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import FilePreview from "../../components/ui/FilePreview";
 import MessageInput from "../../components/ui/MessageInput";
 import Chat from "../../components/ui/Chat";
 import styles from "./AppPage.module.css";
 import Sidebar from "../../components/ui/Sidebar";
-import { ErrorProvider } from "../../context/ErrorProvider";
 import ShrinkButton from "@/components/ui/ShrinkButton";
 import { useAuth } from "../../context/AuthProvider";
 import SimpleFilePreview from "@/components/ui/SimpleFilePreview";
 import { useState, useEffect } from "react";
+import { NAVBAR_HEIGHT } from "@/utils/layoutStyles";
 
 interface AppPageProps {
   isUserLoggedIn?: boolean;
@@ -33,89 +32,162 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
     setIsSidebarOpen(prev => !prev);
   };
 
+  const handleThreadSelect = () => {
+    // Na mobile zavrieme sidebar po výbere konverzácie
+    if (isMobile) {
+      setIsSidebarOpen(false);
+    }
+  };
+
   return (
     <>
       <title>Shrinking Diagrams</title>
-      <div className={styles.page}>
-        <div className={styles.layout}>
-          {/* Floating toggle button keď je sidebar skrytý */}
-          {isLoggedIn && !isSidebarOpen && (
-            <IconButton
-              onClick={toggleSidebar}
-              className={styles.floatingMenuButton}
-              sx={{
-                position: 'fixed',
-                top: '2rem',
-                left: '1.5rem',
-                zIndex: 1000,
-                backgroundColor: 'background.paper',
-                '&:hover': {
-                  backgroundColor: 'action.hover',
-                },
-                boxShadow: 3,
-              }}
-            >
-              <MenuIcon />
-            </IconButton>
-          )}
-          
-          {isLoggedIn && isSidebarOpen && (
-            <Box className={`${styles.sidebar} ${isSidebarOpen ? styles.sidebarOpen : styles.sidebarClosed}`}>
-              <Sidebar onToggle={toggleSidebar} onThreadSelect={isMobile ? toggleSidebar : undefined} />
-            </Box>
-          )}
-          <Grid
-            container
-            spacing={1}
+      <Box 
+        className={styles.page}
+        sx={{
+          height: `calc(100vh - ${NAVBAR_HEIGHT}px)`,
+          marginTop: `${NAVBAR_HEIGHT}px`,
+          display: 'flex',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Toggle button keď je sidebar zatvorený */}
+        {!isSidebarOpen && (
+          <IconButton
+            onClick={toggleSidebar}
             sx={{
-              width: "100%",
-              marginLeft: isSidebarOpen && isLoggedIn ? '0' : '0',
+              position: 'fixed',
+              left: 8,
+              top: `${NAVBAR_HEIGHT + 8}px`,
+              zIndex: 1200,
+              backgroundColor: 'background.paper',
+              '&:hover': {
+                backgroundColor: 'action.hover',
+              },
+            }}
+            aria-label="Open sidebar"
+          >
+            <MenuIcon />
+          </IconButton>
+        )}
+
+        {/* Sidebar - na mobile ako Drawer, na desktop ako fixný panel */}
+        {isMobile ? (
+          <Drawer
+            anchor="left"
+            open={isSidebarOpen}
+            onClose={toggleSidebar}
+            sx={{
+              '& .MuiDrawer-paper': {
+                width: '100%',
+                marginTop: `${NAVBAR_HEIGHT}px`,
+                height: `calc(100vh - ${NAVBAR_HEIGHT}px)`,
+              },
             }}
           >
-            <Grid
-              size={{
-                xs: 12,
-                sm: 8,
+            <Sidebar 
+              isOpen={isSidebarOpen} 
+              onToggle={toggleSidebar} 
+              onThreadSelect={handleThreadSelect}
+            />
+          </Drawer>
+        ) : (
+          isSidebarOpen && (
+            <Box
+              sx={{
+                width: '280px',
+                flexShrink: 0,
+                height: '100%',
+                overflow: 'hidden',
               }}
             >
-              <Box className={styles.content}>
-                <Chat />
-                <MessageInput />
-                <ShrinkButton />
-              </Box>
-            </Grid>
-            <Grid
-              size={{
-                xs: 12,
-                sm: 4,
-              }}
-            >
-              <Stack direction="column">
-                <SimpleFilePreview
-                  title="Placeholder gpt response"
-                  sx={{
-                    borderRadius: 2,
-                    minWidth: "200px",
-                    height: "auto",
-                    marginTop: 12,
-                    backgroundColor: "primary.light",
-                  }}
-                />
-                <SimpleFilePreview
-                  title="Shrunk diagram"
-                  sx={{
-                    borderRadius: 2,
-                    minWidth: "200px",
-                    height: "auto",
-                    // marginTop: 12,
-                    backgroundColor: "primary.light",
-                  }}
-                />
-              </Stack>
-            </Grid>
-          </Grid>
-        </div>
-      </div>
+              <Sidebar 
+                isOpen={isSidebarOpen} 
+                onToggle={toggleSidebar} 
+                onThreadSelect={handleThreadSelect}
+              />
+            </Box>
+          )
+        )}
+
+        {/* Hlavný content - Chat v strede */}
+        <Box
+          sx={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            minWidth: 0,
+          }}
+        >
+          {/* Chat container s scroll */}
+          <Box
+            sx={{
+              flex: 1,
+              overflow: 'auto',
+              padding: '1rem',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            <Chat />
+          </Box>
+
+          {/* Message Input a Shrink Button - fixné dole */}
+          <Box
+            sx={{
+              display: 'flex',
+              gap: 1,
+              padding: '1rem',
+              borderTop: '1px solid',
+              borderColor: 'divider',
+              backgroundColor: 'background.paper',
+              alignItems: 'flex-end',
+            }}
+          >
+            <Box sx={{ flex: 1 }}>
+              <MessageInput />
+            </Box>
+            <ShrinkButton />
+          </Box>
+        </Box>
+
+        {/* File Previews - vpravo */}
+        <Box
+          sx={{
+            width: { xs: 0, md: '300px' },
+            display: { xs: 'none', md: 'flex' },
+            flexDirection: 'column',
+            gap: 2,
+            padding: '1rem',
+            overflow: 'auto',
+            borderLeft: '1px solid',
+            borderColor: 'divider',
+            flexShrink: 0,
+          }}
+        >
+          <SimpleFilePreview
+            title="Placeholder gpt response"
+            sx={{
+              borderRadius: 2,
+              minWidth: "200px",
+              height: "auto",
+              backgroundColor: "primary.light",
+            }}
+          />
+          
+          <SimpleFilePreview
+            title="Shrunk diagram"
+            sx={{
+              borderRadius: 2,
+              minWidth: "200px",
+              height: "auto",
+              backgroundColor: "primary.light",
+            }}
+          />
+        </Box>
+      </Box>
     </>
   );
 }

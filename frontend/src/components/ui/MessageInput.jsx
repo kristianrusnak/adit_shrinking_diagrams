@@ -77,6 +77,7 @@ const MessageInput = ({ isUserLoggedIn = false }) => {
           },
         }}
       />
+    </Box>
   );
 };
 
