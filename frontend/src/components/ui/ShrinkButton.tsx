@@ -1,7 +1,5 @@
 import {Box, Button, IconButton, InputAdornment, Tooltip} from "@mui/material";
-import {Box, Button, IconButton, InputAdornment, Tooltip} from "@mui/material";
 import TuneIcon from '@mui/icons-material/Tune';
-import { useNavigate } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 interface ShrinkButtonProps {

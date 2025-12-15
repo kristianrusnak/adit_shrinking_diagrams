@@ -160,7 +160,7 @@ const CardNav: React.FC<CardNavProps> = ({
   const navigate = useNavigate();
   return (
     <div
-      className={`card-nav-container absolute left-1/2 -translate-x-1/2 w-[90%] max-w-[800px] z-[99] top-[1.2em] lg:top-[2em] ${className}`}
+      className={`card-nav-container absolute left-1/2 -translate-x-1/2 w-[90%] max-w-[800px] z-[1300] top-[0.6em] lg:top-[1em] ${className}`}
     >
 
       <nav

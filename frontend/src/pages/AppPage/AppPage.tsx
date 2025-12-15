@@ -1,5 +1,7 @@
 import { Box, IconButton, useMediaQuery, useTheme, Drawer } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import MessageInput from "../../components/ui/MessageInput";
 import Chat from "../../components/ui/Chat";
 import styles from "./AppPage.module.css";
@@ -20,9 +22,12 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
   const isLoggedIn = isUserLoggedIn || !!userInfo;
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTabletOrBelow = useMediaQuery(theme.breakpoints.down('md'));
   
   // Sidebar je na mobile defaultne skrytý, na desktop viditeľný
   const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
+  // File preview je defaultne skrytý
+  const [isFilePreviewOpen, setIsFilePreviewOpen] = useState(false);
 
   // Pri zmene na/z mobile automaticky adjust sidebar state
   useEffect(() => {
@@ -31,6 +36,10 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
 
   const toggleSidebar = () => {
     setIsSidebarOpen(prev => !prev);
+  };
+
+  const toggleFilePreview = () => {
+    setIsFilePreviewOpen(prev => !prev);
   };
 
   const handleThreadSelect = () => {
@@ -60,7 +69,7 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
             sx={{
               position: 'fixed',
               left: 8,
-              top: `${NAVBAR_HEIGHT + 8}px`,
+              top: `${NAVBAR_HEIGHT + 28}px`,
               zIndex: 1200,
               backgroundColor: 'background.paper',
               '&:hover': {
@@ -139,55 +148,162 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
           <Box
             sx={{
               display: 'flex',
+              flexDirection: { xs: 'column', md: 'row' },
               gap: 1,
               padding: '1rem',
               borderTop: '1px solid',
               borderColor: 'divider',
               backgroundColor: 'background.paper',
-              alignItems: 'flex-end',
+              alignItems: { xs: 'stretch', md: 'flex-end' },
             }}
           >
-            <Box sx={{ flex: 1 }}>
+            <Box 
+              sx={{ 
+                flex: { xs: 'none', md: 1 },
+                width: { xs: '100%', md: 'auto' },
+                order: { xs: 2, md: 1 },
+              }}
+            >
               <MessageInput />
             </Box>
-            <ShrinkButton />
+            <Box
+              sx={{
+                width: { xs: '100%', md: 'auto' },
+                order: { xs: 1, md: 2 },
+                display: { xs: 'flex', md: 'block' },
+                justifyContent: { xs: 'center', md: 'flex-start' },
+              }}
+            >
+              <ShrinkButton />
+            </Box>
           </Box>
         </Box>
 
-        {/* File Previews - vpravo */}
-        <Box
-          sx={{
-            width: { xs: 0, md: '300px' },
-            display: { xs: 'none', md: 'flex' },
-            flexDirection: 'column',
-            gap: 2,
-            padding: '1rem',
-            overflow: 'auto',
-            borderLeft: '1px solid',
-            borderColor: 'divider',
-            flexShrink: 0,
-          }}
-        >
-          <SimpleFilePreview
-            title="Placeholder gpt response"
+        {/* Toggle button pre file preview keď je zatvorený */}
+        {!isFilePreviewOpen && (
+          <IconButton
+            onClick={toggleFilePreview}
             sx={{
-              borderRadius: 2,
-              minWidth: "200px",
-              height: "auto",
-              backgroundColor: "primary.light",
+              position: 'fixed',
+              right: 8,
+              top: `${NAVBAR_HEIGHT + 28}px`,
+              zIndex: 1200,
+              backgroundColor: 'background.paper',
+              '&:hover': {
+                backgroundColor: 'action.hover',
+              },
             }}
-          />
-          
-          <SimpleFilePreview
-            title="Shrunk diagram"
+            aria-label="Open file preview"
+          >
+            <ChevronLeftIcon />
+          </IconButton>
+        )}
+
+        {/* File Previews - na mobile/tablete ako Drawer, na desktope ako panel */}
+        {isTabletOrBelow ? (
+          <Drawer
+            anchor="right"
+            open={isFilePreviewOpen}
+            onClose={toggleFilePreview}
             sx={{
-              borderRadius: 2,
-              minWidth: "200px",
-              height: "auto",
-              backgroundColor: "primary.light",
+              '& .MuiDrawer-paper': {
+                width: '100%',
+                marginTop: `${NAVBAR_HEIGHT}px`,
+                height: `calc(100vh - ${NAVBAR_HEIGHT}px)`,
+              },
             }}
-          />
-        </Box>
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2,
+                padding: '1rem',
+                height: '100%',
+                overflow: 'auto',
+              }}
+            >
+              <IconButton
+                onClick={toggleFilePreview}
+                sx={{
+                  alignSelf: 'flex-end',
+                  marginBottom: '0.5rem',
+                }}
+                aria-label="Close file preview"
+              >
+                <ChevronRightIcon />
+              </IconButton>
+              
+              <SimpleFilePreview
+                title="Placeholder gpt response"
+                sx={{
+                  borderRadius: 2,
+                  minWidth: "200px",
+                  height: "auto",
+                  backgroundColor: "primary.light",
+                }}
+              />
+              
+              <SimpleFilePreview
+                title="Shrunk diagram"
+                sx={{
+                  borderRadius: 2,
+                  minWidth: "200px",
+                  height: "auto",
+                  backgroundColor: "primary.light",
+                }}
+              />
+            </Box>
+          </Drawer>
+        ) : (
+          isFilePreviewOpen && (
+            <Box
+              sx={{
+                width: '300px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2,
+                padding: '1rem',
+                overflow: 'auto',
+                borderLeft: '1px solid',
+                borderColor: 'divider',
+                flexShrink: 0,
+                backgroundColor: 'background.paper',
+              }}
+            >
+              <IconButton
+                onClick={toggleFilePreview}
+                sx={{
+                  alignSelf: 'flex-end',
+                  marginBottom: '0.5rem',
+                }}
+                aria-label="Close file preview"
+              >
+                <ChevronRightIcon />
+              </IconButton>
+              
+              <SimpleFilePreview
+                title="Placeholder gpt response"
+                sx={{
+                  borderRadius: 2,
+                  minWidth: "200px",
+                  height: "auto",
+                  backgroundColor: "primary.light",
+                }}
+              />
+              
+              <SimpleFilePreview
+                title="Shrunk diagram"
+                sx={{
+                  borderRadius: 2,
+                  minWidth: "200px",
+                  height: "auto",
+                  backgroundColor: "primary.light",
+                }}
+              />
+            </Box>
+          )
+        )}
       </Box>
     </>
   );
