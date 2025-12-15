@@ -41,6 +41,7 @@ export default function IntroNavbar() {
       textColor: "#fff",
       links: isAuthenticated
         ? [
+          { label: "Change password", ariaLabel: "Change password", href: "/change-password" },
             {
               label: "Logout",
               ariaLabel: "Logout",

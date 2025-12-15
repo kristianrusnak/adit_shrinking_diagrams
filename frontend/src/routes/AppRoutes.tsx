@@ -11,6 +11,8 @@ import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
 import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
+import ChangePasswordPage from "../pages/ChangePasswordPage/ChangePasswordPage";
+
 import UserChat from "@/components/ui/UserChat";
 
 export default function AppRoutes() {
@@ -35,6 +37,12 @@ export default function AppRoutes() {
             <Route
               path="chat/:id"
               element={<AppPage isUserLoggedIn={true} />}
+            />
+          </Route>
+          <Route element={<ProtectedRoute redirectTo="/login" />}>
+            <Route
+              path="change-password"
+              element={<ChangePasswordPage />}
             />
           </Route>
         </Route>

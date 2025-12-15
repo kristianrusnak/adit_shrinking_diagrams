@@ -26,7 +26,8 @@ from sqlalchemy.orm import Session
 from app.db import get_db
 from app.models.user import User
 from app.models.refresh_token import RefreshToken
-from app.schemas.user import UserListItem, UserRegister, UserResponse, UserLogin, TokenResponse, RefreshRequest
+from app.schemas.user import (UserListItem, UserRegister, UserResponse,
+                              UserLogin, TokenResponse, RefreshRequest, ChangePasswordRequest)
 from app.schemas.chat_thread import ChatThreadSchema, ThreadRenameRequest
 from app.schemas.chat_message import ChatMessageSchema
 from app.schemas.thread_create_response import ThreadCreateResponse
@@ -549,3 +550,15 @@ def get_config_evol(request: ConfigRequest):
     except Exception as e:
         print(f"Error loading config file: {e}")
         raise HTTPException(status_code=500, detail="Unable to load config file")
+
+
+@app.post("/auth/change-password", status_code=200)
+def change_password(
+    data: ChangePasswordRequest,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),):
+    if hash_password(data.current_password) != user.password_hash:
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    user.password_hash = hash_password(data.new_password)
+    db.commit()
+    return {"detail": "Password changed successfully"}

@@ -45,6 +45,16 @@ const extendedApi = apiSlice.injectEndpoints({
         },
       }),
     }),
+    changePassword: build.mutation<
+      { detail: string },
+      { current_password: string; new_password: string }
+    >({
+      query: (body) => ({
+        url: "/auth/change-password",
+        method: "POST",
+        body,
+      }),
+    }),
     getUserInfo: build.query<UserInfo, void>({
       query: () => ({
         url: "auth/me",
@@ -60,4 +70,5 @@ export const {
   useLogoutMutation,
   useRefreshMutation,
   useGetUserInfoQuery,
+  useChangePasswordMutation,
 } = extendedApi;
