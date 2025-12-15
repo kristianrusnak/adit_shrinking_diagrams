@@ -22,21 +22,15 @@ export default function ShrinkButton() {
     >
       <Button
         component="label"
-        color="inherit"
+        color="primary"
         variant="outlined"
         onClick={handleClick}
         sx={{
           height: "64px",
           textTransform: "none",
           borderRadius: "16px",
-          color: "inherit",
           width: "200px",
-          borderColor: "rgba(0, 0, 0, 0.23)",
-          "&:hover": {
-            borderColor: "rgba(0, 0, 0, 0.87)",
-          },
           px: 2.5,
-          // bigger font
           fontSize: "1rem",
         }}
       >

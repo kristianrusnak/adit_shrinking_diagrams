@@ -1,11 +1,12 @@
 import { FC, useCallback, useState } from "react";
-import { Box, Button, List, ListItemButton, ListItemText, Tooltip, Typography, CircularProgress, IconButton, TextField} from "@mui/material";
+import { Box, Button, List, ListItemButton, ListItemText, Tooltip, Typography, CircularProgress, IconButton, TextField } from "@mui/material";
 import AddOutlinedIcon from "@mui/icons-material/Add";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import { useGetChatThreadsQuery, useRenameThreadMutation, useDeleteThreadMutation } from "@/api/api";
 import { useNavigate, useParams } from "react-router-dom";
 import type { ChatThread } from "@/api/types";
@@ -14,11 +15,12 @@ import { clearMessages } from "@/store/slices/messageSlice";
 import { setFile, setFileReduced, setMessage } from "@/store/slices/fileSlice";
 
 interface SidebarProps {
-  onToggle?: () => void;
+  isOpen: boolean;
+  onToggle: () => void;
   onThreadSelect?: () => void;
 }
 
-const Sidebar: FC<SidebarProps> = ({ onToggle, onThreadSelect }) => {
+const Sidebar: FC<SidebarProps> = ({ isOpen, onToggle, onThreadSelect }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { threadId } = useParams<{ threadId?: string }>();
@@ -112,23 +114,23 @@ const Sidebar: FC<SidebarProps> = ({ onToggle, onThreadSelect }) => {
         padding: "1rem",
         gap: "1rem",
         position: 'relative',
+        backgroundColor: 'background.paper',
+        borderRight: { xs: 'none', sm: '1px solid' },
+        borderColor: { xs: 'transparent', sm: 'divider' },
+        width: { xs: '100%', sm: '280px' },
+        flexShrink: 0,
       }}
     >
-      {/* Toggle button vpravo hore v sidebari */}
-      {onToggle && (
-        <IconButton
-          onClick={onToggle}
-          sx={{
-            position: 'absolute',
-            top: '0.5rem',
-            right: '0.5rem',
-            zIndex: 10,
-          }}
-          size="small"
-        >
-          <MenuOpenIcon />
-        </IconButton>
-      )}
+      <IconButton
+        onClick={onToggle}
+        sx={{
+          alignSelf: 'flex-start',
+          marginBottom: '0.5rem',
+        }}
+        aria-label="Close sidebar"
+      >
+        <ChevronLeftIcon />
+      </IconButton>
       
       <Button
         variant="text"
