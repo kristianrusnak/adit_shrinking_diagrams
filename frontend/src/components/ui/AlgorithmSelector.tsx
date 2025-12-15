@@ -39,6 +39,7 @@ export const AlgorithmSelector = ({
             key={opt.id}
             sx={{
               width: 180,
+              // height: 155,
               borderRadius: 3,
               border: `2px solid ${selected ? theme.palette.primary.main : theme.palette.divider}`,
               boxShadow: selected ? theme.shadows[4] : theme.shadows[1],
@@ -52,7 +53,10 @@ export const AlgorithmSelector = ({
               },
             }}
           >
-            <CardActionArea onClick={() => onChange(opt.id)}>
+            <CardActionArea
+              onClick={() => onChange(opt.id)}
+              sx={{ height: "100%", display: "flex", alignItems: "start" }}
+            >
               <CardContent>
                 <Typography
                   variant="h6"

@@ -47,15 +47,16 @@ const FilePreviewDiagrams = () => {
   }, [selectedFile, selectedFileReduced]);
 
   return (
-    <Card sx={{ minWidth: "800px", marginTop: 2, marginBottom: 2 }}>
-      {selectedFile && splitRows.length > 0 && (
+    selectedFile &&
+    splitRows.length > 0 && (
+      <Card sx={{ minWidth: "800px", marginTop: 2, marginBottom: 2 }}>
         <DiffComponent
           fileName={selectedFile.name}
           selectedAlgorithm={selectedAlgorithmName}
           splitRows={splitRows}
         />
-      )}
-    </Card>
+      </Card>
+    )
   );
 };
 

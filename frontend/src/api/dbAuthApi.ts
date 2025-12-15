@@ -1,4 +1,5 @@
 import { apiSlice } from "./apiSlice";
+import type { UserInfo } from "./types";
 
 const extendedApi = apiSlice.injectEndpoints({
   endpoints: (build) => ({
@@ -9,11 +10,15 @@ const extendedApi = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
-    login: build.mutation<UserInfo, { email: string; password: string }>({
+    login: build.mutation<UserInfo, { username: string; password: string }>({
       query: (data) => ({
         url: "auth/login",
         method: "POST",
-        body: data,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          username: data.username,
+          password: data.password,
+        }),
       }),
     }),
     logout: build.mutation<
@@ -40,6 +45,16 @@ const extendedApi = apiSlice.injectEndpoints({
         },
       }),
     }),
+    changePassword: build.mutation<
+      { detail: string },
+      { current_password: string; new_password: string }
+    >({
+      query: (body) => ({
+        url: "/auth/change-password",
+        method: "POST",
+        body,
+      }),
+    }),
     getUserInfo: build.query<UserInfo, void>({
       query: () => ({
         url: "auth/me",
@@ -55,4 +70,5 @@ export const {
   useLogoutMutation,
   useRefreshMutation,
   useGetUserInfoQuery,
+  useChangePasswordMutation,
 } = extendedApi;

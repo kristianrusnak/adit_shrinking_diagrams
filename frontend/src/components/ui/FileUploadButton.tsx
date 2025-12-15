@@ -1,4 +1,4 @@
-import {Badge, Box, Button, IconButton} from "@mui/material";
+import { Badge, Box, Button, IconButton } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useError } from "../../context/useError.jsx";
@@ -14,8 +14,8 @@ import {
 } from "../../store/slices/algorithmSlice";
 
 import { selectFile } from "../../store/slices/fileSlice";
-import {useProcessPumlMutation} from "@/api/dbApi";
-import {clearMessages} from "@/store/slices/messageSlice";
+import { useProcessPumlMutation } from "@/api/api.js";
+import { clearMessages } from "@/store/slices/messageSlice";
 
 const MAX_FILE_SIZE = 1024 * 1024 * 10; // 10 MB
 
@@ -64,6 +64,11 @@ const FileUploadButton = ({ type }: FileUploadButtonProps) => {
   // without this check it causes endless rerender loop
   useEffect(() => {
     if (!selectedFile) return;
+    // TODO:
+    // the selectedFile is being set by the DB query so we dont want any processing done to it here
+    // if this is allowed to go through then it will run the PUML shrinking algorithm on the file
+    // which is already reduced? it should be clarified what exactly are we storing on the backend
+    if (type == ButtonType.ICON) return;
 
     const shouldProcess =
       !lastProcessed.current ||
@@ -114,6 +119,13 @@ const FileUploadButton = ({ type }: FileUploadButtonProps) => {
     }
 
     logger.info("Inside of FileUploadButton.handleFile");
+
+    if (selectedAlgorithm === "none") {
+      dispatch(setFile(file));
+      dispatch(setFileReduced(file)); // we act as if we reduced the file but it stays the same
+      dispatch(clearMessages());
+      return;
+    }
 
     try {
       const response = await processPuml({

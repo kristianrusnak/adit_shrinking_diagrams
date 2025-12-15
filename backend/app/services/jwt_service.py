@@ -6,7 +6,7 @@ import hashlib
 
 SECRET_KEY = "super_secret_key"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 1  # minutes
+ACCESS_TOKEN_EXPIRE_MINUTES = 30 # minutes
 
 
 def create_access_token(subject: str, expires_minutes: Optional[int] = None) -> str:

@@ -9,6 +9,10 @@ import TestRegisterLogin from "@/pages/Test/TestRegisterLogin";
 import DiagramPage from "../pages/DiagramPage/DiagramPage";
 import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
+import ProtectedRoute from "./ProtectedRoute";
+import ChangePasswordPage from "../pages/ChangePasswordPage/ChangePasswordPage";
+
+import UserChat from "@/components/ui/UserChat";
 
 export default function AppRoutes() {
   return (
@@ -20,8 +24,21 @@ export default function AppRoutes() {
           <Route path="docs" element={<DocsPage />} />
           <Route path="diagrams" element={<DiagramPage />} />
           <Route path="app" element={<AppPage />} />
+          <Route path="app/chat/:threadId" element={<AppPage />} />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
+          <Route element={<ProtectedRoute redirectTo="/app" />}>
+            <Route
+              path="chat/:id"
+              element={<AppPage isUserLoggedIn={true} />}
+            />
+          </Route>
+          <Route element={<ProtectedRoute redirectTo="/login" />}>
+            <Route
+              path="change-password"
+              element={<ChangePasswordPage />}
+            />
+          </Route>
         </Route>
         <Route path="testauth" element={<TestRegisterLogin />} />
         <Route path="*" element={<NotFoundPage />} />

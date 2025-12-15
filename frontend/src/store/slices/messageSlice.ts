@@ -3,9 +3,9 @@ import { v4 as uuidv4 } from "uuid";
 
 export interface ChatMessage {
   id: string;
-  role: "user" | "agent";
+  role: "user" | "assistant";
   text: string;
-  file?: File | null; // optional file (not stored in localStorage)
+  file?: File | { name: string; content: string } | null; // optional file (not stored in localStorage)
   timestamp: number;
 }
 
@@ -26,7 +26,10 @@ const messageSlice = createSlice({
   name: "messageStore",
   initialState,
   reducers: {
-    addMessage: (state, action: PayloadAction<Omit<ChatMessage, "id" | "timestamp">>) => {
+    addMessage: (
+      state,
+      action: PayloadAction<Omit<ChatMessage, "id" | "timestamp">>,
+    ) => {
       const newMessage: ChatMessage = {
         id: uuidv4(),
         timestamp: Date.now(),
@@ -36,7 +39,7 @@ const messageSlice = createSlice({
       state.messages.push(newMessage);
 
       // Persist only messages without file to localStorage
-      const messagesForStorage = state.messages.map(msg => ({
+      const messagesForStorage = state.messages.map((msg) => ({
         ...msg,
         file: null,
       }));
@@ -44,7 +47,7 @@ const messageSlice = createSlice({
     },
     setMessages: (state, action: PayloadAction<ChatMessage[]>) => {
       state.messages = action.payload;
-      const messagesForStorage = action.payload.map(msg => ({
+      const messagesForStorage = action.payload.map((msg) => ({
         ...msg,
         file: null,
       }));
@@ -53,14 +56,15 @@ const messageSlice = createSlice({
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
-    clearMessages: state => {
+    clearMessages: (state) => {
       state.messages = [];
       localStorage.removeItem(LS_KEY);
     },
   },
 });
 
-export const { addMessage, setMessages, setLoading, clearMessages } = messageSlice.actions;
+export const { addMessage, setMessages, setLoading, clearMessages } =
+  messageSlice.actions;
 
 // Selectors
 export const selectMessages = (state: any) => state.messageStore.messages;

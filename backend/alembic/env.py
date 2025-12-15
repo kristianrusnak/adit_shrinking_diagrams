@@ -4,9 +4,15 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
-
 from app.db import Base
-from app.models import user, refresh_token
+
+from app.models.user import User
+from app.models.refresh_token import RefreshToken
+from app.models.chat_threads import ChatThread
+from app.models.chat_messages import ChatMessage
+from app.models.chat_files import ChatFiles
+
+from app.models import user, refresh_token, chat_threads, chat_messages, chat_files
 
 
 # this is the Alembic Config object, which provides
