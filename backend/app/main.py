@@ -623,6 +623,8 @@ def reset_password_with_code(
         raise HTTPException(status_code=400, detail="Password must be at least 8 characters long")
     user.password_hash = hash_password(data.new_password)
     entry.used = True
+    db.commit()
+    return {"message": "Password reset successful"}
 
 @app.post("/auth/change-password", status_code=200)
 def change_password(
