@@ -45,6 +45,30 @@ const extendedApi = apiSlice.injectEndpoints({
         },
       }),
     }),
+    forgotPassword: build.mutation<{ detail: string }, { email: string }>({
+      query: (body) => ({
+        url: "/auth/forgot-password",
+        method: "POST",
+        body,
+      }),
+    }),
+    verifyResetCode: build.mutation<{ detail: string }, { email: string; code: string }>({
+      query: (body) => ({
+        url: "/auth/verify-reset-code",
+        method: "POST",
+        body,
+      }),
+    }),
+    resetPasswordWithCode: build.mutation<
+      { detail: string },
+      { email: string; code: string; new_password: string }
+    >({
+      query: (body) => ({
+        url: "/auth/reset-password-with-code",
+        method: "POST",
+        body,
+      }),
+    }),
     changePassword: build.mutation<
       { detail: string },
       { current_password: string; new_password: string }
@@ -55,6 +79,7 @@ const extendedApi = apiSlice.injectEndpoints({
         body,
       }),
     }),
+
     getUserInfo: build.query<UserInfo, void>({
       query: () => ({
         url: "auth/me",
@@ -70,5 +95,8 @@ export const {
   useLogoutMutation,
   useRefreshMutation,
   useGetUserInfoQuery,
+  useForgotPasswordMutation,
+  useVerifyResetCodeMutation,
+  useResetPasswordWithCodeMutation,
   useChangePasswordMutation,
 } = extendedApi;

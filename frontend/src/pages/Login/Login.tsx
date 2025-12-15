@@ -68,6 +68,14 @@ export default function LoginPage() {
           sx={{ color: "white", fontSize: 14 }}>
           Don’t have an account? Register
         </Link>
+        <Link
+          component={RouterLink}
+          to="/forgot-password"
+          underline="hover"
+          textAlign="center"
+          sx={{ color: "white", fontSize: 14 }}>
+          Forgot your password?
+        </Link>
         {errorMsg && (
           <Typography color="error" fontSize={14} textAlign="center">
             {errorMsg}

@@ -4,6 +4,7 @@ import MessageInput from "../../components/ui/MessageInput";
 import Chat from "../../components/ui/Chat";
 import styles from "./AppPage.module.css";
 import Sidebar from "../../components/ui/Sidebar";
+import { ErrorProvider } from "../../context/ErrorProvider";
 import ShrinkButton from "@/components/ui/ShrinkButton";
 import { useAuth } from "../../context/AuthProvider";
 import SimpleFilePreview from "@/components/ui/SimpleFilePreview";

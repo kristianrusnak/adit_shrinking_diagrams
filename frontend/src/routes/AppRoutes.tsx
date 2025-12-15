@@ -10,6 +10,7 @@ import DiagramPage from "../pages/DiagramPage/DiagramPage";
 import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
 import ProtectedRoute from "./ProtectedRoute";
+import ForgotPasswordPage from "../pages/ForgotPasswordPage/ForgotPasswordPage";
 import ChangePasswordPage from "../pages/ChangePasswordPage/ChangePasswordPage";
 
 import UserChat from "@/components/ui/UserChat";
@@ -27,6 +28,7 @@ export default function AppRoutes() {
           <Route path="app/chat/:threadId" element={<AppPage />} />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
+          <Route path="forgot-password" element={<ForgotPasswordPage />} />
           <Route element={<ProtectedRoute redirectTo="/app" />}>
             <Route
               path="chat/:id"
