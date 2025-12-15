@@ -13,6 +13,8 @@ import type { ChatThread } from "@/api/types";
 import { useDispatch } from "react-redux";
 import { clearMessages } from "@/store/slices/messageSlice";
 import { setFile, setFileReduced, setMessage } from "@/store/slices/fileSlice";
+import { useAuth } from "@/context/AuthProvider";
+import { skipToken } from "@reduxjs/toolkit/query";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -24,8 +26,10 @@ const Sidebar: FC<SidebarProps> = ({ isOpen, onToggle, onThreadSelect }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { threadId } = useParams<{ threadId?: string }>();
+  const { userInfo } = useAuth();
   
-  const { data: threads, isLoading, error } = useGetChatThreadsQuery();
+  // Volaj API len keď je používateľ prihlásený
+  const { data: threads, isLoading, error } = useGetChatThreadsQuery(userInfo ? undefined : skipToken);
   const [renameThread] = useRenameThreadMutation();
   const [deleteThread] = useDeleteThreadMutation();
   
@@ -141,9 +145,17 @@ const Sidebar: FC<SidebarProps> = ({ isOpen, onToggle, onThreadSelect }) => {
         New Chat
       </Button>
 
-      <Typography variant="subtitle1" sx={{ opacity: 0.8 }}>
-        Your chats
-      </Typography>
+      {userInfo && (
+        <Typography variant="subtitle1" sx={{ opacity: 0.8 }}>
+          Your chats
+        </Typography>
+      )}
+
+      {!userInfo && (
+        <Typography variant="body2" sx={{ opacity: 0.6, padding: "1rem" }}>
+          Log in to see your chat history
+        </Typography>
+      )}
 
       {isLoading && (
         <Box sx={{ display: "flex", justifyContent: "center", padding: "2rem" }}>
@@ -157,7 +169,7 @@ const Sidebar: FC<SidebarProps> = ({ isOpen, onToggle, onThreadSelect }) => {
         </Typography>
       )}
 
-      {threads && threads.length === 0 && (
+      {threads && threads.length === 0 && userInfo && (
         <Typography variant="body2" sx={{ opacity: 0.6, padding: "1rem" }}>
           No chats yet
         </Typography>
