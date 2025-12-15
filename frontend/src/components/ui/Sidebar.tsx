@@ -5,6 +5,7 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
+import MenuOpenIcon from "@mui/icons-material/MenuOpen";
 import { useGetChatThreadsQuery, useRenameThreadMutation, useDeleteThreadMutation } from "@/api/api";
 import { useNavigate, useParams } from "react-router-dom";
 import type { ChatThread } from "@/api/types";
@@ -12,7 +13,12 @@ import { useDispatch } from "react-redux";
 import { clearMessages } from "@/store/slices/messageSlice";
 import { setFile, setFileReduced, setMessage } from "@/store/slices/fileSlice";
 
-const Sidebar: FC = () => {
+interface SidebarProps {
+  onToggle?: () => void;
+  onThreadSelect?: () => void;
+}
+
+const Sidebar: FC<SidebarProps> = ({ onToggle, onThreadSelect }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { threadId } = useParams<{ threadId?: string }>();
@@ -35,8 +41,12 @@ const Sidebar: FC = () => {
   const handleThreadClick = useCallback(
     (threadIdentifier: string) => {
       navigate(`/app/chat/${threadIdentifier}`);
+      // Na mobile automaticky zavrieť sidebar po výbere konverzácie
+      if (onThreadSelect) {
+        onThreadSelect();
+      }
     },
-    [navigate]
+    [navigate, onThreadSelect]
   );
 
   const truncate = (text: string, max: number) =>
@@ -101,8 +111,25 @@ const Sidebar: FC = () => {
         height: "100%",
         padding: "1rem",
         gap: "1rem",
+        position: 'relative',
       }}
     >
+      {/* Toggle button vpravo hore v sidebari */}
+      {onToggle && (
+        <IconButton
+          onClick={onToggle}
+          sx={{
+            position: 'absolute',
+            top: '0.5rem',
+            right: '0.5rem',
+            zIndex: 10,
+          }}
+          size="small"
+        >
+          <MenuOpenIcon />
+        </IconButton>
+      )}
+      
       <Button
         variant="text"
         color="inherit"
