@@ -65,6 +65,12 @@ const extendedApi = apiSlice.injectEndpoints({
     >({
       query: (body) => ({
         url: "/auth/reset-password-with-code",
+    changePassword: build.mutation<
+      { detail: string },
+      { current_password: string; new_password: string }
+    >({
+      query: (body) => ({
+        url: "/auth/change-password",
         method: "POST",
         body,
       }),
@@ -88,4 +94,5 @@ export const {
   useForgotPasswordMutation,
   useVerifyResetCodeMutation,
   useResetPasswordWithCodeMutation,
+  useChangePasswordMutation,
 } = extendedApi;

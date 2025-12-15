@@ -6,6 +6,7 @@ import { Box, Typography, Paper, Stack, CircularProgress } from "@mui/material";
 import { useParams, useLocation } from "react-router-dom";
 import { useGetChatThreadQuery } from "@/api/api";
 import { skipToken } from "@reduxjs/toolkit/query";
+import ReactMarkdown from "react-markdown";
 import { useAuth } from "@/context/AuthProvider";
 import { setFile, setFileReduced } from "../../store/slices/fileSlice";
 
@@ -104,9 +105,9 @@ const Chat = () => {
       sx={{
         overflowY: "auto",
         p: 2,
-        // px: { xs: 0, sm: 0, md: 5, lg: 10, xl: 40 },
-        marginBottom: "50px",
-        marginTop: 12,
+        width: "100%",
+        marginBottom: "2em",
+        marginTop: "2em",
         paddingTop: 0,
       }}
     >
@@ -138,7 +139,7 @@ const Chat = () => {
               borderRadius: 2,
             }}
           >
-            <Typography variant="body1">{msg.text}</Typography>
+            <ReactMarkdown>{msg.text}</ReactMarkdown>
             {msg.file && (
               <Typography variant="caption" sx={{ display: "block", mt: 0.5 }}>
                 File attached: {msg.file.name}
