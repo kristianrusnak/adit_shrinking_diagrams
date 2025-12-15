@@ -65,7 +65,6 @@ const MessageInput = ({ isUserLoggedIn = false }) => {
                 <InputAdornment position="start">
                   <FileUploadButton type={ButtonType.ICON} />
                 </InputAdornment>
-                <ShrinkButton position="start" />
               </>
             ),
             endAdornment: (
@@ -78,7 +77,6 @@ const MessageInput = ({ isUserLoggedIn = false }) => {
           },
         }}
       />
-    </Box>
   );
 };
 
