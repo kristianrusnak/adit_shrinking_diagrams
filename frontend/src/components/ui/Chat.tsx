@@ -132,7 +132,7 @@ const Chat = () => {
           <Paper
             sx={{
               p: 1.5,
-              maxWidth: "70%",
+              maxWidth: "95%",
               backgroundColor:
                 msg.role === "user" ? "primary.light" : "grey.200",
               color: "black",

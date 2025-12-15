@@ -1,23 +1,35 @@
 import { FC, useCallback, useState } from "react";
-import { Box, Button, List, ListItemButton, ListItemText, Tooltip, Typography, CircularProgress, IconButton, TextField} from "@mui/material";
+import { Box, Button, List, ListItemButton, ListItemText, Tooltip, Typography, CircularProgress, IconButton, TextField } from "@mui/material";
 import AddOutlinedIcon from "@mui/icons-material/Add";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
+import MenuOpenIcon from "@mui/icons-material/MenuOpen";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import { useGetChatThreadsQuery, useRenameThreadMutation, useDeleteThreadMutation } from "@/api/api";
 import { useNavigate, useParams } from "react-router-dom";
 import type { ChatThread } from "@/api/types";
 import { useDispatch } from "react-redux";
 import { clearMessages } from "@/store/slices/messageSlice";
 import { setFile, setFileReduced, setMessage } from "@/store/slices/fileSlice";
+import { useAuth } from "@/context/AuthProvider";
+import { skipToken } from "@reduxjs/toolkit/query";
 
-const Sidebar: FC = () => {
+interface SidebarProps {
+  isOpen: boolean;
+  onToggle: () => void;
+  onThreadSelect?: () => void;
+}
+
+const Sidebar: FC<SidebarProps> = ({ isOpen, onToggle, onThreadSelect }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { threadId } = useParams<{ threadId?: string }>();
+  const { userInfo } = useAuth();
   
-  const { data: threads, isLoading, error } = useGetChatThreadsQuery();
+  // Volaj API len keď je používateľ prihlásený
+  const { data: threads, isLoading, error } = useGetChatThreadsQuery(userInfo ? undefined : skipToken);
   const [renameThread] = useRenameThreadMutation();
   const [deleteThread] = useDeleteThreadMutation();
   
@@ -35,8 +47,12 @@ const Sidebar: FC = () => {
   const handleThreadClick = useCallback(
     (threadIdentifier: string) => {
       navigate(`/app/chat/${threadIdentifier}`);
+      // Na mobile automaticky zavrieť sidebar po výbere konverzácie
+      if (onThreadSelect) {
+        onThreadSelect();
+      }
     },
-    [navigate]
+    [navigate, onThreadSelect]
   );
 
   const truncate = (text: string, max: number) =>
@@ -101,8 +117,25 @@ const Sidebar: FC = () => {
         height: "100%",
         padding: "1rem",
         gap: "1rem",
+        position: 'relative',
+        backgroundColor: 'background.paper',
+        borderRight: { xs: 'none', sm: '1px solid' },
+        borderColor: { xs: 'transparent', sm: 'divider' },
+        width: { xs: '100%', sm: '280px' },
+        flexShrink: 0,
       }}
     >
+      <IconButton
+        onClick={onToggle}
+        sx={{
+          alignSelf: 'flex-start',
+          marginBottom: '0.5rem',
+        }}
+        aria-label="Close sidebar"
+      >
+        <ChevronLeftIcon />
+      </IconButton>
+      
       <Button
         variant="text"
         color="inherit"
@@ -112,9 +145,17 @@ const Sidebar: FC = () => {
         New Chat
       </Button>
 
-      <Typography variant="subtitle1" sx={{ opacity: 0.8 }}>
-        Your chats
-      </Typography>
+      {userInfo && (
+        <Typography variant="subtitle1" sx={{ opacity: 0.8 }}>
+          Your chats
+        </Typography>
+      )}
+
+      {!userInfo && (
+        <Typography variant="body2" sx={{ opacity: 0.6, padding: "1rem" }}>
+          Log in to see your chat history
+        </Typography>
+      )}
 
       {isLoading && (
         <Box sx={{ display: "flex", justifyContent: "center", padding: "2rem" }}>
@@ -128,7 +169,7 @@ const Sidebar: FC = () => {
         </Typography>
       )}
 
-      {threads && threads.length === 0 && (
+      {threads && threads.length === 0 && userInfo && (
         <Typography variant="body2" sx={{ opacity: 0.6, padding: "1rem" }}>
           No chats yet
         </Typography>
