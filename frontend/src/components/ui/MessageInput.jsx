@@ -23,21 +23,6 @@ const MessageInput = ({ isUserLoggedIn = false }) => {
   };
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        position: "fixed", // always fixed relative to viewport
-        bottom: 16, // distance from bottom
-        left: 0,
-        right: 0,
-        px: 2, // horizontal padding
-        maxWidth: "800px",
-        margin: "0 auto", // center horizontally
-        width: "100%",
-        zIndex: 1000, // make sure it's above chat
-      }}
-    >
       <TextField
         id="outlined-basic"
         variant="outlined"
@@ -65,7 +50,6 @@ const MessageInput = ({ isUserLoggedIn = false }) => {
                 <InputAdornment position="start">
                   <FileUploadButton type={ButtonType.ICON} />
                 </InputAdornment>
-                <ShrinkButton position="start" />
               </>
             ),
             endAdornment: (
@@ -78,7 +62,6 @@ const MessageInput = ({ isUserLoggedIn = false }) => {
           },
         }}
       />
-    </Box>
   );
 };
 
