@@ -1,7 +1,7 @@
 import { TextField, Button, Stack, Typography, Box } from "@mui/material";
 import { useState } from "react";
 import { NAVBAR_HEIGHT, textFieldStyles } from "@/utils/layoutStyles";
-import { useChangePasswordMutation } from "@/api/api";
+import { useChangePasswordMutation } from "@/api/dbAuthApi";
 
 export default function ChangePasswordPage() {
   const [currentPassword, setCurrentPassword] = useState("");

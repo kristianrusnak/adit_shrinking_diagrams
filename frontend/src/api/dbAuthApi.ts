@@ -70,4 +70,5 @@ export const {
   useLogoutMutation,
   useRefreshMutation,
   useGetUserInfoQuery,
+  useChangePasswordMutation,
 } = extendedApi;

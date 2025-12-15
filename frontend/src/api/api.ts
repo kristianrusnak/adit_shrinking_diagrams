@@ -176,5 +176,4 @@ export const {
   useCreateThreadMutation,
   useCreateThreadAndSendPromptMutation,
   useSendPromptToThreadMutation,
-  useChangePasswordMutation,
 } = extendedApi;
