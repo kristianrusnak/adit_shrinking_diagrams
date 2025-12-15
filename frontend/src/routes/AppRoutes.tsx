@@ -10,6 +10,7 @@ import DiagramPage from "../pages/DiagramPage/DiagramPage";
 import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
 import ProtectedRoute from "./ProtectedRoute";
+import PublicRoute from "./PublicRoute";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage/ForgotPasswordPage";
 import ChangePasswordPage from "../pages/ChangePasswordPage/ChangePasswordPage";
 
@@ -26,8 +27,13 @@ export default function AppRoutes() {
           <Route path="diagrams" element={<DiagramPage />} />
           <Route path="app" element={<AppPage />} />
           <Route path="app/chat/:threadId" element={<AppPage />} />
-          <Route path="login" element={<Login />} />
-          <Route path="register" element={<Register />} />
+          <Route
+              path="login"
+              element={<PublicRoute> <Login /> </PublicRoute> }
+          />
+          <Route path="register"
+              element={<PublicRoute> <Register /> </PublicRoute> }
+          />
           <Route path="forgot-password" element={<ForgotPasswordPage />} />
           <Route element={<ProtectedRoute redirectTo="/app" />}>
             <Route
