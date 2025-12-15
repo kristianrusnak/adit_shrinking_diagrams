@@ -26,12 +26,15 @@ from sqlalchemy.orm import Session
 from app.db import get_db
 from app.models.user import User
 from app.models.refresh_token import RefreshToken
+
+from app.models.password_reset_code import PasswordResetCode
 from app.schemas.user import (UserListItem, UserRegister, UserResponse,
                               UserLogin, TokenResponse, RefreshRequest, ChangePasswordRequest)
 from app.schemas.chat_thread import ChatThreadSchema, ThreadRenameRequest
 from app.schemas.chat_message import ChatMessageSchema
 from app.schemas.thread_create_response import ThreadCreateResponse
 
+import random
 from app.services.security_service import hash_password
 from app.services.jwt_service import create_access_token, create_refresh_token, hash_refresh_token, verify_access_token, verify_refresh_token
 from app.services.chat_service import ChatService
@@ -44,6 +47,9 @@ from app.schemas.user import (
     UserLogin,
     TokenResponse,
     RefreshRequest,
+    ForgotPasswordRequest,
+    VerifyResetCodeRequest,
+    ResetPasswordWithCodeRequest,
 )
 
 from app.services.security_service import hash_password
@@ -551,6 +557,72 @@ def get_config_evol(request: ConfigRequest):
         print(f"Error loading config file: {e}")
         raise HTTPException(status_code=500, detail="Unable to load config file")
 
+@app.post("/auth/forgot-password")
+def forgot_password(data: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == data.email).first()
+    if not user:
+        raise HTTPException(status_code=400, detail="User with this email does not exist")
+    db.query(PasswordResetCode).filter(
+        PasswordResetCode.user_id == user.id,
+        PasswordResetCode.used == False,
+    ).update({"used": True})
+    db.commit()
+
+    code = f"{random.randint(0, 999999):06d}"
+    entry = PasswordResetCode(
+        user_id=user.id,
+        code=code,
+        expires_at=PasswordResetCode.generate_expiration(),
+        used=False,
+    )
+    db.add(entry)
+    db.commit()
+    print(f"[DEV] Password reset code for {data.email}: {code}")
+    return {"detail": "Reset code generated"}
+
+@app.post("/auth/verify-reset-code")
+def verify_reset_code(data: VerifyResetCodeRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == data.email).first()
+    if not user:
+        raise HTTPException(status_code=400, detail="User with this email does not exist")
+    entry = (
+        db.query(PasswordResetCode)
+        .filter(
+            PasswordResetCode.user_id == user.id,
+            PasswordResetCode.code == data.code,
+            PasswordResetCode.used == False,
+            PasswordResetCode.expires_at > datetime.utcnow(),
+        )
+        .first()
+    )
+    if not entry:
+        raise HTTPException(status_code=400, detail="Invalid or expired code")
+    return {"detail": "Code verified"}
+
+@app.post("/auth/reset-password-with-code")
+def reset_password_with_code(
+    data: ResetPasswordWithCodeRequest,
+    db: Session = Depends(get_db),
+):
+    user = db.query(User).filter(User.email == data.email).first()
+    if not user:
+        raise HTTPException(status_code=400, detail="User with this email does not exist")
+    entry = (
+        db.query(PasswordResetCode)
+        .filter(
+            PasswordResetCode.user_id == user.id,
+            PasswordResetCode.code == data.code,
+            PasswordResetCode.used == False,
+            PasswordResetCode.expires_at > datetime.utcnow(),
+        )
+        .first()
+    )
+    if not entry:
+        raise HTTPException(status_code=400, detail="Invalid or expired code")
+    if len(data.new_password) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters long")
+    user.password_hash = hash_password(data.new_password)
+    entry.used = True
 
 @app.post("/auth/change-password", status_code=200)
 def change_password(

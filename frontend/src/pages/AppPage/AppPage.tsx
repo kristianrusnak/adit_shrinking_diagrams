@@ -5,6 +5,7 @@ import Chat from "../../components/ui/Chat";
 import styles from "./AppPage.module.css";
 import Sidebar from "../../components/ui/Sidebar";
 import { ErrorProvider } from "../../context/ErrorProvider";
+import ShrinkButton from "@/components/ui/ShrinkButton";
 import { useAuth } from "../../context/AuthProvider";
 import SimpleFilePreview from "@/components/ui/SimpleFilePreview";
 
@@ -42,6 +43,7 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
               <Box className={styles.content}>
                 <Chat />
                 <MessageInput/>
+                <ShrinkButton />
               </Box>
             </Grid>
             <Grid
