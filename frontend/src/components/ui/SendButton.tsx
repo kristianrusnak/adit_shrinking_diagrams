@@ -3,7 +3,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { selectFile, selectFileReduced } from "../../store/slices/fileSlice";
+import { selectFile, selectFileReduced, selectIsAnyFileLoading } from "../../store/slices/fileSlice";
 import { selectMessage, setMessage } from "../../store/slices/fileSlice";
 import messageSlice, {addMessage, ChatMessage, selectMessages} from "../../store/slices/messageSlice";
 import {useSendMessageMutation, useSendMockMutation, useCreateThreadAndSendPromptMutation, useSendPromptToThreadMutation} from "../../api/api"; // or your real send function
@@ -22,6 +22,7 @@ const SendButton = () => {
   const selectedFile = useSelector(selectFile);
   const selectedFileReduced = useSelector(selectFileReduced);
   const selectedMessage = useSelector(selectMessage);
+  const isFileLoading = useSelector(selectIsAnyFileLoading);
   // const selectedMessages = useSelector(selectMessages);
 
   const [sendMessage, { data, error, isLoading }] = useSendMessageMutation(); // backend API call
@@ -30,6 +31,11 @@ const SendButton = () => {
   const [localLoading, setLocalLoading] = useState(false);
 
   const handleClick = async () => {
+    if (isFileLoading) {
+      showError("Prosím počkajte, kým sa dokončí načítanie súboru", "Načítavam");
+      return;
+    }
+
     if (!selectedMessage || !selectedFileReduced) {
       showError("Please enter a message and attach a file", "Input error");
       return;
@@ -134,9 +140,10 @@ const SendButton = () => {
         width: 36,
         height: 36,
       }}
-      disabled={localLoading || isLoading}
+      disabled={localLoading || isLoading || isFileLoading}
+      title={isFileLoading ? 'Načítavam súbor...' : undefined}
     >
-      {localLoading || isLoading ? (
+      {localLoading || isLoading || isFileLoading ? (
         <CircularProgress size={20} color="inherit" />
       ) : (
         <SendOutlinedIcon />

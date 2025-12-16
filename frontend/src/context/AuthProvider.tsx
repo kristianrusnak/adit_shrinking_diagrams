@@ -6,6 +6,7 @@ import {
   useRefreshMutation,
   useGetUserInfoQuery,
 } from "../api/dbAuthApi";
+import type { UserInfo } from "../api/types";
 import { useLocalStorage } from "./useLocalStorage";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useDispatch, useSelector } from "react-redux";
@@ -102,6 +103,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
     setAccessToken("");
     setRefreshToken("");
+
+    // Clear conversation history and files from localStorage
+    localStorage.removeItem("chat_conversation");
+    localStorage.removeItem("chat_file");
+    localStorage.removeItem("chat_file_reduced");
 
     dispatch(clearTokens());
   };

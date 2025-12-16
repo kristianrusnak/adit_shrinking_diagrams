@@ -4,7 +4,8 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useError } from "../../context/useError.jsx";
 import { useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setFile, setFileReduced } from "../../store/slices/fileSlice";
+import { AppDispatch } from "@/store/store";
+import { setFileAsync, setFileReducedAsync } from "../../store/slices/fileSlice";
 import { useProcessPumlMutation } from "../../api/api.js";
 import { logger } from "../../utils/logger";
 import {
@@ -33,7 +34,7 @@ const FileUploadButton = () => {
     showError: (msg: string, title?: string) => void;
   };
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const inputRef = useRef<HTMLInputElement>(null);
   const [processPuml, { data, error, isLoading }] = useProcessPumlMutation();
 
@@ -110,13 +111,13 @@ const FileUploadButton = () => {
       }).unwrap();
       const result = response.result_puml;
       logger.debug(`response: ${response.result_puml}`);
-      dispatch(setFile(file));
-      dispatch(setFileReduced(new File([result], file.name)));
+      await dispatch(setFileAsync(file));
+      await dispatch(setFileReducedAsync(new File([result], file.name)));
     } catch (error: any) {
       // might wanna clear out global store, or just keep the previous file like now
       // console.log(error);
-      dispatch(setFile(null)); // this should not happen
-      dispatch(setFileReduced(null));
+      await dispatch(setFileAsync(null)); // this should not happen
+      await dispatch(setFileReducedAsync(null));
       showError(error.data.detail, `Status: ${error.status}`);
 
       if (inputRef.current) {

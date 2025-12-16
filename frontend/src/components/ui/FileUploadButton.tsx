@@ -2,19 +2,12 @@ import { Badge, Box, Button, IconButton } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useError } from "../../context/useError.jsx";
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setFile, setFileReduced } from "../../store/slices/fileSlice";
+import { setFileAsync, setFileReducedAsync } from "../../store/slices/fileSlice";
 import AttachFileOutlinedIcon from "@mui/icons-material/AttachFileOutlined";
-import { RootState } from "@/store/store";
+import { RootState, AppDispatch } from "@/store/store";
 import { logger } from "../../utils/logger";
-import {
-  selectSelectedAlgorithm,
-  selectCurrentAlgorithmSettings,
-} from "../../store/slices/algorithmSlice";
-
-import { selectFile } from "../../store/slices/fileSlice";
-import { useProcessPumlMutation } from "@/api/api.js";
 import { clearMessages } from "@/store/slices/messageSlice";
 
 const MAX_FILE_SIZE = 1024 * 1024 * 10; // 10 MB
@@ -45,47 +38,9 @@ const FileUploadButton = ({ type }: FileUploadButtonProps) => {
     showError: (msg: string, title?: string) => void;
   };
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const inputRef = useRef<HTMLInputElement>(null);
-  const [processPuml, { data, error, isLoading }] = useProcessPumlMutation();
   const uploadedFile = useSelector((state: RootState) => state.fileStore.file);
-
-  const selectedAlgorithm = useSelector(selectSelectedAlgorithm);
-  const selectedAlgorithmSettings = useSelector(selectCurrentAlgorithmSettings);
-  const selectedFile = useSelector(selectFile);
-
-  const lastProcessed = useRef<{
-    file: File;
-    algorithm: string;
-    settings: any;
-  } | null>(null);
-
-  // this is ugly but its the only way i could make it work for setting changes right ow
-  // without this check it causes endless rerender loop
-  useEffect(() => {
-    if (!selectedFile) return;
-    // TODO:
-    // the selectedFile is being set by the DB query so we dont want any processing done to it here
-    // if this is allowed to go through then it will run the PUML shrinking algorithm on the file
-    // which is already reduced? it should be clarified what exactly are we storing on the backend
-    if (type == ButtonType.ICON) return;
-
-    const shouldProcess =
-      !lastProcessed.current ||
-      lastProcessed.current.file !== selectedFile ||
-      lastProcessed.current.algorithm !== selectedAlgorithm ||
-      JSON.stringify(lastProcessed.current.settings) !==
-        JSON.stringify(selectedAlgorithmSettings);
-
-    if (shouldProcess) {
-      handleFile(selectedFile);
-      lastProcessed.current = {
-        file: selectedFile,
-        algorithm: selectedAlgorithm,
-        settings: selectedAlgorithmSettings,
-      };
-    }
-  }, [selectedFile, selectedAlgorithm, selectedAlgorithmSettings]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files == null || event.target.files.length === 0) {
@@ -120,40 +75,11 @@ const FileUploadButton = ({ type }: FileUploadButtonProps) => {
 
     logger.info("Inside of FileUploadButton.handleFile");
 
-    if (selectedAlgorithm === "none") {
-      dispatch(setFile(file));
-      dispatch(setFileReduced(file)); // we act as if we reduced the file but it stays the same
-      dispatch(clearMessages());
-      return;
-    }
-
-    try {
-      const response = await processPuml({
-        file: file,
-        algorithm: selectedAlgorithm,
-        settings: selectedAlgorithmSettings,
-      }).unwrap();
-      const result = response.result_puml;
-      logger.debug(`response: ${response.result_puml}`);
-
-      const LS_KEY = "chat_conversation";
-      localStorage.removeItem(LS_KEY);
-      dispatch(clearMessages());
-
-      dispatch(setFile(file));
-      dispatch(setFileReduced(new File([result], file.name)));
-    } catch (error: any) {
-      // might wanna clear out global store, or just keep the previous file like now
-      // console.log(error);
-      dispatch(setFile(null)); // this should not happen
-      dispatch(setFileReduced(null));
-      showError(error.data.detail, `Status: ${error.status}`);
-
-      if (inputRef.current) {
-        // clear out the input so we can trigger on change again if the user wants to upload the same file again (and fail)
-        inputRef.current.value = "";
-      }
-    }
+    // Just upload the file, don't process it yet
+    // Clear previous reduced file to ensure preview shows only after clicking "Zmenšiť diagram"
+    await dispatch(setFileAsync(file));
+    await dispatch(setFileReducedAsync(null));
+    dispatch(clearMessages());
   };
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
@@ -217,7 +143,7 @@ const FileUploadButton = ({ type }: FileUploadButtonProps) => {
           tabIndex={-1}
           startIcon={<CloudUploadIcon />}
         >
-          {isLoading ? "Processing file" : "Upload file"}
+          Upload file
           <VisuallyHiddenInput
             ref={inputRef}
             type="file"

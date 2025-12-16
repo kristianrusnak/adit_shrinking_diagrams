@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "../../store/store";
+import { RootState, AppDispatch } from "../../store/store";
 import { selectMessages, setMessages, clearMessages } from "../../store/slices/messageSlice";
 import { Box, Typography, Paper, Stack, CircularProgress } from "@mui/material";
 import { useParams, useLocation } from "react-router-dom";
@@ -8,10 +8,10 @@ import { useGetChatThreadQuery } from "@/api/api";
 import { skipToken } from "@reduxjs/toolkit/query";
 import ReactMarkdown from "react-markdown";
 import { useAuth } from "@/context/AuthProvider";
-import { setFile, setFileReduced } from "../../store/slices/fileSlice";
+import { setFileAsync, setFileReducedAsync } from "../../store/slices/fileSlice";
 
 const Chat = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const location = useLocation();
   const { threadId } = useParams<{ threadId?: string }>();
   const { userInfo } = useAuth();
@@ -21,22 +21,6 @@ const Chat = () => {
   const { data: threadMessages, isLoading, isFetching } = useGetChatThreadQuery(
     threadId ?? skipToken
   );
-
-  useEffect(() => {
-    if (userInfo) {
-      localStorage.removeItem("chat_file");
-      localStorage.removeItem("chat_file_reduced");
-    }
-  }, [userInfo]);
-
-  // Clear messages when landing on /app (signed-in users only)
-  useEffect(() => {
-    if (userInfo && !threadId && location.pathname === "/app") {
-      dispatch(clearMessages());
-      dispatch(setFile(null));
-      dispatch(setFileReduced(null));
-    }
-  }, [location.pathname, threadId, userInfo, dispatch]);
 
   // When thread messages are loaded, update Redux and load last file
   useEffect(() => {
@@ -60,11 +44,11 @@ const Chat = () => {
         const fileData = lastMessageWithFile.files[0];
         const blob = new Blob([fileData.file_content], { type: "text/plain" });
         const file = new File([blob], fileData.file_name, { type: "text/plain" });
-        dispatch(setFile(file));
-        dispatch(setFileReduced(file));
+        dispatch(setFileAsync(file));
+        dispatch(setFileReducedAsync(file));
       } else {
-        dispatch(setFile(null));
-        dispatch(setFileReduced(null));
+        dispatch(setFileAsync(null));
+        dispatch(setFileReducedAsync(null));
       }
     }
   }, [threadMessages, threadId, dispatch]);
