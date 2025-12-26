@@ -95,7 +95,7 @@ export const DiagramPage = () => {
             sx={{ mt: 2, minWidth: "400px" }}
           >
             <Typography variant="body2">
-              Načítavam a ukladám súbor... Prosím počkajte.
+              Loading file... Please wait.
             </Typography>
           </Alert>
         )}

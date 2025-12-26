@@ -32,7 +32,7 @@ const SendButton = () => {
 
   const handleClick = async () => {
     if (isFileLoading) {
-      showError("Prosím počkajte, kým sa dokončí načítanie súboru", "Načítavam");
+      showError("Please wait until the file is fully loaded", "Loading");
       return;
     }
 
@@ -141,7 +141,7 @@ const SendButton = () => {
         height: 36,
       }}
       disabled={localLoading || isLoading || isFileLoading}
-      title={isFileLoading ? 'Načítavam súbor...' : undefined}
+      title={isFileLoading ? 'Loading file...' : undefined}
     >
       {localLoading || isLoading || isFileLoading ? (
         <CircularProgress size={20} color="inherit" />

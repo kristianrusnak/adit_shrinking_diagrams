@@ -33,7 +33,7 @@ const ProcessDiagramButton = ({ onProcess }: ProcessDiagramButtonProps) => {
 
   const handleProcess = async () => {
     if (!selectedFile) {
-      showError("Najprv nahrajte súbor", "Chýbajúci súbor");
+      showError("Please upload a file first", "Missing file");
       return;
     }
 
@@ -64,7 +64,7 @@ const ProcessDiagramButton = ({ onProcess }: ProcessDiagramButtonProps) => {
       await dispatch(setFileReducedAsync(new File([result], selectedFile.name)));
       onProcess?.();
     } catch (error: any) {
-      showError(error.data?.detail || "Chyba pri spracovaní súboru", `Status: ${error.status}`);
+      showError(error.data?.detail || "Error processing file", `Status: ${error.status}`);
     }
   };
 
@@ -84,10 +84,10 @@ const ProcessDiagramButton = ({ onProcess }: ProcessDiagramButtonProps) => {
       }}
     >
       {isLoading 
-        ? "Spracúvam diagram..." 
+        ? "Shrinking diagram..." 
         : selectedAlgorithm === "none" 
-          ? "Načítať diagram" 
-          : "Zmenšiť diagram"}
+          ? "Load diagram" 
+          : "Shrink diagram"}
     </Button>
   );
 };
