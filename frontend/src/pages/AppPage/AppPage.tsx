@@ -1,4 +1,4 @@
-import { Box, IconButton, useMediaQuery, useTheme, Drawer } from "@mui/material";
+import { Box, IconButton, useMediaQuery, useTheme, Drawer, Alert, Typography, CircularProgress } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -12,6 +12,8 @@ import { useAuth } from "../../context/AuthProvider";
 import SimpleFilePreview from "@/components/ui/SimpleFilePreview";
 import { useState, useEffect } from "react";
 import { NAVBAR_HEIGHT } from "@/utils/layoutStyles";
+import { useSelector } from "react-redux";
+import { selectIsAnyFileLoading } from "@/store/slices/fileSlice";
 
 interface AppPageProps {
   isUserLoggedIn?: boolean;
@@ -23,6 +25,7 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTabletOrBelow = useMediaQuery(theme.breakpoints.down('md'));
+  const isFileLoading = useSelector(selectIsAnyFileLoading);
   
   // Sidebar je na mobile defaultne skrytý, na desktop viditeľný
   const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
@@ -141,6 +144,18 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
               flexDirection: 'column',
             }}
           >
+            {/* Loading indicator */}
+            {isFileLoading && (
+              <Alert 
+                severity="info" 
+                icon={<CircularProgress size={20} />}
+                sx={{ mb: 2 }}
+              >
+                <Typography variant="body2">
+                  Načítavam a ukladám súbor... Prosím počkajte.
+                </Typography>
+              </Alert>
+            )}
             <Chat />
           </Box>
 

@@ -11,8 +11,9 @@ import { useGetChatThreadsQuery, useRenameThreadMutation, useDeleteThreadMutatio
 import { useNavigate, useParams } from "react-router-dom";
 import type { ChatThread } from "@/api/types";
 import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/store/store";
 import { clearMessages } from "@/store/slices/messageSlice";
-import { setFile, setFileReduced, setMessage } from "@/store/slices/fileSlice";
+import { setFileAsync, setFileReducedAsync, setMessage } from "@/store/slices/fileSlice";
 import { useAuth } from "@/context/AuthProvider";
 import { skipToken } from "@reduxjs/toolkit/query";
 
@@ -24,7 +25,7 @@ interface SidebarProps {
 
 const Sidebar: FC<SidebarProps> = ({ isOpen, onToggle, onThreadSelect }) => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { threadId } = useParams<{ threadId?: string }>();
   const { userInfo } = useAuth();
   
@@ -38,8 +39,8 @@ const Sidebar: FC<SidebarProps> = ({ isOpen, onToggle, onThreadSelect }) => {
 
   const handleNewChat = useCallback(() => {
     dispatch(clearMessages());
-    dispatch(setFile(null));
-    dispatch(setFileReduced(null));
+    dispatch(setFileAsync(null));
+    dispatch(setFileReducedAsync(null));
     dispatch(setMessage(""));
     navigate("/app");
   }, [navigate, dispatch]);

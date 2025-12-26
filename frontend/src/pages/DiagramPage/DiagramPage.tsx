@@ -1,7 +1,8 @@
 import SimpleFilePreview from "@/components/ui/SimpleFilePreview";
 import FileUploadButton from "@/components/ui/FileUploadButton";
+import ProcessDiagramButton from "@/components/ui/ProcessDiagramButton";
 import { ErrorProvider } from "@/context/ErrorProvider";
-import { Box } from "@mui/material";
+import { Box, CircularProgress, Typography, Alert } from "@mui/material";
 import AlgorithmSelector from "@/components/ui/AlgorithmSelector";
 import { useEffect, useState } from "react";
 import EvolutionarySettings from "@/components/ui/alg_settings/EvolutionarySettings";
@@ -11,6 +12,7 @@ import {
   selectSelectedAlgorithm,
   setSelectedAlgorithm,
 } from "@/store/slices/algorithmSlice";
+import { selectIsAnyFileLoading, selectFile, selectFileReduced } from "@/store/slices/fileSlice";
 
 import { ButtonType } from "@/components/ui/FileUploadButton";
 import FilePreviewDiagrams from "@/components/ui/FilePreviewDiagrams";
@@ -38,7 +40,11 @@ export const DiagramPage = () => {
   // const [selectedAlgorithm, setSelectedAlgorithm] = useState("kruskals");
   const dispatch = useDispatch();
   const selectedAlgorithm = useSelector(selectSelectedAlgorithm);
-  const [algConfig, setAlgConfig] = useState<{} | null>(null);
+  const isFileLoading = useSelector(selectIsAnyFileLoading);
+  const selectedFile = useSelector(selectFile);
+  const selectedFileReduced = useSelector(selectFileReduced);
+  const [algConfig, setAlgConfig] = useState<any | null>(null);
+  const [isProcessed, setIsProcessed] = useState(false);
 
   const { data, isLoading } = useGetAlgConfigQuery({
     algorithm: selectedAlgorithm,
@@ -62,6 +68,11 @@ export const DiagramPage = () => {
     }
   }, [data]);
 
+  // Reset isProcessed when a new file is uploaded
+  useEffect(() => {
+    setIsProcessed(false);
+  }, [selectedFile]);
+
   return (
     <>
       <title>Shrinking Diagrams</title>
@@ -75,6 +86,42 @@ export const DiagramPage = () => {
         }}
       >
         <FileUploadButton type={ButtonType.FULL} />
+        
+        {/* Loading indicator */}
+        {isFileLoading && (
+          <Alert 
+            severity="info" 
+            icon={<CircularProgress size={20} />}
+            sx={{ mt: 2, minWidth: "400px" }}
+          >
+            <Typography variant="body2">
+              Loading file... Please wait.
+            </Typography>
+          </Alert>
+        )}
+
+        {/* Algorithm selector - show only if file is uploaded */}
+        {selectedFile && (
+          <Box sx={{ mt: 3, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+            <AlgorithmSelector
+              options={algorithms}
+              value={selectedAlgorithm}
+              onChange={(id) => selectAlgorithm(id)}
+            />
+
+            <AlgorithmSettingsLayout title={algName}>
+              {selectedAlgorithm === "evol" && (
+                <EvolutionarySettings
+                  maxIterations={algConfig?.generations}
+                  maxPopulation={algConfig?.population_size}
+                />
+              )}
+            </AlgorithmSettingsLayout>
+
+            <ProcessDiagramButton onProcess={() => setIsProcessed(true)} />
+          </Box>
+        )}
+        
         <Box
           sx={{
             display: "flex",
@@ -83,22 +130,11 @@ export const DiagramPage = () => {
             marginTop: 3,
           }}
         >
-          {selectedAlgorithm === "none" && <SimpleFilePreview />}
-          {selectedAlgorithm !== "none" && <FilePreviewDiagrams />}
-          <AlgorithmSelector
-            options={algorithms}
-            value={selectedAlgorithm}
-            onChange={(id) => selectAlgorithm(id)}
-          />
-        </Box>
-        <AlgorithmSettingsLayout title={algName}>
-          {selectedAlgorithm === "evol" && (
-            <EvolutionarySettings
-              maxIterations={algConfig?.generations}
-              maxPopulation={algConfig?.population_size}
-            />
+          {selectedFile && !isProcessed && <SimpleFilePreview />}
+          {selectedFile && isProcessed && selectedFileReduced && (
+            selectedAlgorithm === "none" ? <SimpleFilePreview /> : <FilePreviewDiagrams />
           )}
-        </AlgorithmSettingsLayout>
+        </Box>
       </Box>
     </>
   );

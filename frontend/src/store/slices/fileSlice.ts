@@ -1,9 +1,11 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 
 interface FileState {
   file: File | null; // pump file
   fileReduced: File | null; // reduced file
   message: string; // openai prompt
+  isLoadingFile: boolean; // indicates if file is being saved to localStorage
+  isLoadingFileReduced: boolean; // indicates if reduced file is being saved to localStorage
 }
 
 // Keys for localStorage
@@ -57,13 +59,50 @@ const initialState: FileState = {
   file: persistedFile,
   fileReduced: persistedFileReduced,
   message: "",
+  isLoadingFile: false,
+  isLoadingFileReduced: false,
 };
+
+// Async thunks for setting files with localStorage persistence
+export const setFileAsync = createAsyncThunk(
+  'fileStore/setFileAsync',
+  async (file: File | null) => {
+    if (file) {
+      const serialized = await serializeFile(file);
+      if (serialized) {
+        localStorage.setItem(LS_FILE_KEY, serialized);
+      }
+    } else {
+      localStorage.removeItem(LS_FILE_KEY);
+    }
+    return file;
+  }
+);
+
+export const setFileReducedAsync = createAsyncThunk(
+  'fileStore/setFileReducedAsync',
+  async (file: File | null) => {
+    if (file) {
+      const serialized = await serializeFile(file);
+      if (serialized) {
+        localStorage.setItem(LS_FILE_REDUCED_KEY, serialized);
+      }
+    } else {
+      localStorage.removeItem(LS_FILE_REDUCED_KEY);
+    }
+    return file;
+  }
+);
 
 // selectors
 export const selectFile = (state: any): File | null => state.fileStore.file;
 export const selectFileReduced = (state: any): File | null =>
   state.fileStore.fileReduced;
 export const selectMessage = (state: any): string => state.fileStore.message;
+export const selectIsLoadingFile = (state: any): boolean => state.fileStore.isLoadingFile;
+export const selectIsLoadingFileReduced = (state: any): boolean => state.fileStore.isLoadingFileReduced;
+export const selectIsAnyFileLoading = (state: any): boolean => 
+  state.fileStore.isLoadingFile || state.fileStore.isLoadingFileReduced;
 
 const fileSlice = createSlice({
   name: "fileStore",
@@ -71,27 +110,38 @@ const fileSlice = createSlice({
   reducers: {
     setFile: (state, action: PayloadAction<File | null>) => {
       state.file = action.payload;
-      if (action.payload) {
-        serializeFile(action.payload).then((serialized) => {
-          if (serialized) localStorage.setItem(LS_FILE_KEY, serialized);
-        });
-      } else {
-        localStorage.removeItem(LS_FILE_KEY);
-      }
     },
     setFileReduced: (state, action: PayloadAction<File | null>) => {
       state.fileReduced = action.payload;
-      if (action.payload) {
-        serializeFile(action.payload).then((serialized) => {
-          if (serialized) localStorage.setItem(LS_FILE_REDUCED_KEY, serialized);
-        });
-      } else {
-        localStorage.removeItem(LS_FILE_REDUCED_KEY);
-      }
     },
     setMessage: (state, action: PayloadAction<string>) => {
       state.message = action.payload;
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      // setFileAsync
+      .addCase(setFileAsync.pending, (state) => {
+        state.isLoadingFile = true;
+      })
+      .addCase(setFileAsync.fulfilled, (state, action) => {
+        state.file = action.payload;
+        state.isLoadingFile = false;
+      })
+      .addCase(setFileAsync.rejected, (state) => {
+        state.isLoadingFile = false;
+      })
+      // setFileReducedAsync
+      .addCase(setFileReducedAsync.pending, (state) => {
+        state.isLoadingFileReduced = true;
+      })
+      .addCase(setFileReducedAsync.fulfilled, (state, action) => {
+        state.fileReduced = action.payload;
+        state.isLoadingFileReduced = false;
+      })
+      .addCase(setFileReducedAsync.rejected, (state) => {
+        state.isLoadingFileReduced = false;
+      });
   },
 });
 

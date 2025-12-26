@@ -2,6 +2,8 @@ import React, { useLayoutEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { GoArrowUpRight } from 'react-icons/go';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { selectIsAnyFileLoading } from '@/store/slices/fileSlice';
 
 
 type CardNavLink = {
@@ -46,6 +48,7 @@ const CardNav: React.FC<CardNavProps> = ({
   const navRef = useRef<HTMLDivElement | null>(null);
   const cardsRef = useRef<HTMLDivElement[]>([]);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
+  const isFileLoading = useSelector(selectIsAnyFileLoading);
 
   const calculateHeight = () => {
     const navEl = navRef.current;
@@ -196,11 +199,17 @@ const CardNav: React.FC<CardNavProps> = ({
 
           <button
             type="button"
-            className="card-nav-cta-button hidden lg:inline-flex border-0 rounded-[calc(0.75rem-0.2rem)] px-4 items-center h-full font-medium cursor-pointer transition-colors duration-300"
+            className="card-nav-cta-button hidden lg:inline-flex border-0 rounded-[calc(0.75rem-0.2rem)] px-4 items-center h-full font-medium cursor-pointer transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ backgroundColor: buttonBgColor, color: buttonTextColor }}
-            onClick={() => { navigate('/app'); }}
+            onClick={() => { 
+              if (!isFileLoading) {
+                navigate('/app'); 
+              }
+            }}
+            disabled={isFileLoading}
+            title={isFileLoading ? 'Počkajte, kým sa dokončí načítanie súboru' : 'Prejsť do aplikácie'}
           >
-            Go to App
+            {isFileLoading ? 'Načítavam...' : 'Go to App'}
           </button>
         </div>
         <div
