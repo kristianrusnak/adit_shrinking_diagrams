@@ -1,4 +1,13 @@
-import { Box, IconButton, useMediaQuery, useTheme, Drawer, Alert, Typography, CircularProgress } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  useMediaQuery,
+  useTheme,
+  Drawer,
+  Alert,
+  Typography,
+  CircularProgress,
+} from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -23,10 +32,10 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
   const { userInfo } = useAuth();
   const isLoggedIn = isUserLoggedIn || !!userInfo;
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTabletOrBelow = useMediaQuery(theme.breakpoints.down('md'));
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTabletOrBelow = useMediaQuery(theme.breakpoints.down("md"));
   const isFileLoading = useSelector(selectIsAnyFileLoading);
-  
+
   // Sidebar je na mobile defaultne skrytý, na desktop viditeľný
   const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
   // File preview je defaultne skrytý
@@ -38,11 +47,11 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
   }, [isMobile]);
 
   const toggleSidebar = () => {
-    setIsSidebarOpen(prev => !prev);
+    setIsSidebarOpen((prev) => !prev);
   };
 
   const toggleFilePreview = () => {
-    setIsFilePreviewOpen(prev => !prev);
+    setIsFilePreviewOpen((prev) => !prev);
   };
 
   const handleThreadSelect = () => {
@@ -55,14 +64,14 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
   return (
     <>
       <title>Shrinking Diagrams</title>
-      <Box 
+      <Box
         className={styles.page}
         sx={{
           height: `calc(100vh - ${NAVBAR_HEIGHT}px)`,
           marginTop: `${NAVBAR_HEIGHT}px`,
-          display: 'flex',
-          position: 'relative',
-          overflow: 'hidden',
+          display: "flex",
+          position: "relative",
+          overflow: "hidden",
         }}
       >
         {/* Toggle button keď je sidebar zatvorený */}
@@ -70,13 +79,13 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
           <IconButton
             onClick={toggleSidebar}
             sx={{
-              position: 'fixed',
+              position: "fixed",
               left: 8,
               top: `${NAVBAR_HEIGHT + 28}px`,
               zIndex: 1200,
-              backgroundColor: 'background.paper',
-              '&:hover': {
-                backgroundColor: 'action.hover',
+              backgroundColor: "background.paper",
+              "&:hover": {
+                backgroundColor: "action.hover",
               },
             }}
             aria-label="Open sidebar"
@@ -92,16 +101,16 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
             open={isSidebarOpen}
             onClose={toggleSidebar}
             sx={{
-              '& .MuiDrawer-paper': {
-                width: '100%',
+              "& .MuiDrawer-paper": {
+                width: "100%",
                 marginTop: `${NAVBAR_HEIGHT}px`,
                 height: `calc(100vh - ${NAVBAR_HEIGHT}px)`,
               },
             }}
           >
-            <Sidebar 
-              isOpen={isSidebarOpen} 
-              onToggle={toggleSidebar} 
+            <Sidebar
+              isOpen={isSidebarOpen}
+              onToggle={toggleSidebar}
               onThreadSelect={handleThreadSelect}
             />
           </Drawer>
@@ -109,15 +118,15 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
           isSidebarOpen && (
             <Box
               sx={{
-                width: '280px',
+                width: "280px",
                 flexShrink: 0,
-                height: '100%',
-                overflow: 'hidden',
+                height: "100%",
+                overflow: "hidden",
               }}
             >
-              <Sidebar 
-                isOpen={isSidebarOpen} 
-                onToggle={toggleSidebar} 
+              <Sidebar
+                isOpen={isSidebarOpen}
+                onToggle={toggleSidebar}
                 onThreadSelect={handleThreadSelect}
               />
             </Box>
@@ -128,9 +137,9 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
         <Box
           sx={{
             flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
             minWidth: 0,
           }}
         >
@@ -138,16 +147,16 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
           <Box
             sx={{
               flex: 1,
-              overflow: 'auto',
-              padding: '1rem',
-              display: 'flex',
-              flexDirection: 'column',
+              overflow: "auto",
+              padding: "1rem",
+              display: "flex",
+              flexDirection: "column",
             }}
           >
             {/* Loading indicator */}
             {isFileLoading && (
-              <Alert 
-                severity="info" 
+              <Alert
+                severity="info"
                 icon={<CircularProgress size={20} />}
                 sx={{ mb: 2 }}
               >
@@ -162,20 +171,20 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
           {/* Message Input a Shrink Button - fixné dole */}
           <Box
             sx={{
-              display: 'flex',
-              flexDirection: { xs: 'column', md: 'row' },
+              display: "flex",
+              flexDirection: { xs: "column", md: "row" },
               gap: 1,
-              padding: '1rem',
-              borderTop: '1px solid',
-              borderColor: 'divider',
-              backgroundColor: 'background.paper',
-              alignItems: { xs: 'stretch', md: 'flex-end' },
+              padding: "1rem",
+              borderTop: "1px solid",
+              borderColor: "divider",
+              backgroundColor: "background.paper",
+              alignItems: { xs: "stretch", md: "flex-end" },
             }}
           >
-            <Box 
-              sx={{ 
-                flex: { xs: 'none', md: 1 },
-                width: { xs: '100%', md: 'auto' },
+            <Box
+              sx={{
+                flex: { xs: "none", md: 1 },
+                width: { xs: "100%", md: "auto" },
                 order: { xs: 2, md: 1 },
               }}
             >
@@ -183,10 +192,10 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
             </Box>
             <Box
               sx={{
-                width: { xs: '100%', md: 'auto' },
+                width: { xs: "100%", md: "auto" },
                 order: { xs: 1, md: 2 },
-                display: { xs: 'flex', md: 'block' },
-                justifyContent: { xs: 'center', md: 'flex-start' },
+                display: { xs: "flex", md: "block" },
+                justifyContent: { xs: "center", md: "flex-start" },
               }}
             >
               <ShrinkButton />
@@ -199,13 +208,13 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
           <IconButton
             onClick={toggleFilePreview}
             sx={{
-              position: 'fixed',
+              position: "fixed",
               right: 8,
               top: `${NAVBAR_HEIGHT + 28}px`,
               zIndex: 1200,
-              backgroundColor: 'background.paper',
-              '&:hover': {
-                backgroundColor: 'action.hover',
+              backgroundColor: "background.paper",
+              "&:hover": {
+                backgroundColor: "action.hover",
               },
             }}
             aria-label="Open file preview"
@@ -221,8 +230,8 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
             open={isFilePreviewOpen}
             onClose={toggleFilePreview}
             sx={{
-              '& .MuiDrawer-paper': {
-                width: '100%',
+              "& .MuiDrawer-paper": {
+                width: "100%",
                 marginTop: `${NAVBAR_HEIGHT}px`,
                 height: `calc(100vh - ${NAVBAR_HEIGHT}px)`,
               },
@@ -230,27 +239,28 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
           >
             <Box
               sx={{
-                display: 'flex',
-                flexDirection: 'column',
+                display: "flex",
+                flexDirection: "column",
                 gap: 2,
-                padding: '1rem',
-                height: '100%',
-                overflow: 'auto',
+                padding: "1rem",
+                height: "100%",
+                overflow: "auto",
               }}
             >
               <IconButton
                 onClick={toggleFilePreview}
                 sx={{
-                  alignSelf: 'flex-end',
-                  marginBottom: '0.5rem',
+                  alignSelf: "flex-end",
+                  marginBottom: "0.5rem",
                 }}
                 aria-label="Close file preview"
               >
                 <ChevronRightIcon />
               </IconButton>
-              
+
               <SimpleFilePreview
-                title="Placeholder gpt response"
+                title="AI assistant response"
+                type="gpt"
                 sx={{
                   borderRadius: 2,
                   minWidth: "200px",
@@ -258,9 +268,10 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
                   backgroundColor: "primary.light",
                 }}
               />
-              
+
               <SimpleFilePreview
                 title="Shrunk diagram"
+                type="reduced"
                 sx={{
                   borderRadius: 2,
                   minWidth: "200px",
@@ -274,31 +285,32 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
           isFilePreviewOpen && (
             <Box
               sx={{
-                width: '300px',
-                display: 'flex',
-                flexDirection: 'column',
+                width: "300px",
+                display: "flex",
+                flexDirection: "column",
                 gap: 2,
-                padding: '1rem',
-                overflow: 'auto',
-                borderLeft: '1px solid',
-                borderColor: 'divider',
+                padding: "1rem",
+                overflow: "auto",
+                borderLeft: "1px solid",
+                borderColor: "divider",
                 flexShrink: 0,
-                backgroundColor: 'background.paper',
+                backgroundColor: "background.paper",
               }}
             >
               <IconButton
                 onClick={toggleFilePreview}
                 sx={{
-                  alignSelf: 'flex-end',
-                  marginBottom: '0.5rem',
+                  alignSelf: "flex-end",
+                  marginBottom: "0.5rem",
                 }}
                 aria-label="Close file preview"
               >
                 <ChevronRightIcon />
               </IconButton>
-              
+
               <SimpleFilePreview
-                title="Placeholder gpt response"
+                title="AI assistant response"
+                type="gpt"
                 sx={{
                   borderRadius: 2,
                   minWidth: "200px",
@@ -306,9 +318,10 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
                   backgroundColor: "primary.light",
                 }}
               />
-              
+
               <SimpleFilePreview
                 title="Shrunk diagram"
+                type="reduced"
                 sx={{
                   borderRadius: 2,
                   minWidth: "200px",

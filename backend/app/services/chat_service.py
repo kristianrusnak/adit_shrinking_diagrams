@@ -14,6 +14,7 @@ from app.domain.chat_thread import ChatThreadDomain
 from app.domain.chat_message import ChatMessageDomain
 from app.domain.chat_files import ChatFileDomain
 
+
 def _to_chat_thread_domain(chat_thread: ChatThread) -> ChatThreadDomain:
     return ChatThreadDomain(
         user_id=chat_thread.user_id,
@@ -21,24 +22,27 @@ def _to_chat_thread_domain(chat_thread: ChatThread) -> ChatThreadDomain:
         created_at=chat_thread.created_at,
         updated_at=chat_thread.updated_at,
         last_message_at=chat_thread.last_message_at,
-        last_diagram_file_id=chat_thread.last_diagram_file_id
+        last_diagram_file_id=chat_thread.last_diagram_file_id,
     )
+
 
 def _to_chat_message_domain(chat_message: ChatMessage) -> ChatMessageDomain:
     return ChatMessageDomain(
         thread_id=chat_message.thread_id,
         role=chat_message.role,
         content=chat_message.content,
-        created_at=chat_message.created_at
+        created_at=chat_message.created_at,
     )
+
 
 def _to_chat_file_domain(chat_file: ChatFiles) -> ChatFileDomain:
     return ChatFileDomain(
         message_id=chat_file.message_id,
         file_name=chat_file.file_name,
         file_content=chat_file.file_content,
-        uploaded_at=chat_file.uploaded_at
+        uploaded_at=chat_file.uploaded_at,
     )
+
 
 def _to_ai_message_list(messages: list[ChatMessage]) -> list[dict]:
     ai_messages = []
@@ -55,20 +59,21 @@ def _to_ai_message_list(messages: list[ChatMessage]) -> list[dict]:
                     f"--- END FILE ---"
                 )
 
-        ai_messages.append({
-            "role": msg.role.value if hasattr(msg.role, "value") else msg.role,
-            "content": full_content
-        })
+        ai_messages.append(
+            {
+                "role": msg.role.value if hasattr(msg.role, "value") else msg.role,
+                "content": full_content,
+            }
+        )
 
     return ai_messages
+
 
 class ChatService:
     def __init__(self, db_session):
         self.db_session = db_session
 
-    def retrieve_threads(self,
-                        user_id: int,
-                        order: str = "ASC") -> list[ChatThread]:
+    def retrieve_threads(self, user_id: int, order: str = "ASC") -> list[ChatThread]:
         """
         Retrieve chat threads for a user.
 
@@ -91,10 +96,9 @@ class ChatService:
         repo = ChatThreadRepository(self.db_session)
         return repo.get_all_by_user_id(user_id, order)
 
-    def create_thread(self,
-                      user_id: int,
-                      title: str | None,
-                      commit: bool = False) -> ChatThread:
+    def create_thread(
+        self, user_id: int, title: str | None, commit: bool = False
+    ) -> ChatThread:
         """
         Create a new chat thread for a user.
 
@@ -113,27 +117,23 @@ class ChatService:
 
         repo = ChatThreadRepository(self.db_session)
 
-        domain_thread = ChatThreadDomain.create(
-            user_id=user_id,
-            title=title
-        )
+        domain_thread = ChatThreadDomain.create(user_id=user_id, title=title)
 
-        model = repo.create(
-            user_id=domain_thread.user_id,
-            title=domain_thread.title
-        )
+        model = repo.create(user_id=domain_thread.user_id, title=domain_thread.title)
 
         if commit:
             self.db_session.commit()
 
         return model
 
-    def create_new_thread_with_prompt(self,
-                      user_id: int,
-                      title: str | None,
-                      prompt_message: str,
-                      prompt_file: str | None = None,
-                      prompt_file_name: str | None = None) -> tuple[ChatThread, ChatMessage]:
+    def create_new_thread_with_prompt(
+        self,
+        user_id: int,
+        title: str | None,
+        prompt_message: str,
+        prompt_file: str | None = None,
+        prompt_file_name: str | None = None,
+    ) -> tuple[ChatThread, ChatMessage]:
         """
         Create a new chat thread for a user.
 
@@ -164,17 +164,14 @@ class ChatService:
         # return model
 
         # Create new thread
-        thread = self.create_thread(
-            user_id=user_id,
-            title=title
-        )
+        thread = self.create_thread(user_id=user_id, title=title)
 
         # Create initial prompt message in the thread
         input_message = self.record_message(
             user_id=user_id,
             thread_id=thread.id,
             role=RoleEnum.user.value,
-            content=prompt_message
+            content=prompt_message,
         )
 
         # if there is a prompt file, create it
@@ -184,56 +181,45 @@ class ChatService:
                 user_id=user_id,
                 message_id=input_message.id,
                 file_content=prompt_file,
-                file_name=prompt_file_name
+                file_name=prompt_file_name,
             )
 
             # Update the last_diagram_file_id in the thread
             self.update_last_file_in_thread(
-                user_id=user_id,
-                thread_id=thread.id,
-                file_id=file.id
+                user_id=user_id, thread_id=thread.id, file_id=file.id
             )
 
             # Flush to persist file to database
             self.db_session.flush()
-            
+
             # Refresh the message to load the relationship with files
             self.db_session.refresh(input_message)
-            
+
             # Verify file is attached
             if not input_message.files or len(input_message.files) == 0:
                 raise RuntimeError("File was not properly attached to message")
 
         # Send to AI and get response
-        generated_message = self.sent_to_ai(
-            user_id=user_id,
-            thread_id=thread.id
-        )
+        generated_message = self.sent_to_ai(user_id=user_id, thread_id=thread.id)
 
         # Record AI response message in the thread
         output_message = self.record_message(
             user_id=user_id,
             thread_id=thread.id,
             role=RoleEnum.assistant.value,
-            content=generated_message
+            content=generated_message,
         )
 
         # Update the last_message_at in the thread
         self.update_last_message_in_thread(
-            user_id=user_id,
-            thread_id=thread.id,
-            timestamp=output_message.created_at
+            user_id=user_id, thread_id=thread.id, timestamp=output_message.created_at
         )
 
         self.db_session.commit()
 
         return thread, output_message
 
-
-    def delete_thread(self,
-                      user_id: int,
-                      thread_id: str,
-                      commit: bool = False) -> None:
+    def delete_thread(self, user_id: int, thread_id: str, commit: bool = False) -> None:
         """
         Delete a chat thread for a user.
 
@@ -251,7 +237,9 @@ class ChatService:
         if not model:
             raise ValueError("Thread not found.")
         if model.user_id != user_id:
-            raise PermissionError("User does not have permission to delete this thread.")
+            raise PermissionError(
+                "User does not have permission to delete this thread."
+            )
 
         result = repo.delete(thread_id)
 
@@ -261,11 +249,9 @@ class ChatService:
         if commit:
             self.db_session.commit()
 
-    def update_last_message_in_thread(self,
-                                      user_id: int,
-                                      thread_id: str,
-                                      timestamp: datetime,
-                                      commit: bool = False) -> ChatThread:
+    def update_last_message_in_thread(
+        self, user_id: int, thread_id: str, timestamp: datetime, commit: bool = False
+    ) -> ChatThread:
         """
         Update the last message timestamp in a chat thread.
 
@@ -288,7 +274,9 @@ class ChatService:
         if not thread:
             raise ValueError("Thread not found.")
         if thread.user_id != user_id:
-            raise PermissionError("User does not have permission to update this thread.")
+            raise PermissionError(
+                "User does not have permission to update this thread."
+            )
 
         domain_thread = _to_chat_thread_domain(thread)
 
@@ -298,7 +286,7 @@ class ChatService:
         updated_model = repo.update(
             thread_id=thread_id,
             last_message_at=domain_thread.last_message_at,
-            updated_at=domain_thread.updated_at
+            updated_at=domain_thread.updated_at,
         )
 
         if not updated_model:
@@ -309,11 +297,9 @@ class ChatService:
 
         return updated_model
 
-    def update_last_file_in_thread(self,
-                                   user_id: int,
-                                   thread_id: str,
-                                   file_id: int,
-                                   commit: bool = False) -> ChatThread:
+    def update_last_file_in_thread(
+        self, user_id: int, thread_id: str, file_id: int, commit: bool = False
+    ) -> ChatThread:
         """
         Update the last diagram file ID in a chat thread.
 
@@ -338,15 +324,16 @@ class ChatService:
         if not thread:
             raise ValueError("Thread not found.")
         if thread.user_id != user_id:
-            raise PermissionError("User does not have permission to update this thread.")
+            raise PermissionError(
+                "User does not have permission to update this thread."
+            )
 
         domain_thread = _to_chat_thread_domain(thread)
 
         domain_thread.change_last_diagram_file_id(file_id)
 
         updated_model = repo.update(
-            thread_id=thread_id,
-            last_diagram_file_id=domain_thread.last_diagram_file_id
+            thread_id=thread_id, last_diagram_file_id=domain_thread.last_diagram_file_id
         )
 
         if not updated_model:
@@ -357,11 +344,9 @@ class ChatService:
 
         return updated_model
 
-    def rename_thread(self,
-                      user_id: int,
-                      thread_id: str,
-                      title: str | None,
-                      commit: bool = False) -> ChatThread:
+    def rename_thread(
+        self, user_id: int, thread_id: str, title: str | None, commit: bool = False
+    ) -> ChatThread:
         """
         Update a chat thread's title.
 
@@ -386,16 +371,15 @@ class ChatService:
         if not model:
             raise ValueError("Thread not found.")
         if model.user_id != user_id:
-            raise PermissionError("User does not have permission to update this thread.")
+            raise PermissionError(
+                "User does not have permission to update this thread."
+            )
 
         domain_thread = _to_chat_thread_domain(model)
 
         domain_thread.rename_title(title)
 
-        updated_model = repo.update(
-            thread_id=thread_id,
-            title=domain_thread.title
-        )
+        updated_model = repo.update(thread_id=thread_id, title=domain_thread.title)
 
         if not updated_model:
             raise RuntimeError("Failed to update thread.")
@@ -405,11 +389,9 @@ class ChatService:
 
         return updated_model
 
-
-    def retrieve_messages(self,
-                          user_id: int,
-                          thread_id: str,
-                          order: str = "ASC") -> list[ChatMessage]:
+    def retrieve_messages(
+        self, user_id: int, thread_id: str, order: str = "ASC"
+    ) -> list[ChatMessage]:
         """
         Retrieve chat messages for a thread.
 
@@ -435,7 +417,9 @@ class ChatService:
         if not thread:
             raise ValueError("Thread not found.")
         if thread.user_id != user_id:
-            raise PermissionError("User does not have permission to access this thread.")
+            raise PermissionError(
+                "User does not have permission to access this thread."
+            )
 
         repo = ChatMessageRepository(self.db_session)
 
@@ -444,12 +428,14 @@ class ChatService:
 
         return repo.get_by_thread_id(thread_id, order)
 
-    def record_message(self,
-                       user_id: int,
-                       thread_id: str,
-                       role: str,
-                       content: str,
-                       commit: bool = False) -> ChatMessage:
+    def record_message(
+        self,
+        user_id: int,
+        thread_id: str,
+        role: str,
+        content: str,
+        commit: bool = False,
+    ) -> ChatMessage:
         """
         Record a new chat message in a thread.
 
@@ -477,20 +463,20 @@ class ChatService:
         if not thread:
             raise ValueError("Thread not found.")
         if thread.user_id != user_id:
-            raise PermissionError("User does not have permission to access this thread.")
+            raise PermissionError(
+                "User does not have permission to access this thread."
+            )
 
         message_repo = ChatMessageRepository(self.db_session)
 
         domain_message = ChatMessageDomain.create(
-            thread_id=thread_id,
-            role=role,
-            content=content
+            thread_id=thread_id, role=role, content=content
         )
 
         model = message_repo.create(
             thread_id=domain_message.thread_id,
             role=domain_message.role,
-            content=domain_message.content
+            content=domain_message.content,
         )
 
         if commit:
@@ -498,12 +484,14 @@ class ChatService:
 
         return model
 
-    def record_file(self,
-                    user_id: int,
-                    message_id: int,
-                    file_content: str,
-                    file_name: str | None,
-                    commit: bool = False) -> ChatFiles:
+    def record_file(
+        self,
+        user_id: int,
+        message_id: int,
+        file_content: str,
+        file_name: str | None,
+        commit: bool = False,
+    ) -> ChatFiles:
         """
         Record a new chat file associated with a message.
 
@@ -540,20 +528,20 @@ class ChatService:
         if not thread:
             raise ValueError("Thread not found.")
         if thread.user_id != user_id:
-            raise PermissionError("User does not have permission to access this message's thread.")
+            raise PermissionError(
+                "User does not have permission to access this message's thread."
+            )
 
         file_repo = ChatFilesRepository(self.db_session)
 
         domain_file = ChatFileDomain.create(
-            message_id=message_id,
-            file_name=file_name,
-            file_content=file_content
+            message_id=message_id, file_name=file_name, file_content=file_content
         )
 
         file = file_repo.create(
             message_id=domain_file.message_id,
             file_name=domain_file.file_name,
-            file_content=domain_file.file_content
+            file_content=domain_file.file_content,
         )
 
         if commit:
@@ -561,12 +549,14 @@ class ChatService:
 
         return file
 
-    def prompt_message(self,
-                       user_id: int,
-                       thread_id: str,
-                       prompt_message: str,
-                       prompt_file: str | None = None,
-                       prompt_file_name: str | None = None) -> ChatMessage:
+    def prompt_message(
+        self,
+        user_id: int,
+        thread_id: str,
+        prompt_message: str,
+        prompt_file: str | None = None,
+        prompt_file_name: str | None = None,
+    ) -> ChatMessage:
         """
         Send a prompt message to AI and get the response.
 
@@ -589,13 +579,12 @@ class ChatService:
             AI generated response.
         """
 
-
         # Create initial prompt message in the thread
         input_message = self.record_message(
             user_id=user_id,
             thread_id=thread_id,
             role=RoleEnum.user.value,
-            content=prompt_message
+            content=prompt_message,
         )
 
         # if there is a prompt file, create it
@@ -605,69 +594,73 @@ class ChatService:
                 user_id=user_id,
                 message_id=input_message.id,
                 file_content=prompt_file,
-                file_name=prompt_file_name
+                file_name=prompt_file_name,
             )
 
             # Update the last_diagram_file_id in the thread
             self.update_last_file_in_thread(
-                user_id=user_id,
-                thread_id=thread_id,
-                file_id=file.id
+                user_id=user_id, thread_id=thread_id, file_id=file.id
             )
 
             # Flush to persist file to database
             self.db_session.flush()
-            
+
             # Refresh the message to load the relationship with files
             self.db_session.refresh(input_message)
-            
+
             # Verify file is attached
             if not input_message.files or len(input_message.files) == 0:
                 raise RuntimeError("File was not properly attached to message")
 
         # Send to AI and get response
-        generated_message = self.sent_to_ai(
-            user_id=user_id,
-            thread_id=thread_id
-        )
+        generated_message = self.sent_to_ai(user_id=user_id, thread_id=thread_id)
 
         # Record AI response message in the thread
         output_message = self.record_message(
             user_id=user_id,
             thread_id=thread_id,
             role=RoleEnum.assistant.value,
-            content=generated_message
+            content=generated_message,
         )
 
         # Update the last_message_at in the thread
         self.update_last_message_in_thread(
-            user_id=user_id,
-            thread_id=thread_id,
-            timestamp=output_message.created_at
+            user_id=user_id, thread_id=thread_id, timestamp=output_message.created_at
         )
 
         self.db_session.commit()
 
         return output_message
 
-    def sent_to_ai(self,
-                   user_id: int,
-                   thread_id: str) -> str:
+    def sent_to_ai(self, user_id: int, thread_id: str) -> str:
         thread_repo = ChatThreadRepository(self.db_session)
         thread = thread_repo.get_by_id(thread_id)
+
+        # Prepend the messages from the repository with the system prompt exactly once
+        SYSTEM_PROMPT_RULES = """
+        You are an AI agent that modifies and helps with PlantUML (PUML) diagrams.
+
+        When responding to a request that modifies a PUML file:
+        - You MUST return the complete, updated PUML document.
+        - The response MUST contain exactly one PUML block.
+        - The PUML block MUST start with "@startuml" and end with "@enduml".
+        - Do NOT split the PUML into multiple parts.
+        - Describe any modifications you make underneath the PUML block.
+        - If you have NOT made any changes, then you should not return the PUML document.
+        """
 
         if not thread:
             raise ValueError("Thread not found.")
         if thread.user_id != user_id:
-            raise PermissionError("User does not have permission to access this thread.")
+            raise PermissionError(
+                "User does not have permission to access this thread."
+            )
 
         message_repo = ChatMessageRepository(self.db_session)
-        messages = message_repo.get_by_thread_id(
-            thread_id=thread_id,
-            order="ASC"
-        )
+        messages = message_repo.get_by_thread_id(thread_id=thread_id, order="ASC")
 
         ai_messages = _to_ai_message_list(messages)
+        ai_messages = [{"role": "system", "content": SYSTEM_PROMPT_RULES}] + ai_messages
 
         openai = OpenAIService()
         ai_response = openai.chat(ai_messages)

@@ -3,6 +3,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 interface FileState {
   file: File | null; // pump file
   fileReduced: File | null; // reduced file
+  fileGpt: File | null; // gpt response file
   message: string; // openai prompt
   isLoadingFile: boolean; // indicates if file is being saved to localStorage
   isLoadingFileReduced: boolean; // indicates if reduced file is being saved to localStorage
@@ -15,7 +16,7 @@ const LS_FILE_REDUCED_KEY = "chat_file_reduced";
 // Helper to serialize File to localStorage
 const serializeFile = async (file: File | null): Promise<string | null> => {
   if (!file) return null;
-  
+
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = () => {
@@ -33,11 +34,11 @@ const serializeFile = async (file: File | null): Promise<string | null> => {
 // Helper to deserialize File from localStorage
 const deserializeFile = (serialized: string | null): File | null => {
   if (!serialized) return null;
-  
+
   try {
     const data = JSON.parse(serialized);
     // Convert base64 back to File
-    const byteString = atob(data.content.split(',')[1]);
+    const byteString = atob(data.content.split(",")[1]);
     const ab = new ArrayBuffer(byteString.length);
     const ia = new Uint8Array(ab);
     for (let i = 0; i < byteString.length; i++) {
@@ -53,11 +54,14 @@ const deserializeFile = (serialized: string | null): File | null => {
 
 // Load files from localStorage on init
 const persistedFile = deserializeFile(localStorage.getItem(LS_FILE_KEY));
-const persistedFileReduced = deserializeFile(localStorage.getItem(LS_FILE_REDUCED_KEY));
+const persistedFileReduced = deserializeFile(
+  localStorage.getItem(LS_FILE_REDUCED_KEY),
+);
 
 const initialState: FileState = {
   file: persistedFile,
   fileReduced: persistedFileReduced,
+  fileGpt: null,
   message: "",
   isLoadingFile: false,
   isLoadingFileReduced: false,
@@ -98,6 +102,8 @@ export const setFileReducedAsync = createAsyncThunk(
 export const selectFile = (state: any): File | null => state.fileStore.file;
 export const selectFileReduced = (state: any): File | null =>
   state.fileStore.fileReduced;
+export const selectFileGpt = (state: any): File | null =>
+  state.fileStore.fileGpt;
 export const selectMessage = (state: any): string => state.fileStore.message;
 export const selectIsLoadingFile = (state: any): boolean => state.fileStore.isLoadingFile;
 export const selectIsLoadingFileReduced = (state: any): boolean => state.fileStore.isLoadingFileReduced;
@@ -113,6 +119,9 @@ const fileSlice = createSlice({
     },
     setFileReduced: (state, action: PayloadAction<File | null>) => {
       state.fileReduced = action.payload;
+    },
+    setFileGpt: (state, action: PayloadAction<File | null>) => {
+      state.fileGpt = action.payload;
     },
     setMessage: (state, action: PayloadAction<string>) => {
       state.message = action.payload;
@@ -145,5 +154,6 @@ const fileSlice = createSlice({
   },
 });
 
-export const { setFile, setFileReduced, setMessage } = fileSlice.actions;
+export const { setFile, setFileReduced, setFileGpt, setMessage } =
+  fileSlice.actions;
 export default fileSlice.reducer;

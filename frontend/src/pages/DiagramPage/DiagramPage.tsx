@@ -12,7 +12,11 @@ import {
   selectSelectedAlgorithm,
   setSelectedAlgorithm,
 } from "@/store/slices/algorithmSlice";
-import { selectIsAnyFileLoading, selectFile, selectFileReduced } from "@/store/slices/fileSlice";
+import {
+  selectIsAnyFileLoading,
+  selectFile,
+  selectFileReduced,
+} from "@/store/slices/fileSlice";
 
 import { ButtonType } from "@/components/ui/FileUploadButton";
 import FilePreviewDiagrams from "@/components/ui/FilePreviewDiagrams";
@@ -86,11 +90,11 @@ export const DiagramPage = () => {
         }}
       >
         <FileUploadButton type={ButtonType.FULL} />
-        
+
         {/* Loading indicator */}
         {isFileLoading && (
-          <Alert 
-            severity="info" 
+          <Alert
+            severity="info"
             icon={<CircularProgress size={20} />}
             sx={{ mt: 2, minWidth: "400px" }}
           >
@@ -102,7 +106,15 @@ export const DiagramPage = () => {
 
         {/* Algorithm selector - show only if file is uploaded */}
         {selectedFile && (
-          <Box sx={{ mt: 3, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+          <Box
+            sx={{
+              mt: 3,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 2,
+            }}
+          >
             <AlgorithmSelector
               options={algorithms}
               value={selectedAlgorithm}
@@ -121,7 +133,7 @@ export const DiagramPage = () => {
             <ProcessDiagramButton onProcess={() => setIsProcessed(true)} />
           </Box>
         )}
-        
+
         <Box
           sx={{
             display: "flex",
@@ -130,10 +142,15 @@ export const DiagramPage = () => {
             marginTop: 3,
           }}
         >
-          {selectedFile && !isProcessed && <SimpleFilePreview />}
-          {selectedFile && isProcessed && selectedFileReduced && (
-            selectedAlgorithm === "none" ? <SimpleFilePreview /> : <FilePreviewDiagrams />
-          )}
+          {selectedFile && !isProcessed && <SimpleFilePreview type="reduced" />}
+          {selectedFile &&
+            isProcessed &&
+            selectedFileReduced &&
+            (selectedAlgorithm === "none" ? (
+              <SimpleFilePreview type="reduced" />
+            ) : (
+              <FilePreviewDiagrams />
+            ))}
         </Box>
       </Box>
     </>

@@ -16,7 +16,7 @@ import {
   selectRefreshToken,
   setTokens,
 } from "../store/slices/authSlice";
-import { apiSlice } from "@/api/apiSlice";
+import { UserInfo } from "../api/types";
 
 interface AuthContextInterface {
   isRegistering: boolean;
