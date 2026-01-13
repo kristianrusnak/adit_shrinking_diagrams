@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext } from "react";
 import {
   useRegisterMutation,
   useLoginMutation,
@@ -16,7 +16,6 @@ import {
   selectRefreshToken,
   setTokens,
 } from "../store/slices/authSlice";
-import { UserInfo } from "../api/types";
 
 interface AuthContextInterface {
   isRegistering: boolean;
