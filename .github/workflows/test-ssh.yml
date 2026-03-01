@@ -51,4 +51,5 @@ jobs:
             -o ConnectTimeout=15 \
             ${{ secrets.PI_USER }}@${{ secrets.PI_HOST }} \
             echo "✅ SSH connection successful!"
+    
 
