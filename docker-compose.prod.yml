@@ -1,0 +1,19 @@
+services:
+  backend:
+    image: ${DOCKER_USERNAME}/adit-backend:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+
+  frontend:
+    image: ${DOCKER_USERNAME}/adit-frontend:latest
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_BASE=/api
+    depends_on:
+      - backend
+    restart: unless-stopped
+
