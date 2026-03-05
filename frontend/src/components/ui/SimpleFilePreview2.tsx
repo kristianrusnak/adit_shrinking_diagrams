@@ -1,4 +1,4 @@
-import { Button, Modal, Box, Card, Typography } from "@mui/material";
+import { Snackbar, Button, Modal, Box, Card, Typography } from "@mui/material";
 import { useSelector } from "react-redux";
 import {
   selectFile,
@@ -12,6 +12,7 @@ import { grey } from "@mui/material/colors";
 
 import { algorithms } from "../../pages/DiagramPage/DiagramPage";
 import { encodePlantUml } from "@/utils/pumlencoder";
+import PreviewModal from "@/components/ui/PreviewModal";
 
 interface SimpleFilePreviewProps {
   title?: string;
@@ -30,12 +31,31 @@ const SimpleFilePreview = ({ title, sx, type }: SimpleFilePreviewProps) => {
   const [pumlUrl, setPumlUrl] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
 
+  const [snackbarState, setSnackbarState] = useState({
+    open: false,
+    message: "",
+  });
+
   const handleOpen = () => {
     setModalOpen(true);
   };
 
   const handleClose = () => {
     setModalOpen(false);
+  };
+
+  const handleSnackbarOpen = (message: string) => {
+    setSnackbarState({
+      open: true,
+      message: message,
+    });
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbarState({
+      open: false,
+      message: "",
+    });
   };
 
   const PUML_URL_BASE = "https://www.plantuml.com/plantuml/png/";
@@ -72,8 +92,8 @@ const SimpleFilePreview = ({ title, sx, type }: SimpleFilePreviewProps) => {
           color: "#000",
           p: 2,
           mb: 2,
-          maxHeight: "250px",
           display: "flex",
+          overflow: "visible",
           flexDirection: "column",
           backgroundColor: grey[50],
           boxShadow: 3,
@@ -81,108 +101,52 @@ const SimpleFilePreview = ({ title, sx, type }: SimpleFilePreviewProps) => {
           ...sx,
         }}
       >
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: 1,
-          }}
-        >
-          <Typography variant="h6" sx={{ fontWeight: 500 }}>
-            {title ?? selectedFile}
-          </Typography>
-          <Button
-            variant="contained"
-            onClick={handleOpen}
-            sx={(theme) => ({
-              backgroundColor: `${theme.palette.primary.main} !important`,
-              color: `${theme.palette.primary.contrastText} !important`,
-              textTransform: "none",
-            })}
-          >
-            Show Diagram
-          </Button>
-        </Box>
+        <Typography variant="h6" sx={{ fontWeight: 500, mb: 1 }}>
+          {title ?? selectedFile}
+        </Typography>
 
         <Box
           sx={{
-            flexGrow: 1,
-            overflow: "auto",
+            flex: 1,
+            minHeight: 0,
+            height: "100%",
+            overflow: "hidden",
             borderRadius: 1,
-            p: 1,
             backgroundColor: grey[100],
-            fontFamily: "monospace",
-            whiteSpace: "pre-wrap",
-            "&::-webkit-scrollbar": {
-              width: "5px",
-            },
-            "&::-webkit-scrollbar-thumb": {
-              backgroundColor: "#888",
-              borderRadius: "4px",
-            },
-            "&::-webkit-scrollbar-track": {
-              backgroundColor: "#e0e0e0",
-              borderRadius: "2px",
-            },
           }}
         >
-          <Typography variant="body2">{selectedFileText}</Typography>
-
-          <img
+          <Box
+            component="img"
             src={pumlUrl}
-            onClick={handleOpen}
             alt="PlantUML Diagram"
-            style={{
-              width: "auto",
-              maxWidth: "90vw",
-              height: "auto",
-              maxHeight: "90vh",
-              objectFit: "contain",
+            onClick={handleOpen}
+            sx={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              objectPosition: "center",
+              cursor: "pointer",
+              display: "block",
             }}
           />
         </Box>
 
         <Modal open={modalOpen} onClose={handleClose}>
-          <Box
-            sx={(theme) => ({
-              position: "absolute",
-              top: "50%",
-              backgroundColor: "white !important",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              boxShadow: 24,
-              borderRadius: 2,
-              border: `2px solid ${theme.palette.primary.main} !important`,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              overflow: "hidden",
-            })}
-          >
-            <img
-              src={pumlUrl}
-              alt="PlantUML Diagram"
-              style={{
-                width: "auto",
-                maxWidth: "90vw",
-                height: "auto",
-                maxHeight: "90vh",
-                objectFit: "contain",
-              }}
-            />
-            <Button
-              variant="contained"
-              onClick={handleClose}
-              sx={{
-                m: 1,
-              }}
-            >
-              Close
-            </Button>
-          </Box>
+          <PreviewModal
+            url={pumlUrl}
+            puml={selectedFileText}
+            handleClose={handleClose}
+            handleSnackbarOpen={handleSnackbarOpen}
+          />
         </Modal>
+
+        <Snackbar
+          open={snackbarState.open}
+          autoHideDuration={3500}
+          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+          onClose={handleSnackbarClose}
+          message={snackbarState.message}
+        />
       </Card>
     )
   );

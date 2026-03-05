@@ -23,6 +23,7 @@ import { useState, useEffect } from "react";
 import { NAVBAR_HEIGHT } from "@/utils/layoutStyles";
 import { useSelector } from "react-redux";
 import { selectIsAnyFileLoading } from "@/store/slices/fileSlice";
+import SimpleFilePreview2 from "@/components/ui/SimpleFilePreview2";
 
 interface AppPageProps {
   isUserLoggedIn?: boolean;
@@ -258,7 +259,7 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
                 <ChevronRightIcon />
               </IconButton>
 
-              <SimpleFilePreview
+              <SimpleFilePreview2
                 title="AI assistant response"
                 type="gpt"
                 sx={{
@@ -308,12 +309,13 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
                 <ChevronRightIcon />
               </IconButton>
 
-              <SimpleFilePreview
+              <SimpleFilePreview2
                 title="AI assistant response"
                 type="gpt"
                 sx={{
                   borderRadius: 2,
                   minWidth: "200px",
+                  maxHeight: "175px",
                   height: "auto",
                   backgroundColor: "primary.light",
                 }}
