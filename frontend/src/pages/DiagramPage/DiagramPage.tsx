@@ -1,4 +1,4 @@
-import SimpleFilePreview from "@/components/ui/SimpleFilePreview";
+import DiagramFilePreview from "@/components/ui/DiagramFilePreview";
 import FileUploadButton from "@/components/ui/FileUploadButton";
 import ProcessDiagramButton from "@/components/ui/ProcessDiagramButton";
 import { ErrorProvider } from "@/context/ErrorProvider";
@@ -142,12 +142,12 @@ export const DiagramPage = () => {
             marginTop: 3,
           }}
         >
-          {selectedFile && !isProcessed && <SimpleFilePreview type="reduced" />}
+          {selectedFile && !isProcessed && <DiagramFilePreview type="reduced" />}
           {selectedFile &&
             isProcessed &&
             selectedFileReduced &&
             (selectedAlgorithm === "none" ? (
-              <SimpleFilePreview type="reduced" />
+              <DiagramFilePreview type="reduced" />
             ) : (
               <FilePreviewDiagrams />
             ))}

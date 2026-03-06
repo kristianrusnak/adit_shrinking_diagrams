@@ -128,7 +128,7 @@ export const PreviewModal = ({
           src={url}
           alt="PlantUML Diagram"
           style={{
-            width: "300px",
+            minWidth: "300px",
             maxWidth: "90vw",
             height: "auto",
             maxHeight: "70vh",
@@ -141,7 +141,7 @@ export const PreviewModal = ({
         <Box
           sx={{
             flexGrow: 1,
-            width: "300px",
+            minWidth: "500px",
             height: "auto",
             maxHeight: "70vh",
             overflow: "auto",

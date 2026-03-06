@@ -14,12 +14,12 @@ import { algorithms } from "../../pages/DiagramPage/DiagramPage";
 import { encodePlantUml } from "@/utils/pumlencoder";
 import PreviewModal from "@/components/ui/PreviewModal";
 
-interface SimpleFilePreviewProps {
+interface AppFilePreviewProps {
   title?: string;
   sx?: any;
   type: "gpt" | "reduced";
 }
-const SimpleFilePreview = ({ title, sx, type }: SimpleFilePreviewProps) => {
+const AppFilePreview = ({ title, sx, type }: AppFilePreviewProps) => {
   const selectedFile = useSelector(selectFile)?.name ?? "";
   const selectedFileReduced = useSelector(selectFileReduced);
   const selectedFileGpt = useSelector(selectFileGpt);
@@ -59,10 +59,12 @@ const SimpleFilePreview = ({ title, sx, type }: SimpleFilePreviewProps) => {
   };
 
   const PUML_URL_BASE = "https://www.plantuml.com/plantuml/png/";
+  const PUML_DIRECTION = "left to right direction";
 
   useEffect(() => {
     const getText = async (file: File) => {
-      const text = await file.text();
+      let text = await file.text();
+      text = text.replace(/@startuml\n/g, `@startuml\n${PUML_DIRECTION}\n`);
       const encoded = encodePlantUml(text);
       setSelectedFileText(text);
       setPumlUrl(PUML_URL_BASE + encoded);
@@ -152,4 +154,4 @@ const SimpleFilePreview = ({ title, sx, type }: SimpleFilePreviewProps) => {
   );
 };
 
-export default SimpleFilePreview;
+export default AppFilePreview;
