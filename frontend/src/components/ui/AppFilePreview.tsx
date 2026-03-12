@@ -6,7 +6,7 @@ import {
   selectFileGpt,
 } from "../../store/slices/fileSlice";
 import { selectSelectedAlgorithm } from "../../store/slices/algorithmSlice";
-import { useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 
 import { grey } from "@mui/material/colors";
 
@@ -27,9 +27,13 @@ const AppFilePreview = ({ title, sx, type }: AppFilePreviewProps) => {
   const selectedAlgorithmName =
     algorithms.find((a) => a.id === selectedAlgorithmId)?.name ?? "";
 
+  const imgRef = useRef<HTMLImageElement>(null);
+
   const [selectedFileText, setSelectedFileText] = useState("");
   const [pumlUrl, setPumlUrl] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   const [snackbarState, setSnackbarState] = useState({
     open: false,
@@ -82,75 +86,90 @@ const AppFilePreview = ({ title, sx, type }: AppFilePreviewProps) => {
     }
   }, [type, selectedFileReduced, selectedFileGpt]);
 
-  const bg1 = grey[50];
+  useEffect(() => {
+    if (!pumlUrl) return;
+
+    setImageLoaded(false);
+    setImageError(false);
+
+    const img = new Image();
+    img.src = pumlUrl;
+
+    img.onload = () => setImageLoaded(true);
+    img.onerror = () => setImageError(true);
+  }, [pumlUrl]);
 
   const shouldRender =
     type === "reduced" ? !!selectedFileReduced : !!selectedFileGpt;
+
+  if (!shouldRender || imageError || !imageLoaded) {
+    return null;
+  }
+
   return (
-    shouldRender && (
-      <Card
+    <Card
+      sx={{
+        minWidth: "800px",
+        color: "#000",
+        p: 2,
+        mb: 2,
+        display: "flex",
+        overflow: "visible",
+        flexDirection: "column",
+        backgroundColor: grey[50],
+        boxShadow: 3,
+        borderRadius: 2,
+        ...sx,
+      }}
+    >
+      <Typography variant="h6" sx={{ fontWeight: 500, mb: 1 }}>
+        {title ?? selectedFile}
+      </Typography>
+
+      <Box
         sx={{
-          minWidth: "800px",
-          color: "#000",
-          p: 2,
-          mb: 2,
-          display: "flex",
-          overflow: "visible",
-          flexDirection: "column",
-          backgroundColor: grey[50],
-          boxShadow: 3,
-          borderRadius: 2,
-          ...sx,
+          flex: 1,
+          minHeight: 0,
+          height: "100%",
+          overflow: "hidden",
+          borderRadius: 1,
+          backgroundColor: grey[100],
         }}
       >
-        <Typography variant="h6" sx={{ fontWeight: 500, mb: 1 }}>
-          {title ?? selectedFile}
-        </Typography>
-
         <Box
+          component="img"
+          ref={imgRef}
+          src={pumlUrl}
+          alt="PlantUML Diagram"
+          onClick={handleOpen}
           sx={{
-            flex: 1,
-            minHeight: 0,
+            width: "100%",
             height: "100%",
-            overflow: "hidden",
-            borderRadius: 1,
-            backgroundColor: grey[100],
+            objectFit: "cover",
+            objectPosition: "center",
+            cursor: "pointer",
+            display: "block",
           }}
-        >
-          <Box
-            component="img"
-            src={pumlUrl}
-            alt="PlantUML Diagram"
-            onClick={handleOpen}
-            sx={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              objectPosition: "center",
-              cursor: "pointer",
-              display: "block",
-            }}
-          />
-        </Box>
-
-        <Modal open={modalOpen} onClose={handleClose}>
-          <PreviewModal
-            url={pumlUrl}
-            puml={selectedFileText}
-            handleClose={handleClose}
-            handleSnackbarOpen={handleSnackbarOpen}
-          />
-        </Modal>
-
-        <Snackbar
-          open={snackbarState.open}
-          autoHideDuration={3500}
-          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-          onClose={handleSnackbarClose}
-          message={snackbarState.message}
         />
-      </Card>
-    )
+      </Box>
+
+      <Modal open={modalOpen} onClose={handleClose}>
+        <PreviewModal
+          url={pumlUrl}
+          puml={selectedFileText}
+          handleClose={handleClose}
+          handleSnackbarOpen={handleSnackbarOpen}
+        />
+      </Modal>
+
+      <Snackbar
+        open={snackbarState.open}
+        autoHideDuration={3500}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        onClose={handleSnackbarClose}
+        message={snackbarState.message}
+      />
+    </Card>
   );
 };
 
