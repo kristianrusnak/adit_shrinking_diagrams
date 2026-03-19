@@ -1,0 +1,76 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+class User {
+  -id: UUID
+  -name: String
+  +login(password: String): bool
+  +logout(): void
+}
+
+class Admin {
+  -permissions: List<String>
+  +banUser(userId: UUID): void
+}
+
+class Profile {
+  -bio: String
+  -avatarUrl: String
+  +updateBio(text: String): void
+}
+
+class Team {
+  -name: String
+  +addMember(user: User): void
+}
+
+class Project {
+  -title: String
+  +start(): void
+}
+
+class Task {
+  -description: String
+  -done: bool
+  +complete(): void
+}
+
+interface Authenticatable {
+  +login(password: String): bool
+  +logout(): void
+}
+
+interface Exportable {
+  +export(format: String): File
+}
+
+class Report {
+  -createdAt: DateTime
+  +export(format: String): File
+}
+
+class NotificationService {
+  +send(user: User, message: String): void
+}
+
+' extension / inheritance
+User <|-- Admin
+
+' implementation
+User ..> Authenticatable
+Report ..> Exportable
+
+' aggregation
+Team o-- User : members
+
+' composition
+Project *-- Task : tasks
+
+' dependency
+User --> Profile : owns
+Admin --> Report : generates
+
+' implementation according to parser config
+NotificationService ..> User : notifies
+
+@enduml

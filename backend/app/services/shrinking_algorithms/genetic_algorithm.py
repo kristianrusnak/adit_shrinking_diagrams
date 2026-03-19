@@ -8,6 +8,12 @@ import numpy as np
 from app.services.shrinking_algorithms.base import ShrinkingAlgorithm
 from embedding.embedding import uml_dict_to_graph, embed_graph
 
+from app.tests.embedding.graph_builder2 import uml_dict_to_graph as uml_dict_to_graph2
+from app.tests.embedding.embedding2 import (
+    embed_graph as embed_graph2,
+    find_embedding as find_embedding2,
+)
+
 
 class GeneticAlgorithm(ShrinkingAlgorithm):
     """
@@ -35,12 +41,24 @@ class GeneticAlgorithm(ShrinkingAlgorithm):
         config_path = params.get("config_path", "ga_config.json")
         self.config = self.load_config(config_path)
 
-        self.population_size = params.get("population_size", self.config.get("population_size", 50))
-        self.generations = params.get("generations", self.config.get("generations", 100))
-        self.mutation_rate = params.get("mutation_rate", self.config.get("mutation_rate", 0.1))
-        self.crossover_rate = params.get("crossover_rate", self.config.get("crossover_rate", 0.7))
-        self.exclusion_threshold = params.get("exclusion_threshold", self.config.get("exclusion_threshold", 0.5))
-        self.inclusion_threshold = params.get("inclusion_threshold", self.config.get("inclusion_threshold", 0.6))
+        self.population_size = params.get(
+            "population_size", self.config.get("population_size", 50)
+        )
+        self.generations = params.get(
+            "generations", self.config.get("generations", 100)
+        )
+        self.mutation_rate = params.get(
+            "mutation_rate", self.config.get("mutation_rate", 0.1)
+        )
+        self.crossover_rate = params.get(
+            "crossover_rate", self.config.get("crossover_rate", 0.7)
+        )
+        self.exclusion_threshold = params.get(
+            "exclusion_threshold", self.config.get("exclusion_threshold", 0.5)
+        )
+        self.inclusion_threshold = params.get(
+            "inclusion_threshold", self.config.get("inclusion_threshold", 0.6)
+        )
 
         upper_limit = params.get("upper_limit", self.config.get("upper_limit", 100))
         lower_limit = params.get("lower_limit", self.config.get("lower_limit", 1))
@@ -48,11 +66,14 @@ class GeneticAlgorithm(ShrinkingAlgorithm):
         self.population_size = max(lower_limit, min(upper_limit, self.population_size))
         self.generations = max(lower_limit, min(upper_limit, self.generations))
 
+        with open("app/tests/embedding/weights.json", "r") as f:
+            self.scores = json.load(f)["scores"]
+
         self.elements = []
         self.element_types = []
         self.population = []
         self.best_individual = None
-        self.best_fitness = -float('inf')
+        self.best_fitness = -float("inf")
         self.original_embedding = None
         self.G_full = None
 
@@ -89,6 +110,89 @@ class GeneticAlgorithm(ShrinkingAlgorithm):
 
         return reduced_diagram
 
+    def compute2(self, parsed_puml: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Run the genetic algorithm on parsed PUML data and return the reduced PUML data.
+
+        Args:
+            parsed_puml: Dictionary with 'classes' and 'edges' keys
+
+        Returns:
+            Reduced PUML dictionary with same structure
+        """
+        self.PUML = parsed_puml
+        self._extract_elements()
+        self.G_full, self.G_full_stats = uml_dict_to_graph2(self.PUML)
+        self.original_embedding, self.original_model = embed_graph2(self.G_full)
+
+        best_individual = self.solve2()
+        reduced_diagram = self.extract_solution(best_individual)
+
+        return reduced_diagram
+
+    def fitness_function(self, individual):
+        """
+        Evaluate fitness of an individual.
+        """
+
+        G_shrunk = uml_dict_to_graph(self.decode_individual(individual))
+
+        emb_orig = self.original_embedding
+        emb_shrunk = embed_graph(G_shrunk)
+
+        similarity = self._cosine_sim(emb_orig, emb_shrunk)
+
+        compression_ratio = (len(self.G_full) - len(G_shrunk)) / len(self.G_full)
+        compression_ratio = max(compression_ratio, 1e-8)
+
+        # 1 out of 10 removed
+        # 10 - 9 / 10 = 0.1
+        # sim = 1
+        # 1 / 0.1 = 10
+        # 10 out of 10
+        # 10 / 10 = 1
+        # sim = 1
+        # 1 / 1 = 1
+        # less removed should be more? not the other way around?
+
+        return similarity / compression_ratio
+
+    def fitness_function2(self, individual, a=1, b=1, c=1):
+        """
+        Evaluate fitness of an individual.
+        """
+
+        G_shrunk, G_shrunk_stats = uml_dict_to_graph2(
+            self.decode_individual(individual)
+        )
+
+        edges_score = 0
+
+        for key, weight in self.scores.items():
+            full_val = self.G_full_stats.get(key, 0)
+            shrunk_val = G_shrunk_stats.get(key, 0)
+
+            # avoid division by zero
+            if full_val > 0:
+                edges_score += weight * (shrunk_val / full_val)
+
+        emb_orig = self.original_embedding
+        emb_shrunk = find_embedding2(self.original_model, G_shrunk)
+
+        similarity = self._cosine_sim(emb_orig, emb_shrunk)
+
+        full_edges = self.G_full_stats["total_edges"]
+        shrunk_edges = G_shrunk_stats["total_edges"]
+
+        edge_shrink = (full_edges - shrunk_edges) / max(full_edges, 1)
+        node_shrink = (len(self.G_full) - len(G_shrunk)) / max(len(self.G_full), 1)
+        alpha = 0.5
+        shrink_ratio = alpha * edge_shrink + (1 - alpha) * node_shrink
+
+        fitness = a * similarity + b * edges_score + c * shrink_ratio
+
+        return fitness / (a + b + c)
+
     def _extract_elements(self):
         """
         Extract all diagram elements (classes, edges, attributes, methods).
@@ -120,26 +224,6 @@ class GeneticAlgorithm(ShrinkingAlgorithm):
             individual = [random.random() for _ in range(len(self.elements))]
             self.population.append(individual)
 
-    def fitness_function(self, individual):
-        """
-        Evaluate fitness of an individual.
-        """
-
-        G_shrunk = uml_dict_to_graph(self.decode_individual(individual))
-
-        emb_orig = self.original_embedding
-        emb_shrunk = embed_graph(G_shrunk)
-
-        similarity = self._cosine_sim(emb_orig, emb_shrunk)
-
-        compression_ratio = (
-            (len(self.G_full) - len(G_shrunk)) / len(self.G_full)
-        )
-        compression_ratio = max(compression_ratio, 1e-8)
-
-        return similarity / compression_ratio
-
-
     def selection(self):
         """
         Tournament selection: pick random individuals and select the best.
@@ -150,7 +234,27 @@ class GeneticAlgorithm(ShrinkingAlgorithm):
 
         for _ in range(self.population_size):
             tournament = random.sample(self.population, tournament_size)
-            tournament_fitness = [(ind, self.fitness_function(ind)) for ind in tournament]
+            tournament_fitness = [
+                (ind, self.fitness_function(ind)) for ind in tournament
+            ]
+            winner = max(tournament_fitness, key=lambda x: x[1])
+            selected.append(winner[0])
+
+        return selected
+
+    def selection2(self):
+        """
+        Tournament selection: pick random individuals and select the best.
+        Returns selected parents for reproduction.
+        """
+        tournament_size = 3
+        selected = []
+
+        for _ in range(self.population_size):
+            tournament = random.sample(self.population, tournament_size)
+            tournament_fitness = [
+                (ind, self.fitness_function2(ind)) for ind in tournament
+            ]
             winner = max(tournament_fitness, key=lambda x: x[1])
             selected.append(winner[0])
 
@@ -180,7 +284,6 @@ class GeneticAlgorithm(ShrinkingAlgorithm):
             if random.random() < self.mutation_rate:
                 mutated[i] = random.random()
 
-
         return mutated
 
     def solve(self):
@@ -192,7 +295,9 @@ class GeneticAlgorithm(ShrinkingAlgorithm):
 
         for generation in range(self.generations):
             print(f"Generation {generation + 1}")
-            fitness_values = [(ind, self.fitness_function(ind)) for ind in self.population]
+            fitness_values = [
+                (ind, self.fitness_function(ind)) for ind in self.population
+            ]
 
             current_best = max(fitness_values, key=lambda x: x[1])
             if current_best[1] > self.best_fitness:
@@ -213,7 +318,43 @@ class GeneticAlgorithm(ShrinkingAlgorithm):
 
                 new_population.extend([offspring1, offspring2])
 
-            self.population = new_population[:self.population_size]
+            self.population = new_population[: self.population_size]
+
+        return self.best_individual
+
+    def solve2(self):
+        """
+        Run the genetic algorithm for specified number of generations.
+        Returns the best individual found.
+        """
+        self.initialize_population()
+
+        for generation in range(self.generations):
+            print(f"Generation {generation + 1}")
+            fitness_values = [
+                (ind, self.fitness_function2(ind)) for ind in self.population
+            ]
+
+            current_best = max(fitness_values, key=lambda x: x[1])
+            if current_best[1] > self.best_fitness:
+                self.best_fitness = current_best[1]
+                self.best_individual = current_best[0][:]
+
+            selected = self.selection2()
+            new_population = []
+
+            for i in range(0, len(selected), 2):
+                parent1 = selected[i]
+                parent2 = selected[i + 1] if i + 1 < len(selected) else selected[0]
+
+                offspring1, offspring2 = self.crossover(parent1, parent2)
+
+                offspring1 = self.mutate(offspring1)
+                offspring2 = self.mutate(offspring2)
+
+                new_population.extend([offspring1, offspring2])
+
+            self.population = new_population[: self.population_size]
 
         return self.best_individual
 
@@ -234,7 +375,7 @@ class GeneticAlgorithm(ShrinkingAlgorithm):
                         included_classes[key] = {
                             "id": self.PUML["classes"][key]["id"],
                             "attributes": [],
-                            "methods": []
+                            "methods": [],
                         }
 
                 elif element_type == "attribute":
@@ -243,7 +384,7 @@ class GeneticAlgorithm(ShrinkingAlgorithm):
                         included_classes[class_name] = {
                             "id": self.PUML["classes"][class_name]["id"],
                             "attributes": [],
-                            "methods": []
+                            "methods": [],
                         }
                     included_classes[class_name]["attributes"].append(data)
 
@@ -253,7 +394,7 @@ class GeneticAlgorithm(ShrinkingAlgorithm):
                         included_classes[class_name] = {
                             "id": self.PUML["classes"][class_name]["id"],
                             "attributes": [],
-                            "methods": []
+                            "methods": [],
                         }
                     included_classes[class_name]["methods"].append(data)
 
@@ -262,18 +403,21 @@ class GeneticAlgorithm(ShrinkingAlgorithm):
                     source = edge["source"]
                     target = edge["target"]
 
-                    if source in self.PUML["classes"] and target in self.PUML["classes"]:
+                    if (
+                        source in self.PUML["classes"]
+                        and target in self.PUML["classes"]
+                    ):
                         if source not in included_classes:
                             included_classes[source] = {
                                 "id": self.PUML["classes"][source]["id"],
                                 "attributes": [],
-                                "methods": []
+                                "methods": [],
                             }
                         if target not in included_classes:
                             included_classes[target] = {
                                 "id": self.PUML["classes"][target]["id"],
                                 "attributes": [],
-                                "methods": []
+                                "methods": [],
                             }
                         included_edges.append(edge)
 
@@ -290,5 +434,3 @@ class GeneticAlgorithm(ShrinkingAlgorithm):
         a = a.ravel()
         b = b.ravel()
         return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
-
-
