@@ -10,4 +10,5 @@ alembic
 python-jose[cryptography]
 httpx
 numpy
+pytest
 -e ./embedding

@@ -1,6 +1,6 @@
 from node2vec import Node2Vec
 
-from embedding.embedding.graph_builder import *
+from .graph_builder import *
 
 
 def embed_graph(G: nx.Graph, dimensions=64, walk_length=30, num_walks=100):

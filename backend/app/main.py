@@ -19,6 +19,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from app.services.openai_service import OpenAIService
 from app.services.parse_puml_service import PUMLParser
+from app.services.puml_interpreter.exceptions import PumlParseException
 from app.services.shrinking_algorithms.factory import get_algorithm
 
 from sqlalchemy.orm import Session
@@ -175,9 +176,7 @@ def process_puml(
 
         parsed = parser.parse_file(
             source_path
-        )  # TODO: this should be throwing an exception not an empty list
-        if not parsed:
-            raise HTTPException(status_code=500, detail="Unable to parse PUML file")
+        )
 
         # TODO: unify frontend/backend names too tired
         if algorithm == Algorithm.evolution:
@@ -205,6 +204,8 @@ def process_puml(
 
         return {"parsed": parsed, "reduced": reduced, "result_puml": result}
 
+    except PumlParseException as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -636,3 +637,11 @@ def change_password(
     user.password_hash = hash_password(data.new_password)
     db.commit()
     return {"detail": "Password changed successfully"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+
+
