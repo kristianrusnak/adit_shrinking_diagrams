@@ -13,6 +13,10 @@ class Admin {
   +banUser(userId: UUID): void
 }
 
+class Test {
+
+}
+
 class Profile {
   -bio: String
   -avatarUrl: String

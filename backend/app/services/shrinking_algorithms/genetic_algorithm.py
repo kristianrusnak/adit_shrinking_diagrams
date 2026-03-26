@@ -68,6 +68,12 @@ class GeneticAlgorithm(ShrinkingAlgorithm):
 
         with open("app/tests/embedding/weights.json", "r") as f:
             self.scores = json.load(f)["scores"]
+            total = sum(self.scores.values())
+
+            if total <= 0:
+                raise ValueError("Total score must be greater than 0")
+
+            self.scores = {k: (v / total) for k, v in self.scores.items()}
 
         self.elements = []
         self.element_types = []
@@ -100,6 +106,10 @@ class GeneticAlgorithm(ShrinkingAlgorithm):
         Returns:
             Reduced PUML dictionary with same structure
         """
+
+        if self.should_preprocess:
+            parsed_puml = self.preprocess(parsed_puml)
+
         self.PUML = parsed_puml
         self._extract_elements()
         self.G_full = uml_dict_to_graph(self.PUML)
@@ -120,6 +130,9 @@ class GeneticAlgorithm(ShrinkingAlgorithm):
         Returns:
             Reduced PUML dictionary with same structure
         """
+        if self.should_preprocess:
+            parsed_puml = self.preprocess(parsed_puml)
+
         self.PUML = parsed_puml
         self._extract_elements()
         self.G_full, self.G_full_stats = uml_dict_to_graph2(self.PUML)

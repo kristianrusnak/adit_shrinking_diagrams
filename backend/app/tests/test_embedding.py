@@ -4,6 +4,10 @@ import os
 from app.tests.embedding.graph_builder2 import *
 from app.tests.embedding.embedding2 import *
 
+# NOTE:
+# right now we have 2 versions of methods in genetic alg
+# If we are serious about comparing the two we could refactor into strategies
+
 
 def main():
     print(os.getcwd())
@@ -21,7 +25,7 @@ def main():
     emb, model = embed_graph(G)
     print(emb)
 
-    alg = get_algorithm("genetic")
+    alg = get_algorithm("genetic", preprocess=True)
     alg.initialize(
         population_size=50,
         generations=100,

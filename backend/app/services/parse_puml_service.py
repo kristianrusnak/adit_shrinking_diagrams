@@ -1,6 +1,18 @@
 import json
 import re
 
+
+# NOTE:
+# Suggestion: rely less on regex
+# Implement lexer/tokenizer
+# parse tokens and build AST maybe?
+# maybe AST validator - visitor?
+# Lexer - state?
+# parser - builder?
+#
+# We already have puml -> BUML so maybe this is redundant
+
+
 class PUMLParser:
     def __init__(self, config_path="parser_config.json"):
         self.relations = {}
@@ -75,7 +87,7 @@ class PUMLParser:
                             classes[class_name] = {
                                 "id": classesCount,
                                 "attributes": [],
-                                "methods": []
+                                "methods": [],
                             }
                             classesCount += 1
                             in_class_body = line.endswith("{")
@@ -91,24 +103,28 @@ class PUMLParser:
                     member = self.parse_class_member(line)
                     if member:
                         if member["type"] == "attribute":
-                            classes[current_class]["attributes"].append({
-                                "name": member["name"],
-                                "visibility": member["visibility"],
-                                "datatype": member.get("datatype", "")
-                            })
+                            classes[current_class]["attributes"].append(
+                                {
+                                    "name": member["name"],
+                                    "visibility": member["visibility"],
+                                    "datatype": member.get("datatype", ""),
+                                }
+                            )
                         elif member["type"] == "method":
-                            classes[current_class]["methods"].append({
-                                "name": member["name"],
-                                "visibility": member["visibility"],
-                                "signature": member["signature"]
-                            })
+                            classes[current_class]["methods"].append(
+                                {
+                                    "name": member["name"],
+                                    "visibility": member["visibility"],
+                                    "signature": member["signature"],
+                                }
+                            )
 
                 for relation_key, relation_value in self.relations.items():
-                    line_without_brackets = re.sub(r'\[.*?\]', '', line.strip())
+                    line_without_brackets = re.sub(r"\[.*?\]", "", line.strip())
                     if relation_key in line_without_brackets:
                         parts = line_without_brackets.split(relation_key)
                         edge = self.extract_edge_info(parts)
-                        
+
                         source = edge.get("source")
                         target = edge.get("target")
                         if source in classes and target in classes:
@@ -127,9 +143,9 @@ class PUMLParser:
         if len(parts) == 2:
             source = parts[0]
             target = parts[1]
-            
-            if ':' in target:
-                target = target.split(':')[0].strip()
+
+            if ":" in target:
+                target = target.split(":")[0].strip()
 
             if '"' in source:
                 source = source.split('"')[0].strip()
@@ -185,24 +201,29 @@ class PUMLParser:
                 elif skip_class:
                     appendLine = False
 
-                elif in_class_body and current_class and current_class in new_data.get("classes", {}) and not is_class_declaration:
+                elif (
+                    in_class_body
+                    and current_class
+                    and current_class in new_data.get("classes", {})
+                    and not is_class_declaration
+                ):
                     member = self.parse_class_member(stripped_line)
                     if member:
                         class_data = new_data["classes"][current_class]
-                        
+
                         if member["type"] == "attribute":
                             attr_exists = any(
-                                attr["name"] == member["name"] and 
-                                attr["visibility"] == member["visibility"]
+                                attr["name"] == member["name"]
+                                and attr["visibility"] == member["visibility"]
                                 for attr in class_data.get("attributes", [])
                             )
                             if not attr_exists:
                                 appendLine = False
-                        
+
                         elif member["type"] == "method":
                             method_exists = any(
-                                method["signature"] == member["signature"] and
-                                method["visibility"] == member["visibility"]
+                                method["signature"] == member["signature"]
+                                and method["visibility"] == member["visibility"]
                                 for method in class_data.get("methods", [])
                             )
                             if not method_exists:
@@ -210,27 +231,33 @@ class PUMLParser:
 
                 if not is_class_declaration:
                     for relation_key, relation_value in self.relations.items():
-                        line_without_brackets = re.sub(r'\[.*?\]', '', stripped_line)
+                        line_without_brackets = re.sub(r"\[.*?\]", "", stripped_line)
                         if relation_key in line_without_brackets:
-                            lineWithoutComments = re.sub(r"/\'.*?'\/", "", line_without_brackets, flags=re.DOTALL).strip()
+                            lineWithoutComments = re.sub(
+                                r"/\'.*?'\/", "", line_without_brackets, flags=re.DOTALL
+                            ).strip()
                             parts = lineWithoutComments.split(relation_key)
                             edge = self.extract_edge_info(parts)
-                            
+
                             source = edge.get("source")
                             target = edge.get("target")
-                            
+
                             # Check if this edge exists in new_data
                             edge_exists = False
                             for new_edge in new_data.get("edges", []):
-                                if (new_edge.get("source") == source and 
-                                    new_edge.get("target") == target and 
-                                    new_edge.get("relation") == relation_value):
+                                if (
+                                    new_edge.get("source") == source
+                                    and new_edge.get("target") == target
+                                    and new_edge.get("relation") == relation_value
+                                ):
                                     edge_exists = True
                                     break
-                            
+
                             if not edge_exists:
                                 appendLine = False
-                            elif source not in new_data.get("classes", {}) or target not in new_data.get("classes", {}):
+                            elif source not in new_data.get(
+                                "classes", {}
+                            ) or target not in new_data.get("classes", {}):
                                 appendLine = False
                             break
 
@@ -246,15 +273,20 @@ class PUMLParser:
         if not line or line.startswith("//") or line.startswith("'"):
             return None
 
-        visibility_map = {"+": "public", "-": "private", "#": "protected", "~": "package"}
+        visibility_map = {
+            "+": "public",
+            "-": "private",
+            "#": "protected",
+            "~": "package",
+        }
         visibility = "public"
-        
+
         if line and line[0] in visibility_map:
             visibility = visibility_map[line[0]]
             line = line[1:].strip()
 
         if "(" in line and ")" in line:
-            method_match = re.match(r'([a-zA-Z_]\w*)\s*\((.*?)\)', line)
+            method_match = re.match(r"([a-zA-Z_]\w*)\s*\((.*?)\)", line)
             if method_match:
                 method_name = method_match.group(1)
                 params = method_match.group(2).strip()
@@ -263,11 +295,11 @@ class PUMLParser:
                     "type": "method",
                     "name": method_name,
                     "visibility": visibility,
-                    "signature": signature
+                    "signature": signature,
                 }
-        
+
         else:
-            attr_match = re.match(r'([a-zA-Z_]\w*)\s*(?::\s*(.+))?', line)
+            attr_match = re.match(r"([a-zA-Z_]\w*)\s*(?::\s*(.+))?", line)
             if attr_match:
                 attr_name = attr_match.group(1)
                 datatype = attr_match.group(2).strip() if attr_match.group(2) else ""
@@ -275,7 +307,7 @@ class PUMLParser:
                     "type": "attribute",
                     "name": attr_name,
                     "visibility": visibility,
-                    "datatype": datatype
+                    "datatype": datatype,
                 }
 
         return None
