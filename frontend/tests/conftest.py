@@ -40,43 +40,49 @@ def headless_mode(request):
 @pytest.fixture(scope="module")
 def driver(browser_type, headless_mode):
     """Initialize WebDriver based on browser selection"""
-    
+    desktop_width = 1920
+    desktop_height = 1080
+
     if browser_type.lower() == "chrome":
         chrome_options = Options()
         if headless_mode:
             chrome_options.add_argument("--headless")
+            chrome_options.add_argument(f"--window-size={desktop_width},{desktop_height}")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--start-maximized")
         driver = webdriver.Chrome(options=chrome_options)
-        
+
     elif browser_type.lower() == "firefox":
         firefox_options = FirefoxOptions()
         if headless_mode:
             firefox_options.add_argument("--headless")
         driver = webdriver.Firefox(options=firefox_options)
-        
+
     elif browser_type.lower() == "edge":
         edge_options = EdgeOptions()
         if headless_mode:
             edge_options.add_argument("--headless")
+            edge_options.add_argument(f"--window-size={desktop_width},{desktop_height}")
         edge_options.add_argument("--no-sandbox")
         edge_options.add_argument("--disable-dev-shm-usage")
         driver = webdriver.Edge(options=edge_options)
-        
+
     elif browser_type.lower() == "safari":
         safari_options = SafariOptions()
         if headless_mode:
             print("Warning: Safari does not support headless mode. Running in normal mode.")
         driver = webdriver.Safari(options=safari_options)
-        
+
     else:
         raise ValueError(f"Unsupported browser: {browser_type}. Use chrome, firefox, edge, or safari.")
-    
+
+    driver.set_window_size(desktop_width, desktop_height)
+
     driver.implicitly_wait(10)
-    
+
     yield driver
-    
+
     driver.quit()
 
 
