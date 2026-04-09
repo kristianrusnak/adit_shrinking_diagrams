@@ -60,7 +60,7 @@ class PUMLParser:
 
         source_data = interpreter.parse(source_lines)
         filtered = FilteredStructureBuilder().build(source_data, new_data)
-        output = PumlReconstructor(self.relations).reconstruct(filtered)
+        output = PumlReconstructor(self.relations).reconstruct(filtered, source_lines)
 
         with open(output_path, "w") as file:
             file.write(output)

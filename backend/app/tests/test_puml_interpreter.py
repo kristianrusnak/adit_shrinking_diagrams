@@ -219,11 +219,46 @@ A --> C
     assert result == (
         "@startuml\n"
         "class A {\n"
+        "  +id: int\n"
         "  +name: str\n"
+        "  +ping(x)\n"
         "  +pong()\n"
         "}\n"
         "class C\n"
         "A --> C\n"
+        "@enduml\n"
+    )
+
+
+def test_reparse_file_preserves_title_and_comments(tmp_path):
+    source = tmp_path / "reparse_comments_source.puml"
+    output = tmp_path / "reparse_comments_output.puml"
+    source.write_text(
+        """@startuml
+title Banking Diagram
+' top-level note
+class A
+class B
+A -- B ' relation note
+@enduml
+"""
+    )
+
+    parser = _build_parser()
+    parser.reparse_file(
+        str(source),
+        str(output),
+        {
+            "classes": {"A": {"attributes": [], "methods": []}},
+            "edges": [],
+        },
+    )
+
+    assert output.read_text() == (
+        "@startuml\n"
+        "title Banking Diagram\n"
+        "' top-level note\n"
+        "class A\n"
         "@enduml\n"
     )
 
