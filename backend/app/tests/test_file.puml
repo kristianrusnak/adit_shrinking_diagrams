@@ -17,6 +17,11 @@ class Test {
 
 }
 
+class TestGettersSetters {
+  +getX(): bool
+  +setX(): void
+}
+
 class Profile {
   -bio: String
   -avatarUrl: String
