@@ -1,5 +1,5 @@
 import { SplitRow } from "@/utils/myersdiff";
-import { Box, Button, Modal, Divider, Stack, Typography } from "@mui/material";
+import { Box, Button, Modal, Divider, Typography } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import { useState } from "react";
 import { encodePlantUml } from "@/utils/pumlencoder";
@@ -55,6 +55,18 @@ const DiffComponent = ({
   const pumlUrl = PUML_URL_BASE + encoded;
 
   const bg1 = grey[50];
+  const neutralBg = grey[200];
+
+  const getLineBackground = (line: string, isRightColumn: boolean) => {
+    const firstChar = line.charAt(0);
+    if (firstChar === "+") {
+      return isRightColumn ? "success.main" : "success.light";
+    }
+    if (firstChar === "-") {
+      return isRightColumn ? "error.main" : "error.light";
+    }
+    return neutralBg;
+  };
 
   return (
     <Box
@@ -115,11 +127,8 @@ const DiffComponent = ({
           </Button>
         </Box>
       </Modal>
-      <Stack
-        direction="row"
-        spacing={0}
+      <Box
         sx={{
-          alignItems: "stretch",
           maxHeight: "250px",
           overflow: "auto",
           backgroundColor: `${bg1}`,
@@ -138,72 +147,73 @@ const DiffComponent = ({
       >
         <Box
           sx={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
             color: "#000",
-            p: 2,
-            width: "50%",
-            height: "100%",
-            overflow: "hidden",
-            paddingRight: 0,
+            position: "sticky",
+            top: 0,
+            zIndex: 1,
+            backgroundColor: `${bg1}`,
           }}
         >
-          <Typography variant="h6" gutterBottom>
-            {fileName}
-          </Typography>
-          <Divider />
-          {before.map((line, idx) => {
-            const firstChar = line.charAt(0);
-            const sx = {
-              whiteSpace: "pre-wrap",
-              fontFamily: "monospace",
-              backgroundColor:
-                firstChar === "+"
-                  ? "success.light"
-                  : firstChar === "-"
-                    ? "error.light"
-                    : "e0e0e0",
-            };
-            return (
-              <Typography key={idx} variant="body2" sx={sx}>
-                {line}
-              </Typography>
-            );
-          })}
+          <Box sx={{ p: 2, paddingRight: 1 }}>
+            <Typography variant="h6" gutterBottom>
+              {fileName}
+            </Typography>
+          </Box>
+          <Box sx={{ p: 2, paddingLeft: 1 }}>
+            <Typography variant="h6" gutterBottom>
+              {selectedAlgorithm}
+            </Typography>
+          </Box>
         </Box>
-        <Box
-          sx={{
-            color: "#000",
-            p: 2,
-            width: "50%",
-            height: "100%",
-            overflow: "hidden",
-            paddingLeft: 0,
-          }}
-        >
-          <Typography paddingLeft={2} variant="h6" gutterBottom>
-            {selectedAlgorithm}
-          </Typography>
-          <Divider />
+        <Divider />
 
-          {after.map((line, idx) => {
-            const firstChar = line.charAt(0);
-            const sx = {
-              whiteSpace: "pre-wrap",
-              fontFamily: "monospace",
-              backgroundColor:
-                firstChar === "+"
-                  ? "success.main"
-                  : firstChar === "-"
-                    ? "error.main"
-                    : "e0e0e0",
-            };
+        <Box sx={{ color: "#000" }}>
+          {before.map((leftLine, idx) => {
+            const rightLine = after[idx] ?? " ";
             return (
-              <Typography key={idx} variant="body2" sx={sx}>
-                {line}
-              </Typography>
+              <Box
+                key={idx}
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  alignItems: "stretch",
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  sx={{
+                    px: 2,
+                    py: 0.25,
+                    fontFamily: "monospace",
+                    whiteSpace: "pre-wrap",
+                    overflowWrap: "anywhere",
+                    lineHeight: 1.5,
+                    backgroundColor: getLineBackground(leftLine, false),
+                  }}
+                >
+                  {leftLine}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    px: 2,
+                    py: 0.25,
+                    fontFamily: "monospace",
+                    whiteSpace: "pre-wrap",
+                    overflowWrap: "anywhere",
+                    lineHeight: 1.5,
+                    backgroundColor: getLineBackground(rightLine, true),
+                  }}
+                >
+                  {rightLine}
+                </Typography>
+              </Box>
             );
           })}
         </Box>
-      </Stack>
+      </Box>
     </Box>
   );
 };
