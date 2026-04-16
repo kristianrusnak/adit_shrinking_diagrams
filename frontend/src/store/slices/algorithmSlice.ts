@@ -16,8 +16,10 @@ export const selectAlgorithmSettingsMap = (state: any) =>
   state.algorithmStore.algorithmSettings;
 export const selectCurrentAlgorithmSettings = createSelector(
   [selectSelectedAlgorithm, selectAlgorithmSettingsMap],
-  (selectedAlgorithm, algorithmSettings) => 
-    algorithmSettings[selectedAlgorithm] || {}
+  (selectedAlgorithm, algorithmSettings) => ({
+    ...(algorithmSettings[selectedAlgorithm] || {}),
+    ...(algorithmSettings["preprocessing"] || {}),
+  }),
 );
 
 // TODO: consider kruskals as well

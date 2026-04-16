@@ -53,7 +53,7 @@ def main():
     #     generations=10,
     # )
 
-    reduced = alg.compute2(parsed)
+    reduced = alg.compute(parsed)
     print(reduced)
 
     parser.reparse_file(filepath, "app/tests/reparsed.puml", reduced)

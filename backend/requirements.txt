@@ -10,4 +10,5 @@ alembic
 python-jose[cryptography]
 httpx
 numpy
+shrinking-algorithms @ git+https://github.com/shrinking-corp/algorithms.git@markooda/preprocessing
 -e ./embedding

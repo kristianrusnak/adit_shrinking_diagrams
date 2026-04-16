@@ -13,7 +13,7 @@ export const AlgorithmSettingsLayout = ({
   return (
     <Card sx={{ p: 2, mb: 2, mt: 2, borderRadius: 5, boxShadow: 3 }}>
       {title && (
-        <Typography variant="h6" gutterBottom>
+        <Typography variant="h5" gutterBottom>
           {title}
         </Typography>
       )}

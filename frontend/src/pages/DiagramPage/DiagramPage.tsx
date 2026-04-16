@@ -2,10 +2,11 @@ import DiagramFilePreview from "@/components/ui/DiagramFilePreview";
 import FileUploadButton from "@/components/ui/FileUploadButton";
 import ProcessDiagramButton from "@/components/ui/ProcessDiagramButton";
 import { ErrorProvider } from "@/context/ErrorProvider";
-import { Box, CircularProgress, Typography, Alert } from "@mui/material";
+import { Box, CircularProgress, Typography, Alert, Stack } from "@mui/material";
 import AlgorithmSelector from "@/components/ui/AlgorithmSelector";
 import { useEffect, useState } from "react";
 import EvolutionarySettings from "@/components/ui/alg_settings/EvolutionarySettings";
+import PreprocessingSettings from "@/components/ui/alg_settings/PreprocessingSettings";
 import AlgorithmSettingsLayout from "@/components/ui/alg_settings/AlgorithmSettingsLayout";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -122,12 +123,17 @@ export const DiagramPage = () => {
             />
 
             <AlgorithmSettingsLayout title={algName}>
-              {selectedAlgorithm === "evol" && (
-                <EvolutionarySettings
-                  maxIterations={algConfig?.generations}
-                  maxPopulation={algConfig?.population_size}
-                />
-              )}
+              {selectedAlgorithm === "evol" ? (
+                <Stack direction="row" spacing={3}>
+                  <PreprocessingSettings />
+                  <EvolutionarySettings
+                    maxIterations={algConfig?.generations}
+                    maxPopulation={algConfig?.population_size}
+                  />
+                </Stack>
+              ) : selectedAlgorithm === "kruskals" ? (
+                <PreprocessingSettings />
+              ) : null}
             </AlgorithmSettingsLayout>
 
             <ProcessDiagramButton onProcess={() => setIsProcessed(true)} />
@@ -142,7 +148,9 @@ export const DiagramPage = () => {
             marginTop: 3,
           }}
         >
-          {selectedFile && !isProcessed && <DiagramFilePreview type="reduced" />}
+          {selectedFile && !isProcessed && (
+            <DiagramFilePreview type="reduced" />
+          )}
           {selectedFile &&
             isProcessed &&
             selectedFileReduced &&

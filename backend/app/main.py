@@ -4,6 +4,7 @@ import json
 from typing import Union
 
 from datetime import datetime
+from app.services.shrinking_algorithms.preprocessing.preprocess_decorator import PreprocessingDecorator
 from app.util import logger
 from fastapi import (
     FastAPI,
@@ -18,8 +19,8 @@ from fastapi import (
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from app.services.openai_service import OpenAIService
-from app.services.parse_puml_service import PUMLParser
-from app.services.shrinking_algorithms.factory import get_algorithm
+# from app.services.parse_puml_service import PUMLParser
+# from app.services.shrinking_algorithms.factory import get_algorithm
 
 from sqlalchemy.orm import Session
 
@@ -60,6 +61,10 @@ from app.services.jwt_service import (
     verify_access_token,
     verify_refresh_token,
 )
+
+from shrinking_algorithms.parsers import PUMLParser
+from shrinking_algorithms.algorithms import KruskalFactory, EvolFactory
+from shrinking_algorithms.algorithms.preprocessing.preprocess_step_factory import PreprocessStepFactory
 
 app = FastAPI()
 logger.log("Starting FastAPI", level="info")
@@ -164,9 +169,6 @@ def process_puml(
     except Exception:
         raise HTTPException(status_code=400, detail="Unable to parse settings")
 
-    print(algorithm)
-    print(algorithm_settings)
-
     try:
         content = file.file.read()
         with tempfile.NamedTemporaryFile(delete=False, suffix=".puml") as tmp:
@@ -176,19 +178,39 @@ def process_puml(
         parsed = parser.parse_file(
             source_path
         )  # TODO: this should be throwing an exception not an empty list
+
+        print(parsed)
         if not parsed:
             raise HTTPException(status_code=500, detail="Unable to parse PUML file")
 
-        # TODO: unify frontend/backend names too tired
+        preprocess_steps = []
+        if "steps" in algorithm_settings:
+            print(algorithm_settings["steps"])
+            preprocess_factory = PreprocessStepFactory()
+            preprocess_steps = [preprocess_factory.get_step(step_id) for step_id in algorithm_settings["steps"]]
+            print(preprocess_steps)
+
+
+
+
+
+
         if algorithm == Algorithm.evolution:
-            alg = get_algorithm("genetic")
+            factory = EvolFactory()
+            alg = factory.get_algorithm()
+            if preprocess_steps:
+                alg = PreprocessingDecorator(alg, steps=preprocess_steps)
             alg.initialize(
                 population_size=algorithm_settings.get("population", 50),
                 generations=algorithm_settings.get("iterations", 100),
             )
+
         elif algorithm == Algorithm.kruskals:
-            alg = get_algorithm("kruskal")
-            # TODO: add settigns
+            factory = KruskalFactory()
+            alg = factory.get_algorithm()
+            if preprocess_steps:
+                alg = PreprocessingDecorator(alg, steps=preprocess_steps)
+            alg.initialize()
         else:
             raise HTTPException(status_code=400, detail="Invalid algorithm")
 
