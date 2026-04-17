@@ -39,13 +39,13 @@ const ProcessDiagramButton = ({ onProcess }: ProcessDiagramButtonProps) => {
 
     logger.info("Processing diagram with algorithm:", selectedAlgorithm);
 
-    if (selectedAlgorithm === "none") {
-      await dispatch(setFileAsync(selectedFile));
-      await dispatch(setFileReducedAsync(selectedFile)); // we act as if we reduced the file but it stays the same
-      dispatch(clearMessages());
-      onProcess?.();
-      return;
-    }
+    // if (selectedAlgorithm === "none") {
+    //   await dispatch(setFileAsync(selectedFile));
+    //   await dispatch(setFileReducedAsync(selectedFile)); // we act as if we reduced the file but it stays the same
+    //   dispatch(clearMessages());
+    //   onProcess?.();
+    //   return;
+    // }
 
     try {
       const response = await processPuml({
@@ -61,10 +61,15 @@ const ProcessDiagramButton = ({ onProcess }: ProcessDiagramButtonProps) => {
       dispatch(clearMessages());
 
       await dispatch(setFileAsync(selectedFile));
-      await dispatch(setFileReducedAsync(new File([result], selectedFile.name)));
+      await dispatch(
+        setFileReducedAsync(new File([result], selectedFile.name)),
+      );
       onProcess?.();
     } catch (error: any) {
-      showError(error.data?.detail || "Error processing file", `Status: ${error.status}`);
+      showError(
+        error.data?.detail || "Error processing file",
+        `Status: ${error.status}`,
+      );
     }
   };
 
@@ -83,10 +88,10 @@ const ProcessDiagramButton = ({ onProcess }: ProcessDiagramButtonProps) => {
         py: 1.5,
       }}
     >
-      {isLoading 
-        ? "Shrinking diagram..." 
-        : selectedAlgorithm === "none" 
-          ? "Load diagram" 
+      {isLoading
+        ? "Shrinking diagram..."
+        : selectedAlgorithm === "none"
+          ? "Load diagram"
           : "Shrink diagram"}
     </Button>
   );

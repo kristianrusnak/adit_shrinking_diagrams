@@ -12,6 +12,8 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   selectSelectedAlgorithm,
   setSelectedAlgorithm,
+  selectCurrentAlgorithmSettings,
+  setAlgorithmSettings,
 } from "@/store/slices/algorithmSlice";
 import {
   selectIsAnyFileLoading,
@@ -48,18 +50,31 @@ export const DiagramPage = () => {
   const isFileLoading = useSelector(selectIsAnyFileLoading);
   const selectedFile = useSelector(selectFile);
   const selectedFileReduced = useSelector(selectFileReduced);
+  const selectedAlgorithmSettings = useSelector(selectCurrentAlgorithmSettings);
   const [algConfig, setAlgConfig] = useState<any | null>(null);
   const [isProcessed, setIsProcessed] = useState(false);
+  const [isDiagramUnchanged, setIsDiagramUnchanged] = useState(false);
 
   const { data, isLoading } = useGetAlgConfigQuery({
     algorithm: selectedAlgorithm,
   });
 
   console.log(selectedAlgorithm);
+  console.log(selectedAlgorithmSettings);
 
   const algName = algorithms.find((a) => a.id === selectedAlgorithm)?.name;
+  console.log(algName);
 
   const selectAlgorithm = (id: string) => {
+    // clear preprocessing steps on algorithm change
+    dispatch(
+      setAlgorithmSettings({
+        algorithmId: "preprocessing",
+        settings: {
+          steps: [],
+        },
+      }),
+    );
     dispatch(setSelectedAlgorithm(id));
   };
 
@@ -77,6 +92,21 @@ export const DiagramPage = () => {
   useEffect(() => {
     setIsProcessed(false);
   }, [selectedFile]);
+
+  useEffect(() => {
+    const isDiagramSame = async () => {
+      if (!selectedFile || !selectedFileReduced) {
+        return false;
+      }
+
+      const beforeProcessing = await selectedFile.text();
+      const afterProcessing = await selectedFileReduced.text();
+
+      setIsDiagramUnchanged(beforeProcessing === afterProcessing);
+    };
+
+    isDiagramSame();
+  });
 
   return (
     <>
@@ -133,6 +163,8 @@ export const DiagramPage = () => {
                 </Stack>
               ) : selectedAlgorithm === "kruskals" ? (
                 <PreprocessingSettings />
+              ) : selectedAlgorithm === "none" ? (
+                <PreprocessingSettings />
               ) : null}
             </AlgorithmSettingsLayout>
 
@@ -154,7 +186,7 @@ export const DiagramPage = () => {
           {selectedFile &&
             isProcessed &&
             selectedFileReduced &&
-            (selectedAlgorithm === "none" ? (
+            (selectedAlgorithm === "none" && isDiagramUnchanged ? (
               <DiagramFilePreview type="reduced" />
             ) : (
               <FilePreviewDiagrams />

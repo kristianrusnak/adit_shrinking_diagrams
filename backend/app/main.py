@@ -63,7 +63,7 @@ from app.services.jwt_service import (
 )
 
 from shrinking_algorithms.parsers import PUMLParser
-from shrinking_algorithms.algorithms import KruskalFactory, EvolFactory
+from shrinking_algorithms.algorithms import KruskalCreator, EvolCreator, NullCreator
 from shrinking_algorithms.algorithms.preprocessing.preprocess_step_factory import PreprocessStepFactory
 
 app = FastAPI()
@@ -196,8 +196,8 @@ def process_puml(
 
 
         if algorithm == Algorithm.evolution:
-            factory = EvolFactory()
-            alg = factory.get_algorithm()
+            factory = EvolCreator()
+            alg = factory.get_algorithm({})
             if preprocess_steps:
                 alg = PreprocessingDecorator(alg, steps=preprocess_steps)
             alg.initialize(
@@ -206,8 +206,15 @@ def process_puml(
             )
 
         elif algorithm == Algorithm.kruskals:
-            factory = KruskalFactory()
-            alg = factory.get_algorithm()
+            factory = KruskalCreator()
+            alg = factory.get_algorithm({})
+            if preprocess_steps:
+                alg = PreprocessingDecorator(alg, steps=preprocess_steps)
+            alg.initialize()
+
+        elif algorithm == Algorithm.none:
+            factory = NullCreator()
+            alg = factory.get_algorithm({})
             if preprocess_steps:
                 alg = PreprocessingDecorator(alg, steps=preprocess_steps)
             alg.initialize()

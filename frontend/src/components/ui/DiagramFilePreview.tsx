@@ -60,8 +60,6 @@ const AppFilePreview = ({ title, sx, type }: SimpleFilePreviewProps) => {
     }
   }, [type, selectedFileReduced, selectedFileGpt]);
 
-  const bg1 = grey[50];
-
   const shouldRender =
     type === "reduced" ? !!selectedFileReduced : !!selectedFileGpt;
   return (
