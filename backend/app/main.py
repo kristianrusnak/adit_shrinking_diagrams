@@ -177,9 +177,11 @@ def process_puml(
 
         parsed = parser.parse_file(
             source_path
-        )  # TODO: this should be throwing an exception not an empty list
+        )
 
-        print(parsed)
+        print(settings)
+
+
         if not parsed:
             raise HTTPException(status_code=500, detail="Unable to parse PUML file")
 
@@ -191,33 +193,24 @@ def process_puml(
             print(preprocess_steps)
 
 
-
-
-
-
         if algorithm == Algorithm.evolution:
             factory = EvolCreator()
-            alg = factory.get_algorithm({})
+            alg = factory.get_algorithm(algorithm_settings)
             if preprocess_steps:
                 alg = PreprocessingDecorator(alg, steps=preprocess_steps)
-            alg.initialize(
-                population_size=algorithm_settings.get("population", 50),
-                generations=algorithm_settings.get("iterations", 100),
-            )
 
         elif algorithm == Algorithm.kruskals:
             factory = KruskalCreator()
-            alg = factory.get_algorithm({})
+            weights = algorithm_settings.get("weights", {})
+            alg = factory.get_algorithm(weights)
             if preprocess_steps:
                 alg = PreprocessingDecorator(alg, steps=preprocess_steps)
-            alg.initialize()
 
         elif algorithm == Algorithm.none:
             factory = NullCreator()
             alg = factory.get_algorithm({})
             if preprocess_steps:
                 alg = PreprocessingDecorator(alg, steps=preprocess_steps)
-            alg.initialize()
         else:
             raise HTTPException(status_code=400, detail="Invalid algorithm")
 

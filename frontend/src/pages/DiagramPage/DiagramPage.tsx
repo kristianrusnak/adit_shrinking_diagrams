@@ -7,6 +7,7 @@ import AlgorithmSelector from "@/components/ui/AlgorithmSelector";
 import { useEffect, useState } from "react";
 import EvolutionarySettings from "@/components/ui/alg_settings/EvolutionarySettings";
 import PreprocessingSettings from "@/components/ui/alg_settings/PreprocessingSettings";
+import KruskalsSettings from "@/components/ui/alg_settings/KruskalsSettings";
 import AlgorithmSettingsLayout from "@/components/ui/alg_settings/AlgorithmSettingsLayout";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -155,16 +156,19 @@ export const DiagramPage = () => {
             <AlgorithmSettingsLayout title={algName}>
               {selectedAlgorithm === "evol" ? (
                 <Stack direction="row" spacing={3}>
-                  <PreprocessingSettings />
+                  <PreprocessingSettings key="pp-evol" />
                   <EvolutionarySettings
                     maxIterations={algConfig?.generations}
                     maxPopulation={algConfig?.population_size}
                   />
                 </Stack>
               ) : selectedAlgorithm === "kruskals" ? (
-                <PreprocessingSettings />
+                <Stack direction="row" spacing={3}>
+                  <PreprocessingSettings key="pp-kruskals" />
+                  <KruskalsSettings weights={algConfig?.weights} />
+                </Stack>
               ) : selectedAlgorithm === "none" ? (
-                <PreprocessingSettings />
+                <PreprocessingSettings key="pp-none" />
               ) : null}
             </AlgorithmSettingsLayout>
 

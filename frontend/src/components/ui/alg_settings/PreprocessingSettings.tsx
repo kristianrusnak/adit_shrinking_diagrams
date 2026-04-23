@@ -11,6 +11,9 @@ import {
   Typography,
   Card,
 } from "@mui/material";
+import { useSortable } from "@dnd-kit/react/sortable";
+import { DragDropProvider } from "@dnd-kit/react";
+import { move } from "@dnd-kit/helpers";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useDispatch } from "react-redux";
 import { setAlgorithmSettings } from "@/store/slices/algorithmSlice";
@@ -34,6 +37,36 @@ const AVAILABLE_STEPS = [
   { id: "remove_protected_attributes", label: "Remove protected attributes" },
   { id: "remove_package_attributes", label: "Remove package attributes" },
 ];
+
+interface SortableProps {
+  id: string;
+  index: number;
+  label: string;
+  remove: (index: number) => void;
+}
+const Sortable = ({ id, index, label, remove }: SortableProps) => {
+  const { ref, isDragging } = useSortable({ id, index });
+
+  return (
+    <ListItem
+      ref={ref}
+      key={`li-${id}`}
+      secondaryAction={
+        <IconButton edge="end" onClick={() => remove(index)}>
+          <DeleteIcon />
+        </IconButton>
+      }
+      sx={(theme) => ({
+        border: `1px solid ${isDragging ? theme.palette.primary.main : theme.palette.divider}`,
+        borderRadius: 2,
+        marginTop: 0.5,
+        marginBottom: 0.5,
+      })}
+    >
+      <ListItemText primary={label} />
+    </ListItem>
+  );
+};
 
 export const PreprocessingSettings = () => {
   const [preprocessingSteps, setPreprocessingSteps] = useState<string[]>([]);
@@ -88,6 +121,8 @@ export const PreprocessingSettings = () => {
     updatePreprocessingSteps(nextSteps);
   };
 
+  console.log(preprocessingSteps);
+
   return (
     <Card
       sx={(theme) => ({
@@ -99,23 +134,31 @@ export const PreprocessingSettings = () => {
       <Stack direction="column" spacing={1}>
         <Typography variant="h6">Preprocessing steps</Typography>
 
-        <List dense={false} sx={{ mt: 0, pt: 0 }}>
-          {preprocessingSteps.map((stepId, i) => (
-            <ListItem
-              key={`${stepId}-${i}`}
-              secondaryAction={
-                <IconButton
-                  edge="end"
-                  onClick={() => removePreprocessingStep(i)}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              }
-            >
-              <ListItemText primary={stepLabelMap[stepId] ?? stepId} />
-            </ListItem>
-          ))}
-        </List>
+        <DragDropProvider
+          onDragEnd={(event) => {
+            setPreprocessingSteps((items) => move(items, event));
+            dispatch(
+              setAlgorithmSettings({
+                algorithmId: "preprocessing",
+                settings: {
+                  steps: preprocessingSteps,
+                },
+              }),
+            );
+          }}
+        >
+          <List dense={false} sx={{ mt: 0, pt: 0 }}>
+            {preprocessingSteps.map((stepId, i) => (
+              <Sortable
+                key={`sortable-${stepId}`}
+                id={stepId}
+                index={i}
+                label={stepLabelMap[stepId]}
+                remove={removePreprocessingStep}
+              />
+            ))}
+          </List>
+        </DragDropProvider>
 
         <Button variant="outlined" onClick={openMenu}>
           Add preprocessing step
