@@ -136,15 +136,8 @@ export const PreprocessingSettings = () => {
 
         <DragDropProvider
           onDragEnd={(event) => {
-            setPreprocessingSteps((items) => move(items, event));
-            dispatch(
-              setAlgorithmSettings({
-                algorithmId: "preprocessing",
-                settings: {
-                  steps: preprocessingSteps,
-                },
-              }),
-            );
+            const nextSteps = move(preprocessingSteps, event);
+            updatePreprocessingSteps(nextSteps);
           }}
         >
           <List dense={false} sx={{ mt: 0, pt: 0 }}>
