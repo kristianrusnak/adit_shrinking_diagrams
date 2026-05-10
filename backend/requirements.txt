@@ -10,5 +10,4 @@ alembic
 python-jose[cryptography]
 httpx
 numpy
-shrinking-algorithms @ git+https://github.com/shrinking-corp/algorithms.git@markooda/no-algorithm
--e ./embedding
+shrinking-algorithms @ git+https://github.com/shrinking-corp/algorithms.git@new-parser

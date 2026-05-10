@@ -13,7 +13,6 @@ RUN apt-get update \
 
 # Copy requirements and install them
 COPY requirements.txt .
-COPY embedding ./embedding
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy backend source code

@@ -4,7 +4,7 @@ import json
 from typing import Union
 
 from datetime import datetime
-from app.services.shrinking_algorithms.preprocessing.preprocess_decorator import PreprocessingDecorator
+from shrinking_algorithms.algorithms.preprocessing.preprocess_decorator import PreprocessingDecorator
 from app.util import logger
 from fastapi import (
     FastAPI,
@@ -19,8 +19,6 @@ from fastapi import (
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from app.services.openai_service import OpenAIService
-# from app.services.parse_puml_service import PUMLParser
-# from app.services.shrinking_algorithms.factory import get_algorithm
 
 from sqlalchemy.orm import Session
 
@@ -181,7 +179,6 @@ def process_puml(
 
         print(settings)
 
-
         if not parsed:
             raise HTTPException(status_code=500, detail="Unable to parse PUML file")
 
@@ -190,25 +187,24 @@ def process_puml(
             print(algorithm_settings["steps"])
             preprocess_factory = PreprocessStepFactory()
             preprocess_steps = [preprocess_factory.get_step(step_id) for step_id in algorithm_settings["steps"]]
-            print(preprocess_steps)
 
 
         if algorithm == Algorithm.evolution:
             factory = EvolCreator()
-            alg = factory.get_algorithm(algorithm_settings)
+            alg = factory.initialize_and_get_algorithm(algorithm_settings)
             if preprocess_steps:
                 alg = PreprocessingDecorator(alg, steps=preprocess_steps)
 
         elif algorithm == Algorithm.kruskals:
             factory = KruskalCreator()
             weights = algorithm_settings.get("weights", {})
-            alg = factory.get_algorithm(weights)
+            alg = factory.initialize_and_get_algorithm(weights)
             if preprocess_steps:
                 alg = PreprocessingDecorator(alg, steps=preprocess_steps)
 
         elif algorithm == Algorithm.none:
             factory = NullCreator()
-            alg = factory.get_algorithm({})
+            alg = factory.get_algorithm()
             if preprocess_steps:
                 alg = PreprocessingDecorator(alg, steps=preprocess_steps)
         else:
@@ -217,13 +213,7 @@ def process_puml(
         reduced = alg.compute(parsed)
         logger.log(f"Reduced PUML: {reduced}", level="debug")
 
-        with tempfile.NamedTemporaryFile(
-            delete=False, suffix="_reduced.puml"
-        ) as tmp_out:
-            output_path = tmp_out.name
-        parser.reparse_file(source_path, output_path, reduced)
-        with open(output_path, "r") as f:
-            result = f.read()
+        result = parser.reparse_puml(content.decode("utf-8"), reduced)
 
         return {"parsed": parsed, "reduced": reduced, "result_puml": result}
 

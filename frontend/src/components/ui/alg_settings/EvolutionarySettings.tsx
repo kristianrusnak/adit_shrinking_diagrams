@@ -28,7 +28,7 @@ export const EvolutionarySettings = ({
     dispatch(
       setAlgorithmSettings({
         algorithmId: "evol",
-        settings: { iterations: value },
+        settings: { generations: value },
       }),
     );
   };
@@ -38,7 +38,7 @@ export const EvolutionarySettings = ({
     dispatch(
       setAlgorithmSettings({
         algorithmId: "evol",
-        settings: { population: value },
+        settings: { population_size: value },
       }),
     );
   };
