@@ -18,7 +18,7 @@ interface SimpleFilePreviewProps {
   sx?: any;
   type: "gpt" | "reduced";
 }
-const SimpleFilePreview = ({ title, sx, type }: SimpleFilePreviewProps) => {
+const AppFilePreview = ({ title, sx, type }: SimpleFilePreviewProps) => {
   const selectedFile = useSelector(selectFile)?.name ?? "";
   const selectedFileReduced = useSelector(selectFileReduced);
   const selectedFileGpt = useSelector(selectFileGpt);
@@ -59,8 +59,6 @@ const SimpleFilePreview = ({ title, sx, type }: SimpleFilePreviewProps) => {
       getText(selectedFileGpt);
     }
   }, [type, selectedFileReduced, selectedFileGpt]);
-
-  const bg1 = grey[50];
 
   const shouldRender =
     type === "reduced" ? !!selectedFileReduced : !!selectedFileGpt;
@@ -175,4 +173,4 @@ const SimpleFilePreview = ({ title, sx, type }: SimpleFilePreviewProps) => {
   );
 };
 
-export default SimpleFilePreview;
+export default AppFilePreview;

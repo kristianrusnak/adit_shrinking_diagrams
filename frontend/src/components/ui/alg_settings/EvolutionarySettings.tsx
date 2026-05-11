@@ -10,7 +10,7 @@ interface EvolutionarySettingsProps {
 
 export const EvolutionarySettings = ({
   maxIterations = 100,
-  maxPopulation = 100,
+  maxPopulation = 50,
 }: EvolutionarySettingsProps) => {
   const [iterations, setIterations] = useState(maxIterations);
   const [population, setPopulation] = useState(maxPopulation);
@@ -28,7 +28,7 @@ export const EvolutionarySettings = ({
     dispatch(
       setAlgorithmSettings({
         algorithmId: "evol",
-        settings: { iterations: value },
+        settings: { generations: value },
       }),
     );
   };
@@ -38,13 +38,23 @@ export const EvolutionarySettings = ({
     dispatch(
       setAlgorithmSettings({
         algorithmId: "evol",
-        settings: { population: value },
+        settings: { population_size: value },
       }),
     );
   };
 
   return (
     <Stack spacing={4} sx={{ width: 300, p: 2 }}>
+      <Box>
+        <Typography gutterBottom variant="h6">
+          Evolution settings
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Control how many generations are explored and how many individuals are
+          evaluated in each run.
+        </Typography>
+      </Box>
+
       <Box>
         <Typography gutterBottom>Iterations ({iterations})</Typography>
         <Slider

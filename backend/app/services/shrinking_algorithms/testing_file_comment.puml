@@ -1,0 +1,15 @@
+@startuml
+
+/' Classes '/
+class A
+class B
+class C
+class D
+
+A -- B        /' weight 1   (association) '/
+B <|-- C      /' weight 3   (inheritance) '/
+C -- D        /' weight 1   (association) '/
+A <|-- D      /' weight 3   (inheritance) '/
+B .. C        /' weight 1   (dependency) '/
+
+@enduml

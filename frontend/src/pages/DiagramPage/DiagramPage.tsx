@@ -1,16 +1,20 @@
-import SimpleFilePreview from "@/components/ui/SimpleFilePreview";
+import DiagramFilePreview from "@/components/ui/DiagramFilePreview";
 import FileUploadButton from "@/components/ui/FileUploadButton";
 import ProcessDiagramButton from "@/components/ui/ProcessDiagramButton";
 import { ErrorProvider } from "@/context/ErrorProvider";
-import { Box, CircularProgress, Typography, Alert } from "@mui/material";
+import { Box, CircularProgress, Typography, Alert, Stack } from "@mui/material";
 import AlgorithmSelector from "@/components/ui/AlgorithmSelector";
 import { useEffect, useState } from "react";
 import EvolutionarySettings from "@/components/ui/alg_settings/EvolutionarySettings";
+import PreprocessingSettings from "@/components/ui/alg_settings/PreprocessingSettings";
+import KruskalsSettings from "@/components/ui/alg_settings/KruskalsSettings";
 import AlgorithmSettingsLayout from "@/components/ui/alg_settings/AlgorithmSettingsLayout";
 import { useDispatch, useSelector } from "react-redux";
 import {
   selectSelectedAlgorithm,
   setSelectedAlgorithm,
+  selectCurrentAlgorithmSettings,
+  setAlgorithmSettings,
 } from "@/store/slices/algorithmSlice";
 import {
   selectIsAnyFileLoading,
@@ -47,18 +51,31 @@ export const DiagramPage = () => {
   const isFileLoading = useSelector(selectIsAnyFileLoading);
   const selectedFile = useSelector(selectFile);
   const selectedFileReduced = useSelector(selectFileReduced);
+  const selectedAlgorithmSettings = useSelector(selectCurrentAlgorithmSettings);
   const [algConfig, setAlgConfig] = useState<any | null>(null);
   const [isProcessed, setIsProcessed] = useState(false);
+  const [isDiagramUnchanged, setIsDiagramUnchanged] = useState(false);
 
   const { data, isLoading } = useGetAlgConfigQuery({
     algorithm: selectedAlgorithm,
   });
 
   console.log(selectedAlgorithm);
+  console.log(selectedAlgorithmSettings);
 
   const algName = algorithms.find((a) => a.id === selectedAlgorithm)?.name;
+  console.log(algName);
 
   const selectAlgorithm = (id: string) => {
+    // clear preprocessing steps on algorithm change
+    dispatch(
+      setAlgorithmSettings({
+        algorithmId: "preprocessing",
+        settings: {
+          steps: [],
+        },
+      }),
+    );
     dispatch(setSelectedAlgorithm(id));
   };
 
@@ -76,6 +93,21 @@ export const DiagramPage = () => {
   useEffect(() => {
     setIsProcessed(false);
   }, [selectedFile]);
+
+  useEffect(() => {
+    const isDiagramSame = async () => {
+      if (!selectedFile || !selectedFileReduced) {
+        return false;
+      }
+
+      const beforeProcessing = await selectedFile.text();
+      const afterProcessing = await selectedFileReduced.text();
+
+      setIsDiagramUnchanged(beforeProcessing === afterProcessing);
+    };
+
+    isDiagramSame();
+  });
 
   return (
     <>
@@ -122,12 +154,22 @@ export const DiagramPage = () => {
             />
 
             <AlgorithmSettingsLayout title={algName}>
-              {selectedAlgorithm === "evol" && (
-                <EvolutionarySettings
-                  maxIterations={algConfig?.generations}
-                  maxPopulation={algConfig?.population_size}
-                />
-              )}
+              {selectedAlgorithm === "evol" ? (
+                <Stack direction="row" spacing={3}>
+                  <PreprocessingSettings key="pp-evol" />
+                  <EvolutionarySettings
+                    maxIterations={algConfig?.generations}
+                    maxPopulation={algConfig?.population_size}
+                  />
+                </Stack>
+              ) : selectedAlgorithm === "kruskals" ? (
+                <Stack direction="row" spacing={3}>
+                  <PreprocessingSettings key="pp-kruskals" />
+                  <KruskalsSettings weights={algConfig?.weights} />
+                </Stack>
+              ) : selectedAlgorithm === "none" ? (
+                <PreprocessingSettings key="pp-none" />
+              ) : null}
             </AlgorithmSettingsLayout>
 
             <ProcessDiagramButton onProcess={() => setIsProcessed(true)} />
@@ -142,12 +184,14 @@ export const DiagramPage = () => {
             marginTop: 3,
           }}
         >
-          {selectedFile && !isProcessed && <SimpleFilePreview type="reduced" />}
+          {selectedFile && !isProcessed && (
+            <DiagramFilePreview type="reduced" />
+          )}
           {selectedFile &&
             isProcessed &&
             selectedFileReduced &&
-            (selectedAlgorithm === "none" ? (
-              <SimpleFilePreview type="reduced" />
+            (selectedAlgorithm === "none" && isDiagramUnchanged ? (
+              <DiagramFilePreview type="reduced" />
             ) : (
               <FilePreviewDiagrams />
             ))}

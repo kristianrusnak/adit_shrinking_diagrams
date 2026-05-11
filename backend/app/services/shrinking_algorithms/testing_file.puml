@@ -1,0 +1,14 @@
+@startuml
+
+class A
+class B
+class C
+class D
+
+A -- B : label 1
+B <|-- C
+C -- D
+A <|-- D : label 2
+B .. C
+
+@enduml

@@ -1,5 +1,12 @@
 import { apiSlice } from "./apiSlice";
-import type { ProcessPumlResponse, PumlPayload, ChatThread, ChatMessage, ThreadRenameRequest, ThreadCreateResponse } from "./types";
+import type {
+  ProcessPumlResponse,
+  PumlPayload,
+  ChatThread,
+  ChatMessage,
+  ThreadRenameRequest,
+  ThreadCreateResponse,
+} from "./types";
 
 const extendedApi = apiSlice.injectEndpoints({
   endpoints: (build) => ({
@@ -45,6 +52,8 @@ const extendedApi = apiSlice.injectEndpoints({
         formData.append("file", data.file);
         formData.append("algorithm", data.algorithm);
         formData.append("settings", JSON.stringify(data.settings));
+
+        console.log(`sending ${data.settings}`);
 
         // debug
         for (const [key, value] of formData.entries()) {

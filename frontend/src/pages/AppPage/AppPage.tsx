@@ -18,11 +18,11 @@ import Sidebar from "../../components/ui/Sidebar";
 import { ErrorProvider } from "../../context/ErrorProvider";
 import ShrinkButton from "@/components/ui/ShrinkButton";
 import { useAuth } from "../../context/AuthProvider";
-import SimpleFilePreview from "@/components/ui/SimpleFilePreview";
 import { useState, useEffect } from "react";
 import { NAVBAR_HEIGHT } from "@/utils/layoutStyles";
 import { useSelector } from "react-redux";
 import { selectIsAnyFileLoading } from "@/store/slices/fileSlice";
+import AppFilePreview from "@/components/ui/AppFilePreview";
 
 interface AppPageProps {
   isUserLoggedIn?: boolean;
@@ -258,7 +258,7 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
                 <ChevronRightIcon />
               </IconButton>
 
-              <SimpleFilePreview
+              <AppFilePreview
                 title="AI assistant response"
                 type="gpt"
                 sx={{
@@ -269,7 +269,7 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
                 }}
               />
 
-              <SimpleFilePreview
+              <AppFilePreview
                 title="Shrunk diagram"
                 type="reduced"
                 sx={{
@@ -308,18 +308,19 @@ export default function AppPage({ isUserLoggedIn = false }: AppPageProps) {
                 <ChevronRightIcon />
               </IconButton>
 
-              <SimpleFilePreview
+              <AppFilePreview
                 title="AI assistant response"
                 type="gpt"
                 sx={{
                   borderRadius: 2,
                   minWidth: "200px",
+                  maxHeight: "175px",
                   height: "auto",
                   backgroundColor: "primary.light",
                 }}
               />
 
-              <SimpleFilePreview
+              <AppFilePreview
                 title="Shrunk diagram"
                 type="reduced"
                 sx={{
