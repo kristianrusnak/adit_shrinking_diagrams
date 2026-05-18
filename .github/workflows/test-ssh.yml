@@ -1,0 +1,55 @@
+name: Test SSH Connection to Raspberry Pi
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  test-ssh:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install cloudflared
+        run: |
+          curl -fsSL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb -o cloudflared.deb
+          sudo dpkg -i cloudflared.deb
+          cloudflared --version
+
+      - name: Save SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+          echo "=== Key file first line ==="
+          head -1 ~/.ssh/id_rsa
+          echo "=== Key file last line ==="
+          tail -1 ~/.ssh/id_rsa
+          echo "=== Line count ==="
+          wc -l ~/.ssh/id_rsa
+          echo "=== Validating key ==="
+          ssh-keygen -l -f ~/.ssh/id_rsa && echo "✅ Key is valid" || echo "❌ Key is INVALID"
+
+      - name: Add SSH config for Cloudflare tunnel
+        run: |
+          cat >> ~/.ssh/config << EOF
+          Host ${{ secrets.PI_HOST }}
+              ProxyCommand cloudflared access ssh --hostname %h
+              StrictHostKeyChecking no
+          EOF
+          chmod 600 ~/.ssh/config
+
+          echo "=== SSH config ==="
+          cat ~/.ssh/config
+
+      - name: Test SSH connection
+        run: |
+          echo "=== Attempting SSH connection with verbose output ==="
+          ssh -v \
+            -o StrictHostKeyChecking=no \
+            -o ConnectTimeout=15 \
+            ${{ secrets.PI_USER }}@${{ secrets.PI_HOST }} \
+            echo "✅ SSH connection successful!"
+    
+

@@ -1,0 +1,84 @@
+name: CI/CD Deploy to Raspberry Pi
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU (for ARM cross-compilation)
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          platforms: linux/arm64
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/adit-backend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          platforms: linux/arm64
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/adit-frontend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Install cloudflared
+        run: |
+          curl -fsSL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb -o cloudflared.deb
+          sudo dpkg -i cloudflared.deb
+
+      - name: Save SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Add SSH config for Cloudflare tunnel
+        run: |
+          cat >> ~/.ssh/config << EOF
+          Host ${{ secrets.PI_HOST }}
+              ProxyCommand cloudflared access ssh --hostname %h
+              StrictHostKeyChecking no
+          EOF
+          chmod 600 ~/.ssh/config
+
+      - name: Deploy to Raspberry Pi
+        run: |
+          # Copy the production compose file to the Pi
+          scp docker-compose.prod.yml ${{ secrets.PI_USER }}@${{ secrets.PI_HOST }}:~/adit-app/docker-compose.yml
+
+          # SSH in, pull new images, and restart
+          ssh ${{ secrets.PI_USER }}@${{ secrets.PI_HOST }} << DEPLOY
+            cd ~/adit-app
+            export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
+            docker compose pull
+            docker compose up -d --remove-orphans
+            docker image prune -f
+          DEPLOY
+
+

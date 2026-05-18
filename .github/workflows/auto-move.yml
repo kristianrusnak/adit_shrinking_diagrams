@@ -60,3 +60,4 @@ jobs:
             -H "Authorization: Basic ${AUTH_HEADER}" \
             -d '[{"op":"add","path":"/fields/System.State","value":"${{ steps.state.outputs.new_state }}"}]' \
             "https://dev.azure.com/teamok/Shrinking%20diagrams/_apis/wit/workitems/${{ steps.extract.outputs.task_id }}?api-version=7.0"
+
